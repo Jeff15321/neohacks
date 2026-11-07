@@ -47,7 +47,12 @@ NOT available: page JS variables/functions, fetch() to the platform backend, chr
 - Elements that only appear AFTER an interaction (composers, dialogs, message views) cannot be seen in the context snapshot — CLICK first, then wait for the revealed element. NEVER invent class names for them (e.g. ".message-view" when the snapshot shows ".msg-*" naming).
 - WAIT/CHANGE-DETECTION RECIPE (use this, not ad-hoc text-length checks):
     * Before clicking, capture a signature element of the CURRENT view (e.g. const listEl = document.querySelector('<the list>')).
-    * After clicking, poll until EITHER listEl.isConnected === false (SPAs detach old nodes on re-render — most reliable signal) OR an expected affordance appears: [contenteditable="true"], textarea, or an element whose aria-label/text contains the expected action ("Reply", "Compose", "Back").
+    * After clicking, poll until ANY of these fire — check them TOGETHER because sites differ:
+        - location.hash or location.href changed (many SPAs — Gmail included — navigate via hash);
+        - listEl.isConnected === false (node detached on re-render);
+        - listEl.offsetParent === null or !listEl.checkVisibility?.() (node kept in DOM but HIDDEN — Gmail does this);
+        - an expected affordance appeared: [contenteditable="true"], textarea, or an element whose aria-label/text contains the expected action ("Reply", "Compose", "Back").
+      Wait on (hashChanged || detached || hidden || affordanceFound) — never on only one signal.
     * Then query inside the CURRENT top-level view for the affordances you need — prefer aria-label/role/text matching over guessed class names.
     * Action affordances are often NOT <button>: search the broad set [role="button"], [role="link"], [tabindex], a, button, [aria-label] and match by aria-label or textContent against the action word (e.g. /reply/i).
 - Filtering: when the request mentions "unread"/"recent"/"selected", filter rows by the distinguishing class/attribute visible in the context (e.g. .zE vs .zA) — do not just take the first N rows.
