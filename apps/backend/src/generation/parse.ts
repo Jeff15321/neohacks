@@ -1,7 +1,7 @@
 import * as acorn from 'acorn';
 import type { GeneratedWidget, WidgetGrant } from '@app/shared';
 
-const GRANTS: WidgetGrant[] = ['inference', 'log', 'storage'];
+const GRANTS: WidgetGrant[] = ['inference', 'log', 'storage', 'network'];
 
 export interface ParseResult { widget?: GeneratedWidget; error?: string; warnings: string[]; }
 
@@ -31,8 +31,9 @@ export function parseGeneratedWidget(raw: string): ParseResult {
   const grants: WidgetGrant[] = Array.isArray(obj.grants)
     ? obj.grants.filter((g: string) => GRANTS.includes(g as WidgetGrant))
     : [];
-  // hard-ban obviously dangerous constructs in generated code
-  const banned = [/\beval\s*\(/, /new\s+Function\s*\(/, /document\.cookie/, /XMLHttpRequest/, /\bfetch\s*\(\s*['"`]?https?:/];
+  // hard-ban obviously dangerous constructs in generated code — all network
+  // access must go through the grant-gated WidgetAI.net surface.
+  const banned = [/\beval\s*\(/, /new\s+Function\s*\(/, /document\.cookie/, /XMLHttpRequest/, /\bfetch\s*\(/, /\bsendBeacon\s*\(/, /new\s+WebSocket/];
   for (const re of banned) {
     if (re.test(obj.code)) return { error: `generated code uses banned construct: ${re}`, warnings };
   }

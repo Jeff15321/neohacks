@@ -17,6 +17,7 @@ const define = {
 const shared = { bundle: true, format: 'iife', target: 'chrome120', define, sourcemap: true, logLevel: 'warning' };
 
 await esbuild.build({ ...shared, entryPoints: [path.join(DIR, 'src/background/sw.ts')], outfile: path.join(DIST, 'sw.js') });
+await esbuild.build({ ...shared, entryPoints: [path.join(DIR, 'src/net/probe.ts')], outfile: path.join(DIST, 'netprobe.js') });
 await esbuild.build({ ...shared, entryPoints: [path.join(DIR, 'src/content/context.ts')], outfile: path.join(DIST, 'content.js') });
 await esbuild.build({ ...shared, entryPoints: [path.join(DIR, 'src/sidepanel/main.tsx')], outfile: path.join(DIST, 'sidepanel.js'), jsx: 'automatic' });
 

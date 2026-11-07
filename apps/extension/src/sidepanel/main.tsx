@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import type { PanelToSW, SWToPanel, WidgetRecord } from '@app/shared';
+import type { PanelToSW, SWToPanel, WidgetRecord, NetOpSummary, NetInvokeResult } from '@app/shared';
 
 interface LogLine { t: number; text: string; }
 
@@ -15,6 +15,11 @@ function App() {
   const [error, setError] = useState<string>('');
   const [showCode, setShowCode] = useState<Record<string, boolean>>({});
   const [health, setHealth] = useState<{ userScripts: boolean; backend: string; backendUrl: string } | null>(null);
+  const [netOpen, setNetOpen] = useState(false);
+  const [netOps, setNetOps] = useState<NetOpSummary[]>([]);
+  const [netAlive, setNetAlive] = useState<boolean | null>(null);
+  const [netDetail, setNetDetail] = useState<Record<string, boolean>>({});
+  const [netReplay, setNetReplay] = useState<Record<string, string>>({});
   const busyRef = useRef(false);
 
   const pushLog = (widgetId: string, text: string) =>
@@ -50,6 +55,23 @@ function App() {
     });
   };
 
+  const loadNet = () => {
+    send({ type: 'GET_NET_OPS' }).then(r => {
+      if (r?.ok) { setNetOps(r.ops ?? []); setNetAlive(!!r.probeAlive); }
+      else if (r?.error) setNetOps([]);
+    });
+  };
+  const toggleNet = () => { const next = !netOpen; setNetOpen(next); if (next) loadNet(); };
+  const replay = (op: NetOpSummary) => {
+    setNetReplay(p => ({ ...p, [op.id]: 'replaying…' }));
+    send({ type: 'NET_REPLAY', opId: op.id }).then(r => {
+      const res = r?.result as NetInvokeResult | undefined;
+      const txt = !r?.ok ? `failed: ${r?.error ?? 'replay failed'}`
+        : `${res?.status ?? '?'} ${res?.statusText ?? ''}${res?.ok ? '' : ' (HTTP error)'}${res?.bodyText ? ' — ' + String(res.bodyText).slice(0, 160) : ''}`;
+      setNetReplay(p => ({ ...p, [op.id]: txt }));
+      loadNet(); // the replay itself is recorded — refresh the list
+    });
+  };
   const run = (id: string) => send({ type: 'RUN_WIDGET', widgetId: id }).then(r => { if (!r?.ok) setError(r?.error ?? 'run failed'); });
   const remove = (id: string) => send({ type: 'REMOVE_WIDGET', widgetId: id }).then(() => setWidgets(prev => prev.filter(w => w.id !== id)));
   const repair = (id: string, instruction?: string) => { setError(''); setBusy(true); busyRef.current = true; setProgress('repair:regenerating'); send({ type: 'REPAIR_WIDGET', widgetId: id, instruction }).then(r => { if (!r?.ok) { setError(r?.error ?? 'repair failed'); setBusy(false); busyRef.current = false; setProgress(''); } }); };
@@ -61,6 +83,36 @@ function App() {
     <div id="widgets">
       {error && <div className="card err">{error}</div>}
       {progress && <div className="card"><em>Generating… {progress}</em></div>}
+      <div className="card net">
+        <div className="row" style={{ marginTop: 0, alignItems: 'center' }}>
+          <button onClick={toggleNet} id="net-toggle">{netOpen ? '▾' : '▸'} Network activity</button>
+          {netOpen && <button onClick={loadNet} id="net-refresh">Refresh</button>}
+          {netOpen && netAlive === false && <span className="meta" style={{ margin: 0 }}>probe not seen — reload the page</span>}
+        </div>
+        {netOpen && <>
+          {netOps.length === 0 && <div className="hint" style={{ padding: '6px 0 0' }}>No requests captured yet — interact with the page (click, save, navigate), then Refresh.</div>}
+          {netOps.map(op => (
+            <div className="netop" key={op.id}>
+              <div className="netline" onClick={() => setNetDetail(p => ({ ...p, [op.id]: !p[op.id] }))}>
+                <b className={op.method === 'GET' ? '' : 'mut'}>{op.method}</b>
+                <span className="mono path">{op.path}</span>
+                <span className={`st ${op.status && op.status < 400 ? 'ok' : 'bad'}`}>{op.status ?? (op.ok === false ? 'ERR' : '…')}</span>
+                {op.replay && <span className="badge">replay</span>}
+                {op.triggerText && <span className="trig">← {op.triggerText}</span>}
+              </div>
+              {netDetail[op.id] && <div className="netdetail">
+                <div className="meta">full url: {op.url}</div>
+                {op.requestBodyTemplate && <><div className="meta">request body:</div><pre>{op.requestBodyTemplate}</pre></>}
+                {op.responseBodySample && <><div className="meta">response:</div><pre>{op.responseBodySample}</pre></>}
+                <div className="row">
+                  <button onClick={() => replay(op)}>Replay</button>
+                  {netReplay[op.id] && <span className="meta mono" style={{ margin: 0 }}>{netReplay[op.id]}</span>}
+                </div>
+              </div>}
+            </div>
+          ))}
+        </>}
+      </div>
       {widgets.map(w => (
         <div className="card" key={w.id}>
           <h3>{w.name}<span className={`status ${w.status}`}>{w.status}</span></h3>

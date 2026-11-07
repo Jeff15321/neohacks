@@ -75,8 +75,83 @@ function extractContext(): PageContext {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Network probe bridge — the MAIN-world netprobe posts {source:'wwa-net'}
+// messages; we relay records/gesture hellos to the service worker, and relay
+// invoke requests from the SW back into the page.
+// ---------------------------------------------------------------------------
+
+/** Summarize a gesture target as `tag#id.cls[role][aria-label] "text"`. */
+function describeTarget(el: Element | null): { target: string; text?: string } {
+  if (!el) return { target: 'unknown' };
+  const e = el as HTMLElement;
+  const bits = [e.tagName.toLowerCase()];
+  if (e.id) bits.push('#' + e.id);
+  const cls = (typeof e.className === 'string' ? e.className : '').split(/\s+/).filter(Boolean).slice(0, 3);
+  if (cls.length) bits.push('.' + cls.join('.'));
+  const role = e.getAttribute?.('role'); if (role) bits.push(`[role=${role}]`);
+  const al = e.getAttribute?.('aria-label'); if (al) bits.push(`[aria-label="${al.slice(0, 40)}"]`);
+  const text = (e.innerText ?? e.textContent ?? '').trim().replace(/\s+/g, ' ').slice(0, 60) || undefined;
+  return { target: bits.join(''), text };
+}
+
+let lastGesture = { kind: '', target: '', ts: 0 };
+function reportGesture(kind: 'click' | 'submit' | 'keydown', ev: Event) {
+  const now = Date.now();
+  const el = (ev.target as Element)?.closest?.('button, [role="button"], a, [role="link"], input, [contenteditable], [tabindex], form') ?? (ev.target as Element);
+  const { target, text } = describeTarget(el);
+  // Dedupe repeated events on the same element (double-fires, rapid re-clicks);
+  // different targets are never throttled — fast UIs fire actions back-to-back.
+  if (kind === lastGesture.kind && target === lastGesture.target && now - lastGesture.ts < 400) return;
+  lastGesture = { kind, target, ts: now };
+  try { chrome.runtime.sendMessage({ type: 'WWA_GESTURE', gesture: { kind, target, text, ts: now } }); } catch {}
+}
+document.addEventListener('click', e => reportGesture('click', e), true);
+document.addEventListener('submit', e => reportGesture('submit', e), true);
+document.addEventListener('keydown', e => { if ((e as KeyboardEvent).key === 'Enter') reportGesture('keydown', e); }, true);
+
+// Pending invoke requests: invokeId -> resolve. Results arrive via postMessage.
+const pendingInvokes = new Map<string, (r: unknown) => void>();
+let probeSeen = false;
+
+// The probe's hello at document_start predates this script (document_idle);
+// ping it so presence is still detected on every page load.
+try { window.postMessage({ source: 'wwa-ext', kind: 'ping' }, location.origin); } catch {}
+
+window.addEventListener('message', (ev) => {
+  const d = ev.data as { source?: string; kind?: string } | null;
+  if (!d || typeof d !== 'object' || d.source !== 'wwa-net') return;
+  probeSeen = true;
+  if (d.kind === 'record') {
+    try { chrome.runtime.sendMessage({ type: 'WWA_NET_RECORD', record: (d as any).record }); } catch {}
+  } else if (d.kind === 'hello' || d.kind === 'pong') {
+    try { chrome.runtime.sendMessage({ type: 'WWA_NET_HELLO', frameUrl: (d as any).frameUrl }); } catch {}
+  } else if (d.kind === 'result') {
+    const resolve = pendingInvokes.get((d as any).invokeId);
+    if (resolve) { pendingInvokes.delete((d as any).invokeId); resolve((d as any).result); }
+  }
+});
+
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg?.type === 'WWA_GET_CONTEXT') { sendResponse(extractContext()); return; }
   if (msg?.type === 'WWA_PING') { sendResponse({ ok: true }); return; }
+  if (msg?.type === 'WWA_NET_PING') { sendResponse({ ok: true, alive: probeSeen }); return; }
+  if (msg?.type === 'WWA_NET_INVOKE') {
+    const invokeId: string = msg.invokeId;
+    const timer = setTimeout(() => {
+      if (pendingInvokes.delete(invokeId)) sendResponse({ ok: false, error: 'netprobe invoke timed out' });
+    }, 35_000);
+    pendingInvokes.set(invokeId, (result) => {
+      clearTimeout(timer);
+      sendResponse({ ok: true, result });
+    });
+    try {
+      window.postMessage({ source: 'wwa-ext', kind: 'invoke', invokeId, request: msg.request }, location.origin);
+    } catch (e) {
+      clearTimeout(timer); pendingInvokes.delete(invokeId);
+      sendResponse({ ok: false, error: String((e as Error)?.message ?? e) });
+    }
+    return true; // async response
+  }
 });
 export {};
