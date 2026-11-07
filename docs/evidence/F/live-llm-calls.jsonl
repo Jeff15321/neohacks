@@ -1,0 +1,2 @@
+{"trace_id":"t_mjby8my9p02w","stage":"generate.widget","model":"claude-opus-5-5","effort":"high","latency_ms":339945,"input_tokens":1480,"output_tokens":40644,"parse_ok":1,"error":null}
+{"trace_id":"t_eurviz42r164","stage":"generate.widget","model":"claude-opus-5-5","effort":"high","latency_ms":267082,"input_tokens":1480,"output_tokens":33432,"parse_ok":1,"error":null}

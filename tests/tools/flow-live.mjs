@@ -28,7 +28,7 @@ try {
   const t0 = Date.now();
   await panel.click('#gen-btn');
   const card = panel.locator('[data-testid="approval-card"]').first();
-  await card.locator('h3').waitFor({ timeout: 300_000 });
+  await card.locator('h3').waitFor({ timeout: 600_000 });
   out.genSeconds = Math.round((Date.now() - t0) / 1000);
   out.card = (await card.innerText()).split('\n').filter(Boolean).slice(0, 20).join(' | ');
   log(`generated in ${out.genSeconds}s:`, out.card);
@@ -51,8 +51,9 @@ try {
   }
   out.flowSeconds = Math.round((Date.now() - t1) / 1000);
   out.tickets = tickets;
-  out.homeText = await page.evaluate(`[...document.querySelectorAll('[id^="wwa-"]')].map(h => (h.shadowRoot ? h.shadowRoot.textContent : h.textContent)).join(' | ').replace(/\\s+/g, ' ').slice(0, 300)`);
-  out.homeLinks = await page.evaluate(`[...document.querySelectorAll('[id^="wwa-"] a')].map(a => a.href)`);
+  // widget UIs may live in shadow roots (string evaluate — see AGENTS.md)
+  out.homeText = await page.evaluate(`[...document.querySelectorAll('[id^="wwa-"]')].map(h => [...(h.shadowRoot ? h.shadowRoot.children : [h])].filter(c => c.tagName !== 'STYLE').map(c => c.innerText).join(' ')).join(' | ').replace(/\\s+/g, ' ').slice(0, 300)`);
+  out.homeLinks = await page.evaluate(`[...document.querySelectorAll('[id^="wwa-"]')].flatMap(h => [...(h.shadowRoot || h).querySelectorAll('a')]).map(a => a.href)`);
   log('run:', out.run && out.run.status, out.run && out.run.error, 'events:', out.run && out.run.events.map(e => e.event).join(' → '));
   log('tickets:', JSON.stringify(tickets.map(t => ({ key: t.key, summary: t.summary, labels: t.labels, desc: t.description.slice(0, 80) }))));
   log('home widget text:', out.homeText, 'links:', out.homeLinks);
