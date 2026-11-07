@@ -1,11 +1,11 @@
 # Next-gen build progress
-_Last updated: 2026-11-07 15:35 PST by coordinator (local Devin CLI session)_
+_Last updated: 2026-11-07 15:50 PST by coordinator (local Devin CLI session)_
 
 ## Status board
 | Phase | Status (not started / in progress / gate running / DONE / DONE-DEGRADED / blocked) | Branch/PR | Gate result | Updated |
 |---|---|---|---|---|
 | 0 Foundation | DONE | `nextgen` (coordinator, direct) | PASS — typecheck 0 errors; unit 39/39; E2E 4/4; live gmail2 1/1 | 13:10 |
-| C Self-healing runtime | DONE | `phase-c` / PR #7 (merged) | PASS on `nextgen` after merge — runtime.spec ×4 green; unit 123/123; E2E 14/14; 2× 20-run live chaos sweep recorded (task success 25% / 35%) | 14:42 |
+| C Self-healing runtime | DONE | `phase-c` / PR #7 + revisit `phase-c2` / PR #9 (merged) | PASS on `nextgen` — runtime.spec ×4 green; 3× 20-run live chaos sweeps: task success 25% → 35% → **90%** | 15:45 |
 | B Steps + recording + Inspector | DONE | `phase-b` / PR #5 (merged) | PASS on `nextgen` after merge — record.spec ×2 green; unit 93/93; E2E 7/7; live Demo-1 5/5 (+2/2 post-merge) | 13:50 |
 | A User data store | DONE | `phase-a` / PR #4 (merged) | PASS on `nextgen` after merge — data.spec green; unit 75/75; E2E 5/5 | 13:30 |
 | E Network upgrades | DONE | `phase-e` / PR #3 (merged) | PASS on `nextgen` after merge — extended net.spec (rotating CSRF → verified) green; op-analysis unit tests; E2E 5/5 | 13:30 |
@@ -82,6 +82,7 @@ Full report: `docs/phases/C.md`. Summary:
   | emails sent / deleted | 0 | 0 |
 
   Failure modes: sweep 1 slow-load runs falsely "completed" with 0 drafts (fixed); sweep 2 10/13 failures are renamed-Reply seeds where the widget's own `expect` demands a visible "Reply" so a correct "Respond" click can't pass; decider chose `stop` with a popup visible in 2 runs. Narratives + per-run llm ids: `docs/evidence/C/sweep{1,2}/chaos-sweep.md`.
+- **Revisit (PR #9, sweep 3, 15:29–15:42):** generator steps section now requires `expect` on effects (view/composer/draft indicator), not on the clicked control's label; synonym/role locators; a dismiss-popup branch on fragile clicks; empty-inbox pattern. Decide prompt: overlays checked first, never `stop` because of a popup. Create prompt: targets the failed expect, gets a redacted `stateShape` preview. Results: intervention rate 80% (16/20), branch-choice accuracy 100% (29/29), new-branch success n/a (0 calls — the branch-writer changes are unit-tested only), final-failure 10% (2/20, both empty-inbox seeds), false completed 0%, **task success 90% (18/20)**, 0 sent/deleted. Not a controlled comparison (fresh widget per sweep). Unexplained 401s in the page console on every run (no run failed from them). Evidence `docs/evidence/C/sweep3/`.
 - **Not implemented:** E2E for the network danger guard (classifier unit-tested), Inspector runs view (bus log only), runtime interception of `form.submit()` (statically rejected in agent branches only).
 - **Coordinator follow-up applied at merge:** generation `max_tokens` 32k → 64k and timeout 300 s → 600 s (C saw Opus truncate on 2/4 first attempts with the steps section).
 
@@ -115,6 +116,7 @@ Full report: `docs/phases/F.md`. Summary:
 - 14:42 — Accepted C's deviations: static (not LLM) safety review of agent branches, danger confirm rendered by the prelude instead of content/overlay, step cap per step invocation — reasons in C.md.
 - 15:25 — Live tools wait 600 s for generation (integrated prompts made Opus take ~5 min).
 - 15:25 — Accepted F's decision that "Create" is not a danger-guard word (explicit origin approval + consequentialActions instead).
+- 15:25 — Used the remaining time for the one allowed end-of-run revisit, on the weakest result (C live recovery), on a separate branch/PR so `nextgen` stayed green.
 
 ## Stuck log
 - 14:20 C — renamed-Reply chaos seeds fail because generated `expect` checks labels — measured and reported, not fixed (see C.md).
@@ -124,12 +126,12 @@ Full report: `docs/phases/F.md`. Summary:
 ## Final summary
 _Written 2026-11-07 15:35 PST by the coordinator._
 
-**Done:** all seven phases are merged into `nextgen` (PRs #3–#8) and gated on the integrated branch: Phase 0 (new architecture + MVP port), C (self-healing runtime), B (Steps + recording + Inspector + trace harness), A (user data store), E (network upgrades), D (activity model + suggestions + jobs), F (cross-site flows).
-- Integrated `nextgen` @ 15:21: `npm run typecheck` 0 errors · `npm run test:unit` 138/0 · `npx playwright test` **17/17** (data, flow ×3, gmail2, net, record ×2, runtime ×4, spike-world, suggest ×2, widget, youtube).
+**Done:** all seven phases are merged into `nextgen` (PRs #3–#9, #9 = Phase C revisit) and gated on the integrated branch: Phase 0 (new architecture + MVP port), C (self-healing runtime), B (Steps + recording + Inspector + trace harness), A (user data store), E (network upgrades), D (activity model + suggestions + jobs), F (cross-site flows).
+- Integrated `nextgen` @ 15:46: `npm run typecheck` 0 errors · `npm run test:unit` 140/0 · `npx playwright test` **17/17** (data, flow ×3, gmail2, net, record ×2, runtime ×4, spike-world, suggest ×2, widget, youtube).
 - Live (Anthropic, Opus/Sonnet/Haiku 5.5): gmail2 generation 1/1 at Phase 0 and 1/1 again on the integrated branch (14:50; 2 drafts, 0 sent; 295 s, 36.6k output tokens); Demo 1 (record → widget) 5/5 + 2/2; Demo 2 (suggestion) 3/3 card timing, 2/3 end-to-end; Demo 3 (cross-site) 1/1 flow success; net replay → `verified` 1/1; data save/list 1/1 after one prompt fix.
 
 **Degraded / weak (reported as measured):**
-- **C self-healing in live chaos:** task success 25% and 35% over two 20-run sweeps (0 emails sent or deleted). Main failure: the generated widget's own `expect` checks the "Reply" label, so a correct click on a renamed control can never pass; the decider sometimes stops with a popup on screen.
+- **C self-healing in live chaos:** 25% → 35% → **90%** task success over three 20-run sweeps after the end-of-run revisit (0 sent/deleted). Still weak: agent-written branches were not exercised in sweep 3 (unmeasured live), empty-inbox seeds still fail, sweeps are not controlled comparisons, unexplained 401s in the page console.
 - **D latency:** mean suggestion latency 11.1 s vs the <10 s target; a 30-step burst produces the suggestion ~23 s after completion.
 - **E7** inconclusive (Playwright can't produce real background-tab throttling).
 - **E2** measured on fixtures only (real Gmail/YouTube not available).
@@ -138,7 +140,7 @@ _Written 2026-11-07 15:35 PST by the coordinator._
 
 **Top 3 risks**
 1. **Live generation latency and size.** Opus 5.5 at effort `high` with all prompt sections now takes 4.5–6 min and 33–41k output tokens per widget (max_tokens raised to 64k, timeout to 10 min). A UI that waits this long feels broken; effort `medium`, or trimming prompt sections per request, is the obvious next lever.
-2. **Self-healing recovery quality** (C numbers above). The mechanics, caps and safety rails work and nothing dangerous happened, but recovery success is low. The generator should write `expect` checks on effects (composer opened, draft saved), not on labels.
+2. **Self-healing on real sites.** 90% on the chaos fixture came mostly from better generated widgets; the live agent branch-writer path is barely measured, and real-site chaos is untested.
 3. **Real-site behaviour is unverified.** Everything was tested on fixtures. Real Gmail/GitHub/Jira DOMs, the real keyboard shortcut (E1: synthetic keys don't fire `chrome.commands`), settle thresholds (E2) and background-tab throttling (E7) still need a human run.
 
 **Manual-test checklist for the human**
