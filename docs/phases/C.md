@@ -1,8 +1,14 @@
 # Phase C — Self-healing branching runtime
 
 ## HANDOFF
-- Status: **DONE** — decision B mechanics implemented end-to-end; mock E2E green; two 20-run live chaos sweeps recorded
-  (numbers below, reported as measured — they are mediocre and the main failure modes are understood).
+- Status: **DONE** — decision B mechanics implemented end-to-end; mock E2E green (12/12 after merging nextgen); two
+  20-run live chaos sweeps recorded (numbers below, as measured: task success 25% / 35%, final-failure 35% / 65%,
+  0 emails sent or deleted — mediocre, main failure modes identified).
+- Shared files edited (minimal): `background/bus.ts` (+`widgets.newVersion` service type), `modules/widgets/index.ts` +
+  `service.ts` (`newVersion`), `panel/components/WidgetCards.tsx` (+1 import, +1 `<RunTimeline>` line),
+  `generate/prompts/widget.mock.ts` (2 Phase C branches + import; data in new `widget.mockdata.steps.ts`),
+  `widget-runtime/src/index.ts` (+1 export), `widget-runtime/package.json` (+`@app/core` dep), backend `config.ts` /
+  `server.ts` / `llm/callModel.ts` (`LLM_MOCK_STAGES`, 5 lines), `AGENTS.md` (+3 lines), `fixtures/gmail2/app.js` (chaos).
 - What's done: `WidgetAI.run/step` with `expect` postconditions + pre-generated branches; `WidgetAI.assist` ladder
   (Haiku decide → Sonnet new branch executed in the same worldId with JSON state → one Opus escalation → stop) with caps;
   run timeline + final-failure narrative (widget, panel, bus); learned branches → new widget version; runtime danger
@@ -100,8 +106,8 @@ it is rejected statically for agent branches only. No Inspector-tab view of runs
 (`WidgetAI.net` DELETE / send-like) is unit-tested via the classifier but has no E2E.
 
 **Evidence:**
-- `npm run typecheck` → 0 errors. `npm run test:unit` → core 30/0, widget-runtime 7/0, backend 11/0, extension 4/0.
-- `cd tests/e2e && E2E_PORT=8801 npx playwright test --reporter=line` → FULL_E2E_RESULT.
+- `npm run typecheck` → 0 errors. `npm run test:unit` (after merging nextgen) → core 56/0, widget-runtime 10/0, backend 33/0, extension 7/0 (106 passed, 0 failed). New: `packages/core/src/__tests__/assist.test.ts` (6: danger text + net classifier, ladder/caps, resolveDecision, reviewBranchCode, narrative), `packages/widget-runtime/src/__tests__/step.test.ts` (5: parse, local pass w/o agent, state identity, branch pick, new-branch state + stop→narrative), `apps/backend/src/modules/assist/assist.test.ts` (2: stages/models/mock decide+create+escalate, untrusted framing).
+- `cd tests/e2e && E2E_PORT=8801 npx playwright test --reporter=line` → **12 passed** (1.1 min) after merging origin/nextgen (A, B, E): data 1, gmail2 1, net 1, record 2, runtime 4, spike-world 1, widget 1, youtube 1.
 - runtime.spec key assertions (mock LLM): **branch pick** — popup: exactly 1 `assist-decide` choosing `dismiss-popup`,
   branch-result ok, no `assist-create`, 1 intervention, 2 drafts / 0 sent, bus log has ok `WIDGET_ASSIST`.
   **new branch** — renamed: 1 `assist-create` (`click-respond`, executed via SW in the widget worldId), email 2 re-used it
@@ -115,7 +121,42 @@ it is rejected statically for agent branches only. No Inspector-tab view of runs
   (`chaos-sweep.md` table + narratives + per-run llm call ids, `sweep-results.json` full timelines, `sweep-llm-calls.json`,
   `sweep-widget.js` the live-generated widget):
 
-SWEEP_TABLE
+| metric | sweep 1 (13:57, widget `t_uw6ga7y7tqcy`) | sweep 2 (14:24, widget `t_pqbx5qhr6bmq`, after fixes) |
+|---|---|---|
+| intervention rate (runs with ≥1 agent intervention) | 60% (12/20) | 95% (19/20) |
+| interventions per run (mean) | 1.55 | 1.90 |
+| branch-choice accuracy (label heuristic: choice fits an active fault) | 55% (16/29) | 70% (21/30) |
+| branch-choice effectiveness (chosen path fixed the step / correct stop) | 41% (12/29) | 40% (12/30) |
+| new-branch success (agent-written branch fixed the step) | 83% (10/12) | 19% (4/21) |
+| final-failure rate | 35% (7/20) | 65% (13/20) |
+| false success ("completed" with the wrong number of drafts) | 40% (8/20) | 0% (0/20) |
+| task success (expected drafts, 0 sent, 0 deleted) | 25% (5/20) | 35% (7/20) |
+| emails sent / deleted | 0 / 0 | 0 / 0 |
+| learned-branch offers | 10 | 4 |
+| assist LLM calls (decide / create / escalate) | 48 (34 / 11 / 3) | 51 (30 / 13 / 8) |
+
+  Reading the numbers (honest): each sweep is ONE live-generated widget (different Opus generations), so the two are
+  not a controlled A/B. Sweep 1's widget accepted "no unread rows" as success → 8 slow-load runs "completed" with 0
+  drafts and 0 interventions (false successes, which also flattered the intervention/failure rates); the 14:10
+  positive-postcondition rule removed those (0/20) but sweep 2's widget encoded the fragile label in its postcondition
+  (`open-message` expects "a Reply control is visible"), so under `renamed` the agent's branches clicked "Respond"
+  correctly yet could never satisfy the postcondition → 10 of 13 sweep-2 failures are `renamed` seeds and new-branch
+  success fell to 19%. popup: 4/5 healed by a Sonnet-written "dismiss dialog then open row" branch (after Haiku first
+  picked a useless pre-generated branch); collapsed: healed by the pre-generated branch in sweep 2 (2/2 runs), by a
+  new branch in sweep 1; empty inbox: Haiku correctly chose `stop` (4/4), still counted as failure; Haiku wrongly chose
+  `stop` with a popup visible in 2 runs. Label "branch-choice accuracy" = choice is a branch whose `when`/id matches an
+  active fault's keywords, `new` when no listed branch handles it, `stop` only for empty (heuristic, see
+  `tests/tools/chaos-report.mjs`).
+  Sample failure narratives (full text in `docs/evidence/C/sweep{1,2}/chaos-sweep.md`): sweep 1 seed 3 (collapsed+renamed,
+  trace `t_uw6ga7y7tqcy`, calls `llm_j17cv3zbllkz…`): Haiku `new` → Sonnet "click-respond-link-open-composer" (did not
+  fix: composer collapsed) → Opus "expand-collapsed-composer-after-respond" fixed email 1; email 2 (pre-family-reuse)
+  burned attempts on `click-reply-again`/`keyboard-r` → "Why it broke: step "open-reply-2" never reached its
+  postcondition (reply composer is editable); last observed: no editable reply composer… Stopped because: cap: 2
+  recovery attempts". Sweep 2 seed 3 (trace `t_pqbx5qhr6bmq`, calls `llm_ai83o1gki438 llm_vnl6kvce83a9 llm_9t4a3sbp6ff9`):
+  "step "open-message-1" never reached its postcondition (a Reply control is visible…); Agent's last diagnosis: the
+  previous branch only checked that some message was open with a Respond link…". Sweep 2 seed 10 (popup): "Agent's last
+  diagnosis: … a "Try the new HardMail" dialog covers the page … so a new path would ne[ed]… Stopped because: agent
+  stopped" (decider stopped instead of `new`).
 
 - Live generation with the steps section (4 Opus generations today): first attempt hit `max_tokens` 32 000 in 2/4
   (265–268 s, truncated JSON) and parsed after the built-in retry (158–187 s); 2/4 parsed first try (232 s, 6–7 min
