@@ -105,7 +105,7 @@ ${pc.textSample.slice(0, 3000)}
 
 USER REQUEST: ${req.request}`;
   if (req.prior) {
-    p += `\n\nPRIOR WIDGET CODE (fix it):\n${req.prior.code}\n\nPRIOR ERROR/FEEDBACK:\n${req.prior.error ?? ''}\n${req.prior.feedback ?? ''}`;
+    p += `\n\nPRIOR WIDGET CODE (revise it — keep what works, change what the feedback demands):\n${req.prior.code}\n\nISSUE/FEEDBACK TO ADDRESS (this is authoritative — if it says the code must do X in the page, do X):\n${req.prior.error ?? ''}\n${req.prior.feedback ?? ''}`;
   }
   return p;
 }

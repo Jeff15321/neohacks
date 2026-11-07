@@ -134,7 +134,7 @@ export type PanelToSW =
   | { type: 'PANEL_READY' }
   | { type: 'GENERATE_WIDGET'; request: string; tabId?: number }
   | { type: 'RUN_WIDGET'; widgetId: string; tabId?: number }
-  | { type: 'REPAIR_WIDGET'; widgetId: string }
+  | { type: 'REPAIR_WIDGET'; widgetId: string; instruction?: string }
   | { type: 'REMOVE_WIDGET'; widgetId: string }
   | { type: 'LIST_WIDGETS' }
   | { type: 'GET_PAGE_CONTEXT'; tabId?: number }

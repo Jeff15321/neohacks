@@ -177,7 +177,11 @@ chrome.runtime.onMessage.addListener((raw: PanelToSW | SWToPanel, sender, sendRe
           const res = await backendFetch<GenerateWidgetResponse>('/api/generate-widget', {
             request: w.originalRequest ?? w.description,
             pageContext,
-            prior: { code: w.code, error: w.lastError ?? 'widget failed at runtime' },
+            prior: {
+              code: w.code,
+              error: w.lastError ?? 'widget failed at runtime',
+              feedback: msg.instruction ?? undefined,
+            },
           } satisfies GenerateWidgetRequest);
           if (!res.ok || !res.widget) throw new Error(res.error ?? 'repair generation failed');
           const nw: WidgetRecord = {
