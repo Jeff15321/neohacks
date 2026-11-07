@@ -1,5 +1,5 @@
 import type { CompleteOptions, LLMProvider } from './provider.js';
-import { MOCK_WIDGET_CODE, MOCK_WIDGET_CODE_YT, MOCK_WIDGET_CODE_G2, MOCK_REPLY, MOCK_TOPICS } from './mockdata.js';
+import { MOCK_WIDGET_CODE, MOCK_WIDGET_CODE_YT, MOCK_WIDGET_CODE_G2, MOCK_WIDGET_CODE_NET, MOCK_REPLY, MOCK_TOPICS } from './mockdata.js';
 
 /**
  * Deterministic provider for automated tests. No network.
@@ -12,6 +12,17 @@ export class MockProvider implements LLMProvider {
   async complete(opts: CompleteOptions): Promise<string> {
     if (opts.system?.includes('WIDGET-GEN')) {
       const userMsg = opts.messages[0]?.content ?? '';
+      if (/fixture-net|netmail/i.test(userMsg)) {
+        return JSON.stringify({
+          name: 'API Draft Creator',
+          description: 'Button that creates an email draft by replaying the captured save-draft network call.',
+          matchPatterns: ['*://127.0.0.1/*', '*://localhost/*'],
+          grants: ['network', 'log'],
+          insertionHint: 'Inserts a button into the main toolbar.',
+          code: MOCK_WIDGET_CODE_NET,
+          warnings: ['mock provider: deterministic net widget'],
+        });
+      }
       if (/fixture-g2|hardmail/i.test(userMsg)) {
         return JSON.stringify({
           name: 'Unread Reply Drafter',

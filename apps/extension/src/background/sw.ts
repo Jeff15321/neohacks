@@ -1,11 +1,14 @@
 /// <reference lib="webworker" />
 import type {
-  PanelToSW, SWToPanel, UserScriptMsg, UserScriptReply,
+  PanelToSW, SWToPanel, PageToSW, SWToContent, UserScriptMsg, UserScriptReply,
   WidgetRecord, PageContext, GenerateWidgetRequest, GenerateWidgetResponse,
-  InferenceResponse, WidgetStatus,
+  InferenceResponse, WidgetStatus, NetInvokeResult,
 } from '@app/shared';
+import { LIMITS } from '@app/shared';
 import { buildWidgetSource, buildCleanupSource } from '../runtime/widgetSource.js';
 import { matchesAny } from './matchPattern.js';
+import { NetLog } from './netlog.js';
+import { buildInvokeRequest, buildDirectRequest, sameOrigin, type InvokeRequestSpec } from '../net/invoke.js';
 
 declare const BACKEND_URL: string;
 declare const EXTENSION_TOKEN: string;
@@ -19,6 +22,59 @@ const sw = self as unknown as ServiceWorkerGlobalScope;
 // ---------------------------------------------------------------------------
 const widgets = new Map<string, WidgetRecord>();
 const STORAGE_KEY = 'wwa_widgets';
+
+// ---------------------------------------------------------------------------
+// Network observation state — per-tab ring buffers, hydrated from
+// storage.session so service-worker restarts don't lose recent captures.
+// ---------------------------------------------------------------------------
+const netlog = new NetLog();
+const probeAlive = new Map<number, number>(); // tabId -> last hello ts
+const hydrated = new Set<number>();
+const persistTimers = new Map<number, ReturnType<typeof setTimeout>>();
+const netKey = (tabId: number) => `wwa_net_${tabId}`;
+
+async function hydrateNet(tabId: number) {
+  if (hydrated.has(tabId)) return;
+  hydrated.add(tabId);
+  try {
+    const r = await chrome.storage.session.get(netKey(tabId));
+    const records = r[netKey(tabId)];
+    if (Array.isArray(records)) netlog.hydrate(tabId, records);
+  } catch { /* storage.session unavailable */ }
+}
+
+function scheduleNetPersist(tabId: number) {
+  if (persistTimers.has(tabId)) return;
+  persistTimers.set(tabId, setTimeout(() => {
+    persistTimers.delete(tabId);
+    try { void chrome.storage.session.set({ [netKey(tabId)]: netlog.all(tabId) }); } catch {}
+  }, 800));
+}
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+  netlog.clearTab(tabId);
+  probeAlive.delete(tabId);
+  hydrated.delete(tabId);
+  try { void chrome.storage.session.remove(netKey(tabId)); } catch {}
+});
+
+function tabOrigin(tab: chrome.tabs.Tab): string {
+  try { return new URL(tab.url ?? '').origin; } catch { return ''; }
+}
+
+/** Relay a fetch-shaped request to the MAIN-world probe via the content script. */
+async function pageFetch(tabId: number, request: InvokeRequestSpec): Promise<NetInvokeResult> {
+  const invokeId = `i_${Math.random().toString(36).slice(2, 10)}`;
+  const msg: SWToContent = { type: 'WWA_NET_INVOKE', invokeId, request };
+  let resp: { ok?: boolean; result?: NetInvokeResult; error?: string } | undefined;
+  try {
+    resp = await chrome.tabs.sendMessage(tabId, msg);
+  } catch (e) {
+    throw new Error(`page bridge unavailable — reload the tab (${String((e as Error)?.message ?? e)})`);
+  }
+  if (!resp?.ok) throw new Error(resp?.error ?? 'netprobe invoke failed');
+  return resp.result ?? { ok: false, error: 'empty netprobe response' };
+}
 
 async function loadWidgets() {
   const res = await chrome.storage.local.get(STORAGE_KEY);
@@ -115,9 +171,27 @@ async function backendFetch<T>(path: string, body: unknown): Promise<T> {
 // ---------------------------------------------------------------------------
 // Panel message handling
 // ---------------------------------------------------------------------------
-chrome.runtime.onMessage.addListener((raw: PanelToSW | SWToPanel, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((raw: PanelToSW | PageToSW | SWToPanel, sender, sendResponse) => {
   // Ignore our own broadcasts looping back.
-  if ((raw as SWToPanel).type && ['GENERATION_PROGRESS','WIDGET_GENERATED','WIDGET_STATUS','WIDGET_LIST','PAGE_CONTEXT','ERROR'].includes(raw.type)) return;
+  if ((raw as SWToPanel).type && ['GENERATION_PROGRESS','WIDGET_GENERATED','WIDGET_STATUS','WIDGET_LIST','PAGE_CONTEXT','NET_OPS','ERROR'].includes(raw.type)) return;
+  // Content-script telemetry: net records, gestures, probe hellos.
+  const pg = raw as PageToSW;
+  if (pg.type === 'WWA_NET_RECORD' && sender.tab?.id != null) {
+    netlog.addRecord(sender.tab.id, pg.record);
+    scheduleNetPersist(sender.tab.id);
+    sendResponse?.({ ok: true });
+    return;
+  }
+  if (pg.type === 'WWA_GESTURE' && sender.tab?.id != null) {
+    netlog.addGesture(sender.tab.id, pg.gesture);
+    sendResponse?.({ ok: true });
+    return;
+  }
+  if (pg.type === 'WWA_NET_HELLO' && sender.tab?.id != null) {
+    probeAlive.set(sender.tab.id, Date.now());
+    sendResponse?.({ ok: true });
+    return;
+  }
   const msg = raw as PanelToSW;
   void (async () => {
     await loadReady;
@@ -128,6 +202,8 @@ chrome.runtime.onMessage.addListener((raw: PanelToSW | SWToPanel, sender, sendRe
           if (!tab?.id) throw new Error('no eligible web page tab found');
           broadcast({ type: 'GENERATION_PROGRESS', stage: 'context', detail: 'extracting page context' });
           const pageContext = await getPageContext(tab.id, tab);
+          await hydrateNet(tab.id);
+          pageContext.networkOps = netlog.ops(tab.id, 12, tabOrigin(tab));
           broadcast({ type: 'GENERATION_PROGRESS', stage: 'llm', detail: 'generating widget code' });
           const req: GenerateWidgetRequest = { request: msg.request, pageContext };
           const res = await backendFetch<GenerateWidgetResponse>('/api/generate-widget', req);
@@ -173,6 +249,8 @@ chrome.runtime.onMessage.addListener((raw: PanelToSW | SWToPanel, sender, sendRe
           if (!tab?.id) throw new Error(`no tab matches ${w.matchPatterns.join(', ')}`);
           broadcast({ type: 'GENERATION_PROGRESS', stage: 'context', detail: 're-extracting context' });
           const pageContext = await getPageContext(tab.id, tab);
+          await hydrateNet(tab.id);
+          pageContext.networkOps = netlog.ops(tab.id, 12, tabOrigin(tab));
           broadcast({ type: 'GENERATION_PROGRESS', stage: 'llm', detail: 'repairing widget code' });
           const res = await backendFetch<GenerateWidgetResponse>('/api/generate-widget', {
             request: w.originalRequest ?? w.description,
@@ -220,6 +298,24 @@ chrome.runtime.onMessage.addListener((raw: PanelToSW | SWToPanel, sender, sendRe
           const tab = await findTargetTab();
           if (!tab?.id) throw new Error('no eligible tab');
           sendResponse({ ok: true, context: await getPageContext(tab.id, tab) });
+          break;
+        }
+        case 'GET_NET_OPS': {
+          const tab = await findTargetTab();
+          if (!tab?.id) throw new Error('no eligible tab');
+          await hydrateNet(tab.id);
+          sendResponse({ ok: true, tabId: tab.id, ops: netlog.ops(tab.id, 60, tabOrigin(tab)), probeAlive: probeAlive.has(tab.id) });
+          break;
+        }
+        case 'NET_REPLAY': {
+          const tab = await findTargetTab();
+          if (!tab?.id || !tab.url) throw new Error('no eligible tab');
+          await hydrateNet(tab.id);
+          const record = netlog.recordById(tab.id, msg.opId);
+          if (!record) throw new Error('captured request not found (tab may have navigated)');
+          const spec = buildInvokeRequest(record, msg.overrides ?? {});
+          if (!sameOrigin(spec.url, tab.url)) throw new Error('replay restricted to the page origin');
+          sendResponse({ ok: true, result: await pageFetch(tab.id, spec) });
           break;
         }
         case 'GET_HEALTH': {
@@ -292,6 +388,38 @@ chrome.runtime.onUserScriptMessage.addListener((raw: UserScriptMsg, sender, send
           }
           sendResponse({ ok: true });
           break;
+        case 'WIDGET_NET_OPS': {
+          if (!w.grants.includes('network')) { sendResponse({ ok: false, error: 'network not granted' }); return; }
+          const tabId = sender.tab?.id;
+          if (tabId == null) { sendResponse({ ok: false, error: 'no sender tab' }); return; }
+          await hydrateNet(tabId);
+          const origin = sender.tab?.url ? new URL(sender.tab.url).origin : undefined;
+          sendResponse({ ok: true, operations: netlog.ops(tabId, 40, origin) } satisfies UserScriptReply);
+          break;
+        }
+        case 'WIDGET_NET_INVOKE': {
+          if (!w.grants.includes('network')) { sendResponse({ ok: false, error: 'network not granted' }); return; }
+          const tab = sender.tab;
+          if (!tab?.id || !tab.url) { sendResponse({ ok: false, error: 'no sender tab' }); return; }
+          await hydrateNet(tab.id);
+          const record = netlog.recordById(tab.id, msg.opId);
+          if (!record) { sendResponse({ ok: false, error: `captured operation ${msg.opId} not found on this tab` }); return; }
+          const spec = buildInvokeRequest(record, msg.overrides ?? {});
+          if (!sameOrigin(spec.url, tab.url)) { sendResponse({ ok: false, error: 'replay restricted to the page origin' }); return; }
+          const result = await pageFetch(tab.id, spec);
+          sendResponse({ ok: true, result } satisfies UserScriptReply);
+          break;
+        }
+        case 'WIDGET_NET_REQUEST': {
+          if (!w.grants.includes('network')) { sendResponse({ ok: false, error: 'network not granted' }); return; }
+          const tab = sender.tab;
+          if (!tab?.id || !tab.url) { sendResponse({ ok: false, error: 'no sender tab' }); return; }
+          const spec = buildDirectRequest(msg.request ?? {}, tab.url);
+          if (!sameOrigin(spec.url, tab.url)) { sendResponse({ ok: false, error: 'requests restricted to the page origin' }); return; }
+          const result = await pageFetch(tab.id, spec);
+          sendResponse({ ok: true, result } satisfies UserScriptReply);
+          break;
+        }
         default:
           sendResponse({ ok: false, error: 'unknown message' });
       }

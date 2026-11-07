@@ -115,6 +115,59 @@ btn.addEventListener('click', async () => {
 });
 `;
 
+// NetMail fixture widget — uses the NETWORK surface: finds the captured
+// POST /fixture-api/drafts operation and replays it with modified params,
+// then verifies via a read-back request. Mirrors what the LLM is expected to
+// produce when OBSERVED NETWORK OPERATIONS are present in the context.
+export const MOCK_WIDGET_CODE_NET = `
+const waitFor = async (fn, timeout = 8000) => {
+  const t0 = Date.now();
+  while (Date.now() - t0 < timeout) { const v = fn(); if (v) return v; await new Promise(r => setTimeout(r, 120)); }
+  return null;
+};
+const toolbar = await waitFor(() => document.getElementById('nm-toolbar'));
+const host = document.createElement('div');
+host.id = 'wwa-net-drafter';
+(toolbar || document.body).appendChild(host);
+const root = host.attachShadow({ mode: 'open' });
+root.innerHTML = \`<style>
+  button { font:13px arial; padding:6px 12px; border:1px solid #dadce0; border-radius:4px; background:#fff; cursor:pointer; }
+  #st { font:12px arial; color:#5f6368; margin-left:8px; }
+</style><button id="go">Create draft via captured API</button><span id="st"></span>\`;
+const btn = root.getElementById('go');
+const st = root.getElementById('st');
+const say = (m) => { st.textContent = m; WidgetAI.log(m); };
+
+btn.addEventListener('click', async () => {
+  btn.disabled = true;
+  try {
+    say('Looking for the captured draft operation…');
+    const ops = await WidgetAI.net.operations();
+    const op = ops.find(o => o.method === 'POST' && /\\/fixture-api\\/drafts$/.test(o.path));
+    if (!op) throw new Error('no captured POST /fixture-api/drafts — save a draft via the UI once first');
+    say('Replaying ' + op.method + ' ' + op.path + ' with new parameters…');
+    const res = await WidgetAI.net.invoke(op.id, {
+      mergeBody: {
+        to: 'devin+api@example.com',
+        subject: 'API-authored draft',
+        body: 'This draft was created by replaying the captured save-draft request via WidgetAI.net.invoke — no UI clicks.',
+      },
+    });
+    if (!res.ok) throw new Error('invoke failed: HTTP ' + res.status + ' ' + String(res.bodyText || '').slice(0, 120));
+    say('Verifying via read-back request…');
+    const list = await WidgetAI.net.request({ url: '/fixture-api/drafts' });
+    if (!list.ok || !(list.bodyText || '').includes('API-authored draft')) {
+      throw new Error('draft not present in read-back list');
+    }
+    say('Draft created and verified via the API.');
+    WidgetAI.status('completed', 'draft created via network replay');
+  } catch (e) {
+    say('Error: ' + (e?.message ?? e));
+    WidgetAI.status('failed', String(e?.message ?? e));
+  } finally { btn.disabled = false; }
+});
+`;
+
 // Gmail-realistic (obfuscated) fixture widget — selectors mirror what the LLM
 // produces for Gmail-shaped DOM: tr.zA.zE rows, aria-label affordances.
 export const MOCK_WIDGET_CODE_G2 = `

@@ -39,6 +39,11 @@ const WidgetAI = {
     set: (key, value) => __GRANTS.includes('storage') ? __request('WIDGET_STORAGE', { op: 'set', key, value }).then(() => undefined) : Promise.reject(new Error('grant "storage" not declared')),
     remove: (key) => __GRANTS.includes('storage') ? __request('WIDGET_STORAGE', { op: 'remove', key }).then(() => undefined) : Promise.reject(new Error('grant "storage" not declared')),
   },
+  net: {
+    operations: () => __GRANTS.includes('network') ? __request('WIDGET_NET_OPS', {}).then(r => r.operations) : Promise.reject(new Error('grant "network" not declared')),
+    invoke: (opId, overrides) => __GRANTS.includes('network') ? __request('WIDGET_NET_INVOKE', { opId, overrides: overrides || {} }).then(r => r.result) : Promise.reject(new Error('grant "network" not declared')),
+    request: (req) => __GRANTS.includes('network') ? __request('WIDGET_NET_REQUEST', { request: req }).then(r => r.result) : Promise.reject(new Error('grant "network" not declared')),
+  },
 };
 `;
   return `(async () => {

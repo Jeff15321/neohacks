@@ -11,6 +11,7 @@
   "action": { "default_title": "Widget AI" },
   "side_panel": { "default_path": "sidepanel.html" },
   "content_scripts": [
+    { "matches": ["http://*/*", "https://*/*"], "js": ["netprobe.js"], "run_at": "document_start", "all_frames": true, "world": "MAIN" },
     { "matches": ["http://*/*", "https://*/*"], "js": ["content.js"], "run_at": "document_idle", "all_frames": false }
   ],
   "icons": {}
