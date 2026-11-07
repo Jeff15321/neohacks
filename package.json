@@ -1,0 +1,28 @@
+{
+  "name": "neohacks",
+  "private": true,
+  "description": "AI Website Widget Builder — generate custom website widgets from natural language",
+  "workspaces": [
+    "apps/extension",
+    "apps/backend",
+    "packages/shared",
+    "tests/e2e"
+  ],
+  "scripts": {
+    "build": "npm run build -w packages/shared && npm run build -w apps/extension && npm run build -w apps/backend",
+    "build:extension": "npm run build -w packages/shared && npm run build -w apps/extension",
+    "dev:backend": "npm run dev -w apps/backend",
+    "test": "npm run test -w tests/e2e",
+    "typecheck": "npm run typecheck -w packages/shared && npm run typecheck -w apps/extension && npm run typecheck -w apps/backend"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "allowScripts": {
+    "esbuild@0.24.2": true,
+    "esbuild@0.28.2": true
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@app/extension",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:unit": "tsx --test src/__tests__/*.test.ts"
+  },
+  "dependencies": {
+    "@app/shared": "*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.3.7",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "esbuild": "^0.24.0",
+    "tsx": "^4.23.15",
+    "typescript": "~5.6.3"
+  }
+}

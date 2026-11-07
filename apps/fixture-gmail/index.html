@@ -1,0 +1,39 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Fixture Mail — Inbox</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.4 system-ui, sans-serif; color: #202124; background: #f6f8fc; }
+  .gj-toolbar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #fff; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; }
+  .gj-toolbar .logo { font-weight: 700; margin-right: 16px; }
+  .gj-toolbar button { font: inherit; padding: 6px 14px; border-radius: 16px; border: 1px solid #dadce0; background: #fff; cursor: pointer; }
+  .msg-list { max-width: 900px; margin: 16px auto; background: #fff; border-radius: 8px; overflow: hidden; }
+  .msg-row { display: flex; gap: 12px; padding: 10px 16px; border-bottom: 1px solid #eee; cursor: pointer; align-items: baseline; }
+  .msg-row:hover { background: #f2f6fc; }
+  .msg-row.unread { font-weight: 700; background: #fff; }
+  .msg-row:not(.unread) { color: #5f6368; }
+  .msg-row .r-sender { width: 180px; flex: none; }
+  .msg-row .r-subject { width: 260px; flex: none; }
+  .msg-row .r-snippet { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
+  .msg-row .r-date { flex: none; color: #5f6368; font-size: 12px; }
+  .msg-view { max-width: 900px; margin: 16px auto; background: #fff; border-radius: 8px; padding: 20px 24px; }
+  .msg-view .back-btn, .msg-view .reply-btn, .msg-view .send-btn, .drafts-link { font: inherit; padding: 6px 14px; border-radius: 16px; border: 1px solid #dadce0; background: #fff; cursor: pointer; }
+  .msg-view h2.msg-subject { margin: 8px 0 4px; }
+  .msg-view .msg-sender { color: #5f6368; margin-bottom: 16px; }
+  .msg-view .msg-body { white-space: pre-wrap; padding: 12px 0; border-top: 1px solid #eee; }
+  .reply-composer { min-height: 90px; border: 1px solid #dadce0; border-radius: 8px; padding: 10px; margin: 12px 0; background: #fff; outline: none; }
+  .reply-composer:focus { border-color: #1a73e8; }
+  .send-btn { background: #1a73e8 !important; color: #fff !important; }
+  .draft-saved { color: #137333; font-size: 12px; margin-left: 8px; }
+  .draft-item { border: 1px solid #eee; border-radius: 8px; padding: 10px; margin: 8px 0; }
+  [hidden] { display: none !important; }
+</style></head>
+<body>
+  <div class="gj-toolbar" role="toolbar" aria-label="Main toolbar">
+    <span class="logo">FixtureMail</span>
+    <button id="compose-btn">Compose</button>
+    <button class="drafts-link" id="drafts-link">Drafts (<span id="draft-count">0</span>)</button>
+    <button id="inbox-link">Inbox</button>
+  </div>
+  <main id="app"></main>
+  <script src="app.js"></script>
+</body></html>
