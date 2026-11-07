@@ -62,7 +62,7 @@ await panel.waitForSelector('#req');
 await panel.fill('#req', REQUEST);
 console.log('generating widget (real LLM)…');
 await panel.click('#gen-btn');
-await panel.waitForSelector('[data-testid="approval-card"] h3', { timeout: 300_000 });
+await panel.waitForSelector('[data-testid="approval-card"] h3', { timeout: 600_000 });
 console.log('CARD:', (await panel.locator('[data-testid="approval-card"]').first().innerText()).split('\n').slice(0, 4).join(' | '));
 
 console.log('approving & injecting…');

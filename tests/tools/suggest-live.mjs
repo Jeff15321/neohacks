@@ -69,7 +69,7 @@ try {
   const tj = Date.now();
   await page.bringToFront();
   await page.locator(`${CARD} button[data-a="accept"]`).click(); // Accept while generating → "Preparing…" → approval card when ready
-  await panel.locator('[data-testid="approval-card"] h3').first().waitFor({ timeout: 300_000 });
+  await panel.locator('[data-testid="approval-card"] h3').first().waitFor({ timeout: 600_000 });
   result.timings.jobReadyAfterAccept = Date.now() - tj;
   const jobs = (await msg(panel, { type: 'JOBS_LIST' })).jobs;
   result.job = jobs[0] && { id: jobs[0].id, status: jobs[0].status, traceId: jobs[0].traceId, ms: jobs[0].updatedAt - jobs[0].createdAt };

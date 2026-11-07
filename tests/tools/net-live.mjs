@@ -24,7 +24,7 @@ await page.waitForTimeout(500);
 console.log('NET OPS:', (await panel.locator('[data-testid="net-ops"]').innerText()).replace(/\n/g, ' | ').slice(0, 600));
 
 const t0 = Date.now();
-const title = await generate(panel, process.env.REQUEST || 'Add a button that creates an email draft to live-test@example.com with subject "Live API test" using the captured save-draft network call, then verify it exists.', 300000);
+const title = await generate(panel, process.env.REQUEST || 'Add a button that creates an email draft to live-test@example.com with subject "Live API test" using the captured save-draft network call, then verify it exists.', 600000);
 console.log('GENERATED:', title, `(${Math.round((Date.now() - t0) / 1000)} s)`);
 const code = await panel.evaluate(async () => { const w = (await chrome.storage.local.get('wwa_widgets')).wwa_widgets; return (Array.isArray(w) ? w[0] : Object.values(w ?? {})[0])?.code; });
 console.log('=== GENERATED CODE ===\n' + code + '\n=== END ===');

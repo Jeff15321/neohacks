@@ -9,7 +9,7 @@ await panel.goto(`chrome-extension://${EXT_ID}/sidepanel.html`);
 await panel.waitForSelector('#req');
 await panel.fill('#req', 'Add a button that reads my two most recent unread emails and writes a friendly AI-generated reply draft for each.');
 await panel.click('#gen-btn');
-await panel.waitForSelector('[data-testid="approval-card"] h3', { timeout: 300000 });
+await panel.waitForSelector('[data-testid="approval-card"] h3', { timeout: 600000 });
 const card = await panel.locator('[data-testid="approval-card"]').first().innerText();
 console.log('CARD:', card.split('\n').slice(0,4).join(' | '));
 // dump code for inspection

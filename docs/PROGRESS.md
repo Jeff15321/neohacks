@@ -1,5 +1,5 @@
 # Next-gen build progress
-_Last updated: 2026-11-07 14:50 PST by coordinator (local Devin CLI session)_
+_Last updated: 2026-11-07 15:35 PST by coordinator (local Devin CLI session)_
 
 ## Status board
 | Phase | Status (not started / in progress / gate running / DONE / DONE-DEGRADED / blocked) | Branch/PR | Gate result | Updated |
@@ -10,17 +10,13 @@ _Last updated: 2026-11-07 14:50 PST by coordinator (local Devin CLI session)_
 | A User data store | DONE | `phase-a` / PR #4 (merged) | PASS on `nextgen` after merge — data.spec green; unit 75/75; E2E 5/5 | 13:30 |
 | E Network upgrades | DONE | `phase-e` / PR #3 (merged) | PASS on `nextgen` after merge — extended net.spec (rotating CSRF → verified) green; op-analysis unit tests; E2E 5/5 | 13:30 |
 | D Activity + suggestions + jobs | DONE | `phase-d` / PR #6 (merged) | PASS on `nextgen` after merge — suggest.spec ×2 green; trace-eval 10/10 pattern, 0/5 noise; E2E 9/9 → 14/14 with C | 14:38 |
-| F Cross-site flows | in progress | `phase-f` (subagent, port 8806) | — | 14:45 |
+| F Cross-site flows | DONE | `phase-f` / PR #8 (merged) | PASS on `nextgen` after merge — flow.spec ×3 green; unit 138/138; E2E 17/17; E5 done, E7 inconclusive | 15:21 |
 
 ## Now working on
-- coordinator: 0, A, E, B, D, C merged and gated (E2E 14/14 on `nextgen`); F started 14:45 (needs B ✓ C ✓), PR due 16:50.
+- coordinator: all phases merged and gated (E2E 17/17 on `nextgen`). Final summary written below.
 
 ## Up next
-- C: WidgetAI.step/expect/branches, assist (Haiku→Sonnet→Opus), caps, danger guard, failure narrative, learned branches, gmail2 chaos mode, runtime.spec, 20-run live chaos sweep.
-- B: Steps (settle/locators/redaction), recording session + REC indicators, WorkflowSpec interpreter, spec-conditioned generation, Record + Inspector tabs, debug bundle export, trace harness, record.spec, E1/E2/E9.
-- A: /api/data store (node:sqlite), WidgetAI.db, Data tab, movies fixture, data.spec.
-- E: Step attribution, webRequest cross-check upgrades, op analysis (templates/tokens/deps), verification tiers + reportVerified, strategy rule, rotating-CSRF net.spec.
-- Then D ∥ F once B (and C for F) gates pass.
+- Nothing scheduled. Follow-ups: see "Final summary" (risks + manual checklist).
 
 ## Phase reports
 ### Phase 0 — Foundation — DONE
@@ -95,6 +91,13 @@ Full report: `docs/phases/D.md`. Summary:
 - **Evidence (after merge):** in the 14/14 E2E above. suggest.spec: no card after the 1st manual reply, card after the 2nd, job ready → Accept → unapproved approval card → approve → drafts {m1, m3 by user, m2 by widget}, 0 sent; "Never for this" → no suggestion after a 3rd reply; restore from Activity works. Live trace eval (15 traces — 4 fixture-derived + 10 synthetic + B's youtube-read; 10 repeat, 5 noise): correct pattern **10/10**, **0/5** noise suggestions (none reached the Judge), 7/10 repeat traces suggested (Judge declined add-to-cart, expense approval, CRM logging). E3: default 10/10, no-Tier-1 10/10, full-trace 10/10 (latency 10.9 / 10.3 / 15.1 s — traces likely too easy to separate). E4: 0 false suggestions in 30 noise runs. E10: 30-step burst at 300 ms → 3 coalesced requests (max queue 19), suggestion ~23 s after completion. Live Demo 2: 3/3 card after 2nd completion (not 1st), 2/3 end-to-end (run 1: Judge proposed a per-email button; prompt adjusted, recorded). Tuning disclosed: Judge min score 0.3 → 0.2, effort medium → low (before the reported eval).
 - **Known issues:** observe toggle reaches open tabs only after reload; job cancel can't abort an in-flight Opus call (result discarded); reconsolidation rarely changes anything on these traces.
 
+### Phase F — Cross-site flows — DONE (E7 inconclusive under Playwright)
+Full report: `docs/phases/F.md`. Summary:
+- **Implemented:** §5 bundle parts (`GeneratedWidget.parts`, grant `flow`, every part validated with the same checks, approval card lists every origin), `WidgetAI.flow.call(role, handler, input, opts)` / `WidgetAI.flow.handle(handler, fn)` with `ctx.checkpoint/resumeState/cancelled`, durable FlowCoordinator in `modules/flow` (FlowRun in storage.session, `chrome.alarms` timeouts, find/create target tab, re-inject with resumeState after navigation, tab-closed/timeout → home promise rejects with a reason, cancel from home or panel, focus target + progress pill + return focus), sink parts run as `<widgetId>#<role>` restricted to their own sites and keep C's danger guard, cross-tab recording → lineage edges → bundle, fixtures `fixtures/issues` (127.0.0.1) + `fixtures/tracker` (localhost, real REST mock), panel FlowRuns view with Cancel.
+- **Evidence (on `nextgen` after merging F, 15:21):** typecheck 0 errors; unit **138 passed / 0 failed** (core 75, widget-runtime 14, backend 42, extension 7); E2E **17 passed (1.9 min)**. flow.spec (recording path): copy issue title/body on 127.0.0.1 → paste into tracker on localhost → Create → 4 lineage edges (≥2 cross-tab) → bundle; approval lists both origins, nothing runs before approval; "Create ticket" on issue #102 → tracker stores TRK-2 with mapped title/body/labels, home links `ticket.html?key=TRK-2`; 3 injections / 2 navigations (checkpoint resume exercised), focus returned, no alarms left. Failure: tracker slowed, tab closed after checkpoint → "target tab was closed before the flow finished", run `failed`, no active runs/alarms; panel Cancel → `cancelled`. E5: `onUserScriptConnect` ports bidirectional + stable (50/50 and 20/20 round trips, ~0.1 ms; re-execute opens a second port sharing globals; ports drop on navigation) — kept execute + sendMessage as the doc's simpler path. E7: background sink completes with `activate:false`, but timings are meaningless (Playwright keeps every tab visible: 316 vs 306 ms headless) — **inconclusive**, manual measurement owed; `activate:true` stays default. Live (1 run, Opus): bundle generated + validated (267 s, 33.4k out tokens), flow succeeded in 484 ms with checkpoint + re-injection, tracker got exact title/body/labels; the tool's link assertion couldn't see into shadow DOM (fixed, not re-run). Artifacts `docs/evidence/F/`.
+- **Decision:** "Create" is not a danger-guard word; cross-site creates must be listed in `consequentialActions` and every origin is approved explicitly; Send/Submit/Delete/Publish stay blocked in sink parts.
+- **Known issues:** cancel can't undo a Create already clicked; a sink navigating without a checkpoint restarts; other modules don't recognise `<widgetId>#<role>` ids (sink parts can't use `WidgetAI.db`/net); two-site bundle generation takes ~4.5–5.7 min live.
+
 ## Decisions (made without the human)
 - 11:35 — `nextgen` branched from `feat/network-observation` (89963a5), not `mvp`; `mvp-final` tag placed on 89963a5 — `mvp` lacks the netprobe window.fetch fallback commit; human approved this before leaving — rejected: branching from `mvp` exactly as the doc says.
 - 11:35 — Child "Devin sessions" are local Devin CLI subagents (max 4 parallel), each in its own `git worktree` under `.worktrees/`; PRs via `gh` into `nextgen`, merged by the coordinator — the human runs Devin CLI locally.
@@ -110,9 +113,38 @@ Full report: `docs/phases/D.md`. Summary:
 - 13:55 — Phase D started as soon as B passed its gate (table: depends on B, +C only for codegen; D's suggestion jobs reuse the existing generator, C's runtime can be layered on later) — maximises parallel time — rejected: waiting for C.
 - 14:42 — Raised generation max_tokens to 64k and the generation timeout to 10 min after Phase C observed Opus truncation at 32k — coordinator owns generate/service.ts.
 - 14:42 — Accepted C's deviations: static (not LLM) safety review of agent branches, danger confirm rendered by the prelude instead of content/overlay, step cap per step invocation — reasons in C.md.
+- 15:25 — Live tools wait 600 s for generation (integrated prompts made Opus take ~5 min).
+- 15:25 — Accepted F's decision that "Create" is not a danger-guard word (explicit origin approval + consequentialActions instead).
 
 ## Stuck log
-(none yet)
+- 14:20 C — renamed-Reply chaos seeds fail because generated `expect` checks labels — measured and reported, not fixed (see C.md).
+- 15:10 F — E7 background-tab timing: 3 approaches, Playwright never reports a hidden tab — recorded inconclusive (see F.md).
+- Per-phase stuck notes: `docs/phases/<X>.md`.
 
 ## Final summary
-(Written at the end.)
+_Written 2026-11-07 15:35 PST by the coordinator._
+
+**Done:** all seven phases are merged into `nextgen` (PRs #3–#8) and gated on the integrated branch: Phase 0 (new architecture + MVP port), C (self-healing runtime), B (Steps + recording + Inspector + trace harness), A (user data store), E (network upgrades), D (activity model + suggestions + jobs), F (cross-site flows).
+- Integrated `nextgen` @ 15:21: `npm run typecheck` 0 errors · `npm run test:unit` 138/0 · `npx playwright test` **17/17** (data, flow ×3, gmail2, net, record ×2, runtime ×4, spike-world, suggest ×2, widget, youtube).
+- Live (Anthropic, Opus/Sonnet/Haiku 5.5): gmail2 generation 1/1 at Phase 0 and 1/1 again on the integrated branch (14:50; 2 drafts, 0 sent; 295 s, 36.6k output tokens); Demo 1 (record → widget) 5/5 + 2/2; Demo 2 (suggestion) 3/3 card timing, 2/3 end-to-end; Demo 3 (cross-site) 1/1 flow success; net replay → `verified` 1/1; data save/list 1/1 after one prompt fix.
+
+**Degraded / weak (reported as measured):**
+- **C self-healing in live chaos:** task success 25% and 35% over two 20-run sweeps (0 emails sent or deleted). Main failure: the generated widget's own `expect` checks the "Reply" label, so a correct click on a renamed control can never pass; the decider sometimes stops with a popup on screen.
+- **D latency:** mean suggestion latency 11.1 s vs the <10 s target; a 30-step burst produces the suggestion ~23 s after completion.
+- **E7** inconclusive (Playwright can't produce real background-tab throttling).
+- **E2** measured on fixtures only (real Gmail/YouTube not available).
+
+**Missing:** IndexedDB event store (B uses a 300-entry session ring), `replay-bundle.mjs`, screenshot thumbnails, CDP/WebSocket capture, network danger-guard E2E, Inspector runs view, auto-probing GET ops (deliberately off).
+
+**Top 3 risks**
+1. **Live generation latency and size.** Opus 5.5 at effort `high` with all prompt sections now takes 4.5–6 min and 33–41k output tokens per widget (max_tokens raised to 64k, timeout to 10 min). A UI that waits this long feels broken; effort `medium`, or trimming prompt sections per request, is the obvious next lever.
+2. **Self-healing recovery quality** (C numbers above). The mechanics, caps and safety rails work and nothing dangerous happened, but recovery success is low. The generator should write `expect` checks on effects (composer opened, draft saved), not on labels.
+3. **Real-site behaviour is unverified.** Everything was tested on fixtures. Real Gmail/GitHub/Jira DOMs, the real keyboard shortcut (E1: synthetic keys don't fire `chrome.commands`), settle thresholds (E2) and background-tab throttling (E7) still need a human run.
+
+**Manual-test checklist for the human**
+1. `git checkout nextgen && npm install && npm run build`, load `apps/extension/dist` unpacked, enable **Allow User Scripts**, `npm run dev:backend` (LLM_PROVIDER=anthropic).
+2. Real Gmail demo (`docs/manual-test.md`): Create tab → "draft replies to my 2 most recent unread emails" → approve → click the toolbar button → 2 drafts, nothing sent.
+3. Recording: press **Alt+Shift+R** on the physical keyboard (REC badge + pill appear), reply to one email, press it again → Review sheet → Generate → approve → run.
+4. Suggestions: turn **Observe on**, reload Gmail, reply manually to 2 emails → suggestion card after the 2nd → Accept → approve.
+5. Inspector: check Steps, LLM calls (stage/model/latency), Bus log, Network tiers; click **Export debug bundle**.
+6. Cross-site (optional): issue tracker → ticket tracker on real sites only if you have test accounts. Fixture version: `npx playwright test flow.spec.ts`.

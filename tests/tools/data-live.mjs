@@ -18,7 +18,7 @@ async function generateAndApprove(request) {
   await panel.fill('#req', request);
   const t0 = Date.now();
   await panel.click('#gen-btn');
-  await panel.locator('[data-testid="approval-card"] h3').first().waitFor({ timeout: 300_000 });
+  await panel.locator('[data-testid="approval-card"] h3').first().waitFor({ timeout: 600_000 });
   const card = await panel.locator('[data-testid="approval-card"]').first().innerText();
   log(`generated in ${Math.round((Date.now() - t0) / 1000)}s:`, card.split('\n').filter(Boolean).slice(0, 12).join(' | '));
   await panel.locator('[data-testid="approval-card"] [data-testid="approve"]').first().click();
