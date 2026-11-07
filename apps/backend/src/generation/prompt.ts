@@ -45,15 +45,15 @@ NOT available: page JS variables/functions, fetch() to the platform backend, chr
 - The site is a live SPA. NEVER assume elements exist — poll for them with a waitFor helper (timeout ~8s).
 - GROUND YOUR SELECTORS in the provided page context (ids, classes, roles, aria-labels, row/listitem structures). Do NOT invent generic heuristics like "elements containing '@'" when a concrete selector is visible in the context.
 - Elements that only appear AFTER an interaction (composers, dialogs, message views) cannot be seen in the context snapshot — CLICK first, then wait for the revealed element. NEVER invent class names for them (e.g. ".message-view" when the snapshot shows ".msg-*" naming).
-- WAIT/CHANGE-DETECTION RECIPE (use this, not ad-hoc text-length checks):
-    * Before clicking, capture a signature element of the CURRENT view (e.g. const listEl = document.querySelector('<the list>')).
-    * After clicking, poll until ANY of these fire — check them TOGETHER because sites differ:
-        - location.hash or location.href changed (many SPAs — Gmail included — navigate via hash);
-        - listEl.isConnected === false (node detached on re-render);
-        - listEl.offsetParent === null or !listEl.checkVisibility?.() (node kept in DOM but HIDDEN — Gmail does this);
-        - an expected affordance appeared: [contenteditable="true"], textarea, or an element whose aria-label/text contains the expected action ("Reply", "Compose", "Back").
-      Wait on (hashChanged || detached || hidden || affordanceFound) — never on only one signal.
-    * Then query inside the CURRENT top-level view for the affordances you need — prefer aria-label/role/text matching over guessed class names.
+- WAITING RULES (critical — read carefully):
+    * "Wait for a view change" is a HINT, not a gate. A change-detection helper must LOG-and-continue on timeout — it may NEVER throw or abort the workflow. Sites transition in ways you can't predict (hash nav, node detach, node hidden-but-connected, in-place composer, collapsed editor).
+    * The real assertion is ALWAYS "does the element I need exist now" — after any click, wait for the specific element you need next (composer, message body, dialog), not for an abstract "view changed".
+    * Canonical helpers — include these and reuse them:
+        const waitForEl = async (fn, timeout=8000, label='element') => { /* poll fn() until truthy; on timeout throw Error(label+' not found within '+timeout+'ms') */ };
+        const transition = async (fn, timeout=4000) => { /* poll fn() until truthy; on timeout WidgetAI.log('transition not detected, continuing','warn') — never throws */ };
+    * Multi-signal transition checks: hash/href changed OR captured el !isConnected OR el offsetParent===null/checkVisibility()===false OR expected element appeared. IMPORTANT: only count affordances that did NOT exist before the click (Gmail always shows a "Compose" button — pre-existing elements are not evidence of change).
+    * Some affordances open COLLAPSED UI (e.g. a minimized reply editor). If the expected editable/expanded form isn't found, look for a collapsed stub of the same affordance near where it should appear and click it once to expand.
+    * On a step failure, before reporting failed, dump evidence: WidgetAI.log a ~500-char structural summary of the CURRENT view (tag#id.class tree of the main region, depth ≤3) — that evidence is what makes later repair possible.
     * Action affordances are often NOT <button>: search the broad set [role="button"], [role="link"], [tabindex], a, button, [aria-label] and match by aria-label or textContent against the action word (e.g. /reply/i).
 - Filtering: when the request mentions "unread"/"recent"/"selected", filter rows by the distinguishing class/attribute visible in the context (e.g. .zE vs .zA) — do not just take the first N rows.
 - LISTS THAT SHRINK WHILE YOU PROCESS THEM: when the action changes item state (unread -> read, pending -> done), a positional index into a re-filtered list skips items. Instead capture a STABLE KEY per target up front (a data-* id such as data-legacy-message-id, or the row's subject text), then each iteration re-query the UNFILTERED list and find the row matching that key.
