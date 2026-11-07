@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { PageContext } from './page.js';
 import { GeneratedWidget } from './widget.js';
+import { DATA_LIMITS, DataCollectionName } from './data.js';
 
 /** Uniform backend error shape (plugins/errors). */
 export const ApiError = z.object({
@@ -24,7 +25,7 @@ export const GenerateWidgetRequest = z.object({
   /** Last N conversation turns for this widget (edit thread). */
   history: z.array(z.object({ role: z.enum(['user', 'generator']), text: z.string() })).max(20).optional(),
   /** The user's existing WidgetAI.db collection names, so the generator reuses them (Phase A). */
-  existingCollections: z.array(z.string().max(64)).max(100).optional(),
+  existingCollections: z.array(DataCollectionName).max(DATA_LIMITS.MAX_COLLECTIONS_PER_USER).optional(),
 });
 export type GenerateWidgetRequest = z.infer<typeof GenerateWidgetRequest>;
 

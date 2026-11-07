@@ -91,13 +91,15 @@ export const installId = () => (installIdP ??= (async () => {
 export const backend = {
   url: BACKEND,
   async request<T>(method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE', path: string, body: unknown, traceId?: string): Promise<T> {
+    const sendBody = !(method === 'GET' || method === 'DELETE' || body === undefined);
     const res = await fetch(`${BACKEND}${path}`, {
       method,
       headers: {
-        'content-type': 'application/json', 'x-extension-token': TOKEN, 'x-user-id': await installId(),
+        // no content-type without a body: Fastify rejects an empty application/json body (DELETE /api/data/…)
+        ...(sendBody ? { 'content-type': 'application/json' } : {}), 'x-extension-token': TOKEN, 'x-user-id': await installId(),
         ...(traceId ? { 'x-trace-id': traceId } : {}),
       },
-      body: method === 'GET' || method === 'DELETE' || body === undefined ? undefined : JSON.stringify(body),
+      body: sendBody ? JSON.stringify(body) : undefined,
     });
     const json = await res.json().catch(() => ({})) as { error?: string };
     if (!res.ok && !(res.status === 422 && 'ok' in json)) throw new Error(json?.error ?? `backend ${res.status}`);

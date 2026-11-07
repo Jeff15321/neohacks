@@ -132,7 +132,7 @@ export const widgetSystemPrompt = () => [BASE, ...WIDGET_PROMPT_SECTIONS].join('
 export const WIDGET_JSON_SCHEMA: Record<string, unknown> = {
   type: 'object',
   additionalProperties: false,
-  required: ['name', 'description', 'matchPatterns', 'grants', 'insertionHint', 'code', 'warnings', 'plan', 'changeSummary', 'consequentialActions'],
+  required: ['name', 'description', 'matchPatterns', 'grants', 'insertionHint', 'code', 'warnings', 'plan', 'changeSummary', 'consequentialActions', 'collections'],
   properties: {
     name: { type: 'string' },
     description: { type: 'string' },
@@ -144,6 +144,8 @@ export const WIDGET_JSON_SCHEMA: Record<string, unknown> = {
     plan: { type: 'array', items: { type: 'string' } },
     changeSummary: { type: 'string' },
     consequentialActions: { type: 'array', items: { type: 'string' } },
+    /** Phase A: WidgetAI.db collections the widget reads/writes ([] when unused). */
+    collections: { type: 'array', items: { type: 'string' } },
   },
 };
 
@@ -191,6 +193,9 @@ VISIBLE TEXT SAMPLE:
 ${pc.textSample.slice(0, 3000)}
 
 USER REQUEST: ${req.request}`;
+  if (req.existingCollections) { // Phase A
+    p += `\n\nEXISTING DATA COLLECTIONS (this user's WidgetAI.db — reuse one when it fits the request):\n${req.existingCollections.slice(0, 100).map(c => `- ${c}`).join('\n') || '(none yet)'}`;
+  }
   if (req.history?.length) {
     p += `\n\nCONVERSATION SO FAR (oldest first):\n${req.history.map(h => `${h.role}: ${h.text.slice(0, 600)}`).join('\n')}`;
   }
