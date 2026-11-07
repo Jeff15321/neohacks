@@ -1,0 +1,98 @@
+{
+  "save": {
+    "summary": {
+      "label": "save",
+      "status": 200,
+      "ok": true,
+      "secs": 60,
+      "name": "Save Movie for Later",
+      "grants": [
+        "data",
+        "log"
+      ],
+      "collections": [
+        "saved_movies"
+      ],
+      "usesDbList": false,
+      "usesDbAdd": true,
+      "usesTextContent": true,
+      "innerHTMLWithDoc": false,
+      "warnings": [
+        "attempt 1: Movies are saved to your personal WidgetAI data store (collection 'saved_movies'), not to CineBase's own Watchlist — the site's Watchlist link is not touched.",
+        "attempt 1: Movie details (title, year, rating, genres, director, short plot) are read from the page at save time; if the page layout changes, some fields may be empty."
+      ]
+    },
+    "widget": {
+      "name": "Save Movie for Later",
+      "description": "Adds a Save button to the movie's action toolbar that stores this movie in your personal saved_movies list so you can find it later.",
+      "matchPatterns": [
+        "*://127.0.0.1/fixture-movies/*"
+      ],
+      "grants": [
+        "data",
+        "log"
+      ],
+      "code": "const waitForEl = async (fn, timeout = 8000, label = 'element') => {\n  const start = Date.now();\n  while (Date.now() - start < timeout) {\n    try { const r = fn(); if (r) return r; } catch (e) {}\n    await new Promise(r => setTimeout(r, 150));\n  }\n  throw new Error(label + ' not found within ' + timeout + 'ms');\n};\n\nconst dumpView = () => {\n  const root = document.querySelector('main') || document.body;\n  const desc = (el, d) => {\n    if (!el || d > 3) return '';\n    const cls = typeof el.className === 'string' && el.className.trim() ? '.' + el.className.trim().split(/\\s+/).join('.') : '';\n    const s = el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + cls;\n    const kids = Array.from(el.children).slice(0, 8).map(c => desc(c, d + 1)).filter(Boolean);\n    return kids.length ? s + '>[' + kids.join(',') + ']' : s;\n  };\n  return desc(root, 0).slice(0, 500);\n};\n\nconst ROOT_ID = 'wwa-save-movie';\nconst clean = s => (s || '').replace(/\\s+/g, ' ').trim();\n\nconst showFallbackError = (text) => {\n  document.getElementById(ROOT_ID)?.remove();\n  const host = document.createElement('div');\n  host.id = ROOT_ID;\n  host.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:2147483647;';\n  const sh = host.attachShadow({ mode: 'open' });\n  const box = document.createElement('div');\n  box.style.cssText = 'font:13px system-ui,sans-serif;background:#fff;border:1px solid #b00020;color:#b00020;padding:8px 12px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.2);max-width:320px;';\n  box.textContent = 'Save movie widget: ' + text;\n  sh.appendChild(box);\n  document.body.appendChild(host);\n};\n\ntry {\n  const main = await waitForEl(() => document.querySelector('main[data-movie-id]'), 8000, 'movie detail (main[data-movie-id])');\n  const toolbar = await waitForEl(\n    () => document.querySelector('[role=\"toolbar\"][aria-label=\"Movie actions\"]') || document.querySelector('.movie-actions'),\n    8000,\n    'Movie actions toolbar'\n  );\n  const movieId = clean(main.getAttribute('data-movie-id')) || clean(new URLSearchParams(location.search).get('id'));\n  if (!movieId) throw new Error('Could not determine the movie id on this page');\n\n  // Idempotency: replace any previous instance\n  document.getElementById(ROOT_ID)?.remove();\n\n  const host = document.createElement('span');\n  host.id = ROOT_ID;\n  host.style.cssText = 'display:inline-block;vertical-align:middle;margin-left:8px;';\n  const shadow = host.attachShadow({ mode: 'open' });\n  shadow.innerHTML = '<style>' +\n    '.wrap{display:inline-flex;align-items:center;gap:8px;font:14px system-ui,sans-serif}' +\n    'button{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;border:1px solid #c9a227;background:#fff8e1;color:#5d4500;cursor:pointer;font:inherit}' +\n    'button:hover{background:#ffefb3}' +\n    'button[aria-pressed=\"true\"]{background:#c9a227;color:#fff}' +\n    'button:disabled{opacity:.6;cursor:wait}' +\n    '.msg{font-size:12px;color:#666}.msg.err{color:#b00020}' +\n    '</style>' +\n    '<span class=\"wrap\"><button type=\"button\" aria-pressed=\"false\"><span class=\"icon\">☆</span><span class=\"label\">Save for later</span></button>' +\n    '<span class=\"msg\" role=\"status\" aria-live=\"polite\"></span></span>';\n  toolbar.appendChild(host);\n\n  const btn = shadow.querySelector('button');\n  const icon = shadow.querySelector('.icon');\n  const label = shadow.querySelector('.label');\n  const msg = shadow.querySelector('.msg');\n\n  let saved = false;\n  const render = () => {\n    btn.setAttribute('aria-pressed', String(saved));\n    icon.textContent = saved ? '★' : '☆';\n    label.textContent = saved ? 'Saved' : 'Save for later';\n    btn.title = saved ? 'Saved — click to remove from your saved movies' : 'Save this movie to see it later';\n  };\n  const setMsg = (t, err = false) => { msg.textContent = t; msg.className = 'msg' + (err ? ' err' : ''); };\n\n  // Read movie details from the page (small structured fields only)\n  const collect = () => {\n    const q = sel => clean(main.querySelector(sel)?.textContent);\n    const genresEl = main.querySelector('.genres');\n    let genres = genresEl ? Array.from(genresEl.children).map(c => clean(c.textContent)).filter(Boolean) : [];\n    if (!genres.length && genresEl) genres = clean(genresEl.textContent).split(/\\s*[,·|\\/]\\s*/).filter(Boolean);\n    const yearNum = parseInt(q('.movie-year'), 10);\n    const ratingMatch = q('.movie-rating').match(/\\d+(\\.\\d+)?/);\n    const ratingNum = ratingMatch ? parseFloat(ratingMatch[0]) : NaN;\n    return {\n      movieId,\n      title: q('.movie-title') || clean(document.title),\n      year: Number.isFinite(yearNum) ? yearNum : null,\n      runtime: q('.movie-runtime') || null,\n      rating: Number.isFinite(ratingNum) ? ratingNum : null,\n      genres: genres.slice(0, 10),\n      director: q('.movie-director').replace(/^director:\\s*/i, '') || null,\n      plot: q('.movie-plot').slice(0, 400) || null,\n      url: location.href,\n      site: location.host,\n      savedAt: new Date().toISOString()\n    };\n  };\n\n  // Initial state\n  try {\n    const existing = await WidgetAI.db.get('saved_movies', movieId);\n    saved = !!existing;\n  } catch (e) {\n    WidgetAI.log('Could not read saved state: ' + e.message, 'warn');\n    setMsg('Could not check saved state', true);\n  }\n  render();\n\n  btn.addEventListener('click', async () => {\n    btn.disabled = true;\n    try {\n      if (!saved) {\n        const data = collect();\n        await WidgetAI.db.add('saved_movies', data, movieId);\n        const check = await WidgetAI.db.get('saved_movies', movieId);\n        if (!check) throw new Error('Save could not be verified');\n        saved = true;\n        setMsg('Saved \"' + data.title + '\"');\n        WidgetAI.log('Saved \"' + data.title + '\" to saved_movies');\n      } else {\n        await WidgetAI.db.remove('saved_movies', movieId);\n        const check = await WidgetAI.db.get('saved_movies', movieId);\n        if (check) throw new Error('Removal could not be verified');\n        saved = false;\n        setMsg('Removed from saved movies');\n        WidgetAI.log('Removed ' + movieId + ' from saved_movies');\n      }\n    } catch (e) {\n      setMsg('Error: ' + e.message, true);\n      WidgetAI.log('Save action failed: ' + e.message, 'error');\n    } finally {\n      btn.disabled = false;\n      render();\n    }\n  });\n\n  WidgetAI.log('Save button added for movie \"' + movieId + '\"' + (saved ? ' (already saved)' : ''));\n  WidgetAI.status('completed', saved ? 'Movie already saved — button ready' : 'Save button ready');\n} catch (err) {\n  WidgetAI.log('View evidence: ' + dumpView(), 'warn');\n  WidgetAI.log(err.message, 'error');\n  try { showFallbackError(err.message); } catch (e) {}\n  WidgetAI.status('failed', err.message);\n}\n",
+      "insertionHint": "Appended inside the 'Movie actions' toolbar (div.movie-actions[role=toolbar]) next to the Trailer and Share buttons",
+      "plan": [
+        "Wait for the movie detail section and the 'Movie actions' toolbar to appear",
+        "Add a 'Save for later' button next to Trailer and Share",
+        "Check whether this movie (by its page id, e.g. 'dune') is already in your saved movies and show ★ Saved if so",
+        "On click, store the title, year, rating, genres, director, short plot and page link in your 'saved_movies' collection, then confirm it was saved",
+        "Click again to remove it from your saved movies"
+      ],
+      "consequentialActions": [],
+      "collections": [
+        "saved_movies"
+      ]
+    }
+  },
+  "list": {
+    "summary": {
+      "label": "list",
+      "status": 200,
+      "ok": true,
+      "secs": 44,
+      "name": "Saved Movies Sidebar",
+      "grants": [
+        "data",
+        "log"
+      ],
+      "collections": [
+        "saved_movies"
+      ],
+      "usesDbList": true,
+      "usesDbAdd": false,
+      "usesTextContent": true,
+      "innerHTMLWithDoc": false,
+      "warnings": [
+        "attempt 1: Saved movie documents may have been written by other widgets, so field names can vary; the widget looks for title/name, year, rating, url, note and savedAt and shows 'Untitled' if no title field exists.",
+        "attempt 1: Only links starting with http(s) are made clickable; they open in a new tab.",
+        "attempt 1: Shows at most the 200 most recently saved movies."
+      ]
+    },
+    "widget": {
+      "name": "Saved Movies Sidebar",
+      "description": "Lists the movies saved in your personal saved_movies collection inside the CineBase watchlist sidebar.",
+      "matchPatterns": [
+        "http://127.0.0.1:8803/fixture-movies/*"
+      ],
+      "grants": [
+        "data",
+        "log"
+      ],
+      "code": "const ROOT_ID = 'wwa-saved-movies';\n\nconst waitForEl = async (fn, timeout = 8000, label = 'element') => {\n  const start = Date.now();\n  while (Date.now() - start < timeout) {\n    try { const el = fn(); if (el) return el; } catch (e) { /* keep polling */ }\n    await new Promise(r => setTimeout(r, 200));\n  }\n  throw new Error(label + ' not found within ' + timeout + 'ms');\n};\n\nconst dumpView = () => {\n  const root = document.querySelector('div.layout') || document.body;\n  const desc = (el) => el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + (typeof el.className === 'string' && el.className.trim() ? '.' + el.className.trim().split(/\\s+/).join('.') : '');\n  const walk = (el, depth) => {\n    if (depth > 3) return '';\n    let out = '  '.repeat(depth) + desc(el) + '\\n';\n    for (const c of el.children) out += walk(c, depth + 1);\n    return out;\n  };\n  return walk(root, 0).slice(0, 500);\n};\n\nconst safeUrl = (u) => (typeof u === 'string' && /^https?:\\/\\//i.test(u)) ? u : null;\nconst fmtDate = (v) => {\n  if (!v) return '';\n  const d = new Date(v);\n  return isNaN(d.getTime()) ? '' : d.toLocaleDateString();\n};\n\nlet msgEl = null;\ntry {\n  // Idempotency: replace any previous instance\n  const old = document.getElementById(ROOT_ID);\n  if (old) old.remove();\n\n  const host = document.createElement('div');\n  host.id = ROOT_ID;\n\n  let sidebar = null;\n  try {\n    sidebar = await waitForEl(\n      () => document.querySelector('#watchlist-sidebar') || document.querySelector('aside[role=\"complementary\"]'),\n      8000,\n      'watchlist sidebar'\n    );\n  } catch (e) {\n    WidgetAI.log(e.message + ' - using floating dock instead', 'warn');\n    WidgetAI.log('View structure: ' + dumpView(), 'warn');\n  }\n\n  if (sidebar) {\n    sidebar.appendChild(host);\n  } else {\n    host.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:2147483647;width:300px;max-height:70vh;overflow:auto;';\n    document.body.appendChild(host);\n  }\n\n  const shadow = host.attachShadow({ mode: 'open' });\n  shadow.innerHTML = `\n    <style>\n      :host { all: initial; display: block; margin-top: 16px; font-family: system-ui, sans-serif; }\n      .card { background: #fff; color: #222; border: 1px solid #ddd; border-radius: 8px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }\n      .hd { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }\n      h3 { margin: 0; font-size: 15px; flex: 1; }\n      .count { font-size: 12px; background: #eef; color: #335; border-radius: 10px; padding: 1px 8px; }\n      .count:empty { display: none; }\n      button { border: 1px solid #ccc; background: #f7f7f7; border-radius: 4px; cursor: pointer; font-size: 13px; padding: 2px 8px; }\n      button:hover { background: #eee; }\n      .msg { font-size: 13px; color: #666; }\n      .msg.err { color: #b00020; }\n      .msg:empty { display: none; }\n      ul { list-style: none; margin: 0; padding: 0; }\n      li { padding: 8px 0; border-top: 1px solid #f0f0f0; }\n      li:first-child { border-top: none; }\n      .title { font-weight: 600; font-size: 14px; color: #1a4fa0; text-decoration: none; }\n      a.title:hover { text-decoration: underline; }\n      span.title { color: #222; }\n      .meta { font-size: 12px; color: #777; margin-top: 2px; }\n      .note { font-size: 12px; color: #444; margin-top: 4px; font-style: italic; white-space: pre-wrap; }\n    </style>\n    <section class=\"card\" aria-label=\"Saved movies\">\n      <div class=\"hd\">\n        <h3>Saved movies</h3>\n        <span class=\"count\"></span>\n        <button class=\"refresh\" type=\"button\" title=\"Refresh list\">Refresh</button>\n      </div>\n      <div class=\"msg\"></div>\n      <ul class=\"list\"></ul>\n    </section>`;\n\n  msgEl = shadow.querySelector('.msg');\n  const listEl = shadow.querySelector('.list');\n  const countEl = shadow.querySelector('.count');\n  const refreshBtn = shadow.querySelector('.refresh');\n\n  const render = async () => {\n    msgEl.className = 'msg';\n    msgEl.textContent = 'Loading...';\n    listEl.replaceChildren();\n    countEl.textContent = '';\n\n    const docs = await WidgetAI.db.list('saved_movies', { limit: 200 });\n    if (!Array.isArray(docs) || docs.length === 0) {\n      msgEl.textContent = 'No saved movies yet.';\n      return { expected: 0, rendered: 0 };\n    }\n\n    msgEl.textContent = '';\n    countEl.textContent = String(docs.length);\n\n    for (const doc of docs) {\n      const d = (doc && typeof doc.data === 'object' && doc.data) ? doc.data : {};\n      const li = document.createElement('li');\n\n      const rawTitle = d.title ?? d.name ?? d.movieTitle ?? 'Untitled';\n      const title = String(rawTitle);\n      const url = safeUrl(d.url);\n      let titleEl;\n      if (url) {\n        titleEl = document.createElement('a');\n        titleEl.href = url;\n        titleEl.target = '_blank';\n        titleEl.rel = 'noopener noreferrer';\n      } else {\n        titleEl = document.createElement('span');\n      }\n      titleEl.className = 'title';\n      titleEl.textContent = title;\n      li.appendChild(titleEl);\n\n      const metaParts = [];\n      if (d.year != null && d.year !== '') metaParts.push(String(d.year));\n      if (d.rating != null && d.rating !== '') metaParts.push('Rating: ' + String(d.rating));\n      const saved = fmtDate(d.savedAt || doc.createdAt);\n      if (saved) metaParts.push('Saved ' + saved);\n      if (metaParts.length) {\n        const meta = document.createElement('div');\n        meta.className = 'meta';\n        meta.textContent = metaParts.join(' \\u00b7 ');\n        li.appendChild(meta);\n      }\n\n      if (d.note != null && String(d.note).trim()) {\n        const note = document.createElement('div');\n        note.className = 'note';\n        note.textContent = String(d.note).slice(0, 300);\n        li.appendChild(note);\n      }\n\n      listEl.appendChild(li);\n    }\n    return { expected: docs.length, rendered: listEl.querySelectorAll('li').length };\n  };\n\n  refreshBtn.addEventListener('click', async () => {\n    refreshBtn.disabled = true;\n    try {\n      const r = await render();\n      WidgetAI.log('Refreshed: ' + r.rendered + ' saved movie(s) shown');\n    } catch (err) {\n      msgEl.className = 'msg err';\n      msgEl.textContent = 'Could not load saved movies: ' + err.message;\n      WidgetAI.log('Refresh failed: ' + err.message, 'error');\n    } finally {\n      refreshBtn.disabled = false;\n    }\n  });\n\n  WidgetAI.log('Loading saved movies from your data store...');\n  const result = await render();\n\n  if (!host.isConnected) throw new Error('Widget container was removed from the page');\n  if (result.rendered !== result.expected) {\n    throw new Error('Rendered ' + result.rendered + ' of ' + result.expected + ' saved movies');\n  }\n\n  const where = sidebar ? 'sidebar' : 'floating dock';\n  WidgetAI.log('Showing ' + result.rendered + ' saved movie(s) in the ' + where);\n  WidgetAI.status('completed', result.rendered ? ('Showing ' + result.rendered + ' saved movie(s)') : 'No saved movies yet');\n} catch (err) {\n  WidgetAI.log('Error: ' + err.message, 'error');\n  if (msgEl) {\n    msgEl.className = 'msg err';\n    msgEl.textContent = 'Could not load saved movies: ' + err.message;\n  }\n  WidgetAI.status('failed', err.message);\n}\n",
+      "insertionHint": "Appended to the end of the sidebar <aside id=\"watchlist-sidebar\">; falls back to a fixed bottom-right dock if the sidebar is not found.",
+      "plan": [
+        "Wait for the watchlist sidebar on the page (or fall back to a small floating panel).",
+        "Read your saved movies from the shared 'saved_movies' collection in your data store.",
+        "List each movie's title, year, rating, saved date and note in a 'Saved movies' card in the sidebar.",
+        "Show 'No saved movies yet' if the collection is empty, and offer a Refresh button to reload the list."
+      ],
+      "consequentialActions": [],
+      "collections": [
+        "saved_movies"
+      ]
+    }
+  }
+}

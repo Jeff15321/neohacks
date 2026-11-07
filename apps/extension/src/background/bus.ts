@@ -26,6 +26,10 @@ export interface Services {
   'page.context': (tab: chrome.tabs.Tab) => Promise<PageContext>;
   'net.opsForTab': (tabId: number, origin: string, limit?: number) => Promise<NetOpSummary[]>;
   'widgets.list': () => WidgetRecord[];
+  /** One widget record (Phase A: modules/data checks its declared `collections`). */
+  'widgets.get': (widgetId: string) => WidgetRecord | undefined;
+  /** The user's existing WidgetAI.db collection names (Phase A; sent with GENERATE_WIDGET). */
+  'data.collections': () => Promise<string[]>;
   /** Returns an error string when the user script may not perform this call. */
   'widgets.authorize': (widgetId: string, tabUrl: string, grant?: WidgetGrant) => string | undefined;
   /** Module on/off flags (settings flag per module, Rules §5). */

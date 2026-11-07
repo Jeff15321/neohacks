@@ -11,6 +11,7 @@ export function registerWidgets(bus: Bus) {
   runtime.onStartup(() => void ready.then(() => svc.syncRegistrations()));
 
   bus.provide('widgets.list', () => svc.store.list());
+  bus.provide('widgets.get', (id) => svc.store.get(id));
   bus.provide('widgets.authorize', (id, url, grant) => svc.authorize(id, url, grant));
 
   // panel → SW
