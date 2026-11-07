@@ -1,0 +1,22 @@
+{
+ "headed": true,
+ "expectedTimersMs": 2000,
+ "background": {
+  "timersMs": 1989,
+  "rafIn400ms": 49,
+  "hidden": false,
+  "vis": "visible"
+ },
+ "backgroundAfter12s": {
+  "timersMs": 1990,
+  "rafIn400ms": 48,
+  "hidden": false,
+  "vis": "visible"
+ },
+ "foreground": {
+  "timersMs": 1990,
+  "rafIn400ms": 48,
+  "hidden": false,
+  "vis": "visible"
+ }
+}

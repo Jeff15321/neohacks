@@ -217,12 +217,16 @@ test.describe('Cross-site flows (Demo 3, mock LLM)', () => {
       await issues.evaluate(`document.documentElement.setAttribute('data-wwa-flow-activate', 'true')`);
       await issues.locator('[data-testid="wwa-create-ticket"]').click();
       await opened2;
-      const [r2] = await runs(panel);
-      const c = await msg(panel, { type: 'CANCEL_FLOW_RUN', runId: r2.runId });
-      expect(c.ok, c.error).toBe(true);
+      // Widgets tab → the widget card lists its cross-site runs with a Cancel button for the active one
+      await panel.click('[data-testid="tab-widgets"]');
+      await panel.locator('[data-testid="flow-cancel"]').first().click({ timeout: 5_000 });
       await expect(result).toHaveAttribute('data-error', /cancelled/, { timeout: 10_000 });
       const [cancelled] = await runs(panel);
       expect(cancelled.status).toBe('cancelled');
+      expect(cancelled.error).toMatch(/cancelled from the panel/);
+      await expect(panel.locator('[data-testid="flow-run"]').first()).toContainText('cancelled');
+      await expect(panel.locator('[data-testid="flow-run"]').nth(1)).toContainText('target tab was closed');
+      if (EVIDENCE) await panel.screenshot({ path: path.join(EVIDENCE, 'panel-flow-runs.png'), fullPage: true });
       expect(await flowAlarms(sw)).toEqual([]);
 
       // ---- security: a part id cannot be used from the wrong origin; parts cannot start flows
@@ -278,6 +282,25 @@ test.describe('Cross-site flows (Demo 3, mock LLM)', () => {
       expect(r.sessions[0].pongs).toBe(50);
       expect(r.sessions[1].pongs).toBe(20);
       expect(r.exec2).toBe(2); // same worldId shares globals across executions
+
+      // E7 (platform part): chained 50 ms timers + rAF in a background vs foreground tab (sink-style polling loops)
+      const e7 = await sw.evaluate(`(async () => {
+        await chrome.userScripts.configureWorld({ worldId: 'e7-spike', messaging: true });
+        const code = "new Promise((resolve) => { const t0 = performance.now(); let n = 0; const tick = () => { if (++n >= 40) { let raf = 0; const r0 = performance.now(); const done = () => resolve({ timersMs: Math.round(r0 - t0), raf, hidden: document.hidden, vis: document.visibilityState }); requestAnimationFrame(() => { raf++; }); setTimeout(done, 400); return; } setTimeout(tick, 50); }; tick(); })";
+        const run = async (tabId) => (await chrome.userScripts.execute({ target: { tabId }, world: 'USER_SCRIPT', worldId: 'e7-spike', js: [{ code }] }))[0].result;
+        const home = (await chrome.tabs.query({ url: '*://127.0.0.1/*' }))[0];
+        await chrome.tabs.update(home.id, { active: true });
+        const bgTab = await chrome.tabs.create({ url: ${JSON.stringify(TRACKER_URL)}, active: false });
+        await new Promise(r => setTimeout(r, 1500));
+        const background = await run(bgTab.id);
+        await chrome.tabs.update(bgTab.id, { active: true });
+        await new Promise(r => setTimeout(r, 300));
+        const foreground = await run(bgTab.id);
+        return { expectedMs: 40 * 50, background, foreground };
+      })()`) as any;
+      console.log('[e2e-flow] E7 timers', JSON.stringify(e7));
+      if (EVIDENCE) fs.writeFileSync(path.join(EVIDENCE, `e7-timers-${process.env.HEADED === '1' ? 'headed' : 'headless'}.json`), JSON.stringify(e7, null, 1));
+      expect(e7.background.timersMs).toBeGreaterThan(0);
     } finally { await context.close(); }
   });
 });

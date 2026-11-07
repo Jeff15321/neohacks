@@ -1,0 +1,27 @@
+{
+ "available": true,
+ "sessions": [
+  {
+   "label": "first",
+   "connected": true,
+   "name": "e5",
+   "pongs": 50,
+   "senderUrl": "http://127.0.0.1:8806/fixture-issues/index.html?n=101",
+   "avgRttMs": 0.12,
+   "maxRttMs": 1
+  },
+  {
+   "label": "second (same world, re-executed)",
+   "connected": true,
+   "name": "e5",
+   "pongs": 20,
+   "senderUrl": "http://127.0.0.1:8806/fixture-issues/index.html?n=101",
+   "avgRttMs": 0.1,
+   "maxRttMs": 1
+  }
+ ],
+ "disconnects": 2,
+ "exec1": 1,
+ "exec2": 2,
+ "disconnectOnNavigation": true
+}

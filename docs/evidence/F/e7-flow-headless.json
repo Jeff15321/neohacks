@@ -1,0 +1,99 @@
+{
+ "headless": true,
+ "foregroundMs": 316,
+ "backgroundMs": 306,
+ "fgEvents": [
+  {
+   "ts": 1794092454047,
+   "event": "created",
+   "detail": "tracker-sink.createTicket"
+  },
+  {
+   "ts": 1794092454053,
+   "event": "tab",
+   "detail": "1350819679"
+  },
+  {
+   "ts": 1794092454054,
+   "event": "injected",
+   "detail": "1"
+  },
+  {
+   "ts": 1794092454058,
+   "event": "checkpoint"
+  },
+  {
+   "ts": 1794092454075,
+   "event": "navigated"
+  },
+  {
+   "ts": 1794092454078,
+   "event": "reinjected",
+   "detail": "2"
+  },
+  {
+   "ts": 1794092454082,
+   "event": "checkpoint"
+  },
+  {
+   "ts": 1794092454357,
+   "event": "navigated"
+  },
+  {
+   "ts": 1794092454359,
+   "event": "reinjected",
+   "detail": "3"
+  },
+  {
+   "ts": 1794092454363,
+   "event": "succeeded"
+  }
+ ],
+ "bgEvents": [
+  {
+   "ts": 1794092454963,
+   "event": "created",
+   "detail": "tracker-sink.createTicket"
+  },
+  {
+   "ts": 1794092454964,
+   "event": "tab",
+   "detail": "1350819679"
+  },
+  {
+   "ts": 1794092454965,
+   "event": "injected",
+   "detail": "1"
+  },
+  {
+   "ts": 1794092454967,
+   "event": "checkpoint"
+  },
+  {
+   "ts": 1794092454984,
+   "event": "navigated"
+  },
+  {
+   "ts": 1794092454985,
+   "event": "reinjected",
+   "detail": "2"
+  },
+  {
+   "ts": 1794092454988,
+   "event": "checkpoint"
+  },
+  {
+   "ts": 1794092455265,
+   "event": "navigated"
+  },
+  {
+   "ts": 1794092455267,
+   "event": "reinjected",
+   "detail": "3"
+  },
+  {
+   "ts": 1794092455269,
+   "event": "succeeded"
+  }
+ ]
+}
