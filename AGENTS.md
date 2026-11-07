@@ -49,3 +49,4 @@
 - `gmail-live.mjs` — real-Gmail driver, persistent profile in .gmail-profile
 - `gmail-netprobe.mjs` — capture-only probe on real Gmail (needs signed-in profile; Google may block automated sign-in)
 - `record-demo.mjs` — headed recording of the g2 workflow (needs mock backend)
+- `data-live.mjs` — live-LLM run of the WidgetAI.db save/list flow on the movies fixture
