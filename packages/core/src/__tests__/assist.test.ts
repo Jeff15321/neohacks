@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { classifyDangerText, classifyNetRequest } from '../danger.js';
-import { beginAttempt, buildRunNarrative, newRunAssistState, planAssist, resolveDecision, reviewBranchCode } from '../assist.js';
+import { beginAttempt, buildRunNarrative, newRunAssistState, planAssist, resolveDecision, reviewBranchCode, stateShapePreview } from '../assist.js';
 
 test('danger classifier: consequential control labels', () => {
   for (const l of ['Send', 'Delete', 'Remove item', 'Publish', 'Buy now', 'Pay $20', 'Place order', 'Move to trash', 'Submit', 'Unsubscribe'])
@@ -77,4 +77,16 @@ test('narrative lists steps, decisions, evidence and why', () => {
   assert.match(txt, /chose "new": no branch fits/);
   assert.match(txt, /Why it broke: step "find-unread" never reached its postcondition \(at least 1 unread row\); last observed: 0 rows\. Agent's last diagnosis: no branch fits\. Stopped because: the inbox is empty/);
   assert.match(txt, /Your inbox is empty/);
+});
+
+test('stateShapePreview: real ids, truncated strings/arrays, bounded size', () => {
+  const state = { cur: 1, items: [{ id: 'm1', subject: 'Q4 launch checklist', body: 'x'.repeat(500) }, { id: 'm2', subject: 'Dinner' }], extra: Array.from({ length: 9 }, (_, i) => i) };
+  const out = stateShapePreview(state);
+  assert.match(out, /"cur":1/);
+  assert.match(out, /"id":"m1"/);
+  assert.match(out, /…\(500 chars\)/);
+  assert.match(out, /…\+4 more/);
+  assert.ok(stateShapePreview({ big: Array.from({ length: 5 }, () => ({ a: 'y'.repeat(60), b: 'z'.repeat(60), c: { d: { e: { f: 1 } } } })) }, 200).length <= 201);
+  const cyc: Record<string, unknown> = {}; cyc.self = cyc;
+  assert.equal(typeof stateShapePreview(cyc), 'string');
 });

@@ -179,3 +179,60 @@ it is rejected statically for agent branches only. No Inspector-tab view of runs
   runs share one traceId; the sweep attributes llm calls to runs by time window.
 - Chromium `userScripts.execute` swallows rejections (spike) — handled by the wrapper, but a branch that never settles
   is only bounded by the run timeout.
+
+## Revisit (sweep 3)
+
+Branch `phase-c2` (from `nextgen`), one bounded pass on live recovery quality, re-measured with ONE 20-run live sweep
+(15:29–15:42 PST, widget `t_yvov9irx7olb`, evidence `docs/evidence/C/sweep3/`).
+
+**What changed and why** (safety unchanged: danger guard, ≤2 attempts per step invocation, ≤5 interventions per run,
+static branch review, draft-only all as before):
+- Generator steps section (`apps/backend/src/modules/generate/prompts/sections/steps.ts`): postconditions must check the
+  EFFECT of a step (message view open, editable composer visible, drafts counter/toast, row state, dialog gone), never
+  the wording of the control that was clicked (sweep 2: 10/13 failures were `renamed` seeds whose `expect` demanded a
+  visible "Reply" control, unsatisfiable after a correct "Respond" click); prefer role/structure/attributes over text,
+  synonym regexes when text is needed; one "popup/dialog covers the page → dismiss with Not now/Close, redo" branch per
+  fragile click step; how to accept an explicit empty state (`s.emptyState` set from an empty-state element).
+- Decide prompt (`apps/backend/src/modules/assist/prompts/decide.ts`): priority rules — overlays first (pick the
+  popup branch or `new`, NEVER `stop` because of an overlay; dismissing via Not now/Close is reversible, not a
+  consequential action — sweep 2 seeds 4 and 10 stopped for exactly that reason); only pick a branch whose `when` is
+  visibly true (no plausible-but-unrelated "click another cell"); renamed control → `new`; `stop` only for explicit
+  empty / login wall / consequential / hostile.
+- Create/escalate prompt (`prompts/create.ts`): "how to write a branch that works" — target the postcondition, clear
+  overlays/expand collapsed sections first, locate controls by role + synonym, use real state values, waitFor the
+  effect. Plus a new optional `stateShape` (contracts `AssistCreateRequest`, ≤1400 chars) built in the SW by
+  `stateShapePreview` (`packages/core/src/assist.ts`: strings ≤60 chars, arrays ≤5, depth 4, ≤1200 chars) and framed
+  as untrusted in the prompt — sweep 2 seed 6's Opus branch used the index `state.cur` as a message id
+  ("No visible inbox row with data-legacy-message-id=0") because it only saw key names.
+- Tests: core `stateShapePreview` (1), backend prompt contract (overlay rule, synonym guidance, state-shape framing) (1).
+  Mocks unchanged (the mock decide/create contracts did not change; `stateShape` is optional).
+
+| metric | sweep 1 | sweep 2 | sweep 3 (this revisit) |
+|---|---|---|---|
+| intervention rate (runs with ≥1 agent intervention) | 60% (12/20) | 95% (19/20) | 80% (16/20) |
+| interventions per run (mean) | 1.55 | 1.90 | 1.45 |
+| branch-choice accuracy (label heuristic) | 55% (16/29) | 70% (21/30) | 100% (29/29) |
+| branch-choice effectiveness (fixed the step / correct stop) | 41% (12/29) | 40% (12/30) | 100% (29/29) |
+| new-branch success (agent-written branch fixed the step) | 83% (10/12) | 19% (4/21) | n/a (0 create/escalate calls) |
+| final-failure rate | 35% (7/20) | 65% (13/20) | 10% (2/20) |
+| false success ("completed" with the wrong number of drafts) | 40% (8/20) | 0% (0/20) | 0% (0/20) |
+| task success (expected drafts, 0 sent, 0 deleted) | 25% (5/20) | 35% (7/20) | **90% (18/20)** |
+| emails sent / deleted | 0 / 0 | 0 / 0 | 0 / 0 |
+| learned-branch offers | 10 | 4 | 0 |
+| assist LLM calls (decide / create / escalate) | 48 (34 / 11 / 3) | 51 (30 / 13 / 8) | 29 (29 / 0 / 0) |
+
+Reading the numbers (honest):
+- Again ONE live-generated widget per sweep, so this is not a controlled A/B. Almost all of the gain comes from the
+  generator change: the sweep-3 widget matches the reply control with `/\b(reply|respond|answer)\b/i` and checks
+  `open-message` by "subject heading visible / list row gone", so none of the 10 `renamed` seeds needed the agent for the rename
+  (seeds 11/14/18: 0 interventions), and it shipped a `dismiss-overlay` branch on every click step and an
+  `expand-collapsed-stub` branch, which Haiku picked correctly every time (popup 7/7, collapsed 20/20 step-level picks).
+- The create/escalate path was never exercised (0 calls), so the create-prompt rewrite and `stateShape` are NOT
+  measured live by this sweep (unit-tested only); "new-branch success" is n/a, not an improvement.
+- Both failures are `empty` seeds (7, 19): the widget's `collect-unread` expect only accepts `noUnread` when rows exist,
+  so the explicit "Your inbox is empty" state never satisfies it; Haiku correctly chose `stop` (citing the role=status
+  empty state) and the run is reported failed with a correct narrative. The prompt now shows the empty-state pattern but
+  this generation did not follow it. Follow-up idea (not done, would change the ladder contract): a decide outcome
+  "nothing-to-do" that ends the run as completed-with-0 when the DOM shows an explicit empty state.
+- `collapsed` still costs one intervention per email (the scripted path never expands the stub itself), so runs with
+  collapsed+popup use 3 of the 5 run interventions.

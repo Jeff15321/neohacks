@@ -86,6 +86,8 @@ export type AssistDecideResponse = z.infer<typeof AssistDecideResponse>;
 export const AssistCreateRequest = AssistDecideRequest.extend({
   tier: z.enum(['create', 'escalate']),
   stateKeys: z.array(z.string().max(80)).max(40).optional(),
+  /** compact JSON preview of the run state (core stateShapePreview) so the branch writer uses real ids/indices */
+  stateShape: z.string().max(1400).optional(),
   previous: z.object({ code: z.string().max(ASSIST_LIMITS.BRANCH_CODE_CHARS), error: z.string().max(2000) }).optional(),
 });
 export type AssistCreateRequest = z.infer<typeof AssistCreateRequest>;
