@@ -1,0 +1,2481 @@
+{
+ "backend": "http://127.0.0.1:8805",
+ "provider": "anthropic",
+ "at": "2026-11-07T22:28:24.783Z",
+ "traces": 0,
+ "checks": "0/0",
+ "tier1Accuracy": null,
+ "specCheckRate": null,
+ "results": [],
+ "activity": {
+  "mode": "step",
+  "noTier1": false,
+  "effort": "low",
+  "patternAccuracy": "10/10",
+  "repeatSuggested": "7/10",
+  "expectedSuggestionsHit": "7/9",
+  "noiseTracesWithSuggestions": "0/5",
+  "noiseSuggestions": 0,
+  "meanSuggestionLatencyMs": 11057,
+  "callMs": {
+   "n": 133,
+   "mean": 3699,
+   "p50": 3081,
+   "p90": 4425,
+   "max": 12251
+  },
+  "results": [
+   {
+    "name": "act-add-to-cart-x2",
+    "kind": "repeat",
+    "traceId": "t_act_actaddtocartx2_mw6z3mih",
+    "steps": 8,
+    "ms": 30001,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Add a product to cart",
+     "Add a product to cart"
+    ],
+    "patterns": [
+     {
+      "id": "p_add_product_to_cart",
+      "name": "Add product to cart",
+      "completed": 2
+     }
+    ],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1
+      ],
+      "ms": 3583,
+      "tier1Ms": 1183,
+      "tier2Ms": 2396,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       2
+      ],
+      "ms": 3033,
+      "tier1Ms": 987,
+      "tier2Ms": 2044,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       3
+      ],
+      "ms": 3576,
+      "tier1Ms": 934,
+      "tier2Ms": 2639,
+      "recon": false,
+      "judge": "gate: t1: not flagged by Tier 2",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "complete_task",
+       "create_pattern",
+       "link_pattern"
+      ]
+     },
+     {
+      "seqs": [
+       4
+      ],
+      "ms": 3985,
+      "tier1Ms": 896,
+      "tier2Ms": 1898,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       5
+      ],
+      "ms": 2975,
+      "tier1Ms": 1223,
+      "tier2Ms": 1750,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       6
+      ],
+      "ms": 2992,
+      "tier1Ms": 1216,
+      "tier2Ms": 1773,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       7
+      ],
+      "ms": 5508,
+      "tier1Ms": 1244,
+      "tier2Ms": 1795,
+      "judgeMs": 2466,
+      "recon": false,
+      "judge": "judge declined: These are two completed add-to-cart actions, but each one is a quick, user-driven shopping choice. Picking which product to buy is the real work, and that is browsing and deciding, not a mechanical chore. Nothing is copied between places, and there is no list of remaining items a widget could process. A suggestion here would likely be premature and unwanted.",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     },
+     {
+      "seqs": [
+       8
+      ],
+      "ms": 4349,
+      "tier1Ms": 903,
+      "tier2Ms": 1914,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_add_product_to_cart (2)",
+    "suggested": false,
+    "expectSuggestion": null,
+    "ok": true
+   },
+   {
+    "name": "act-approve-expense-x2",
+    "kind": "repeat",
+    "traceId": "t_act_actapproveexpensex_mw6z3mii",
+    "steps": 8,
+    "ms": 31587,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Approve an expense report",
+     "Approve an expense report"
+    ],
+    "patterns": [
+     {
+      "id": "p_approve_expense_report",
+      "name": "Approve an expense report",
+      "completed": 2
+     }
+    ],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1
+      ],
+      "ms": 3697,
+      "tier1Ms": 1176,
+      "tier2Ms": 2515,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       2
+      ],
+      "ms": 3036,
+      "tier1Ms": 1303,
+      "tier2Ms": 1731,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       3
+      ],
+      "ms": 3695,
+      "tier1Ms": 1093,
+      "tier2Ms": 2598,
+      "recon": false,
+      "judge": "gate: t1: not flagged by Tier 2",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "complete_task",
+       "create_pattern",
+       "link_pattern"
+      ]
+     },
+     {
+      "seqs": [
+       4
+      ],
+      "ms": 3432,
+      "tier1Ms": 889,
+      "tier2Ms": 1320,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       5
+      ],
+      "ms": 2672,
+      "tier1Ms": 1457,
+      "tier2Ms": 1213,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       6
+      ],
+      "ms": 3193,
+      "tier1Ms": 1103,
+      "tier2Ms": 2087,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       7
+      ],
+      "ms": 7772,
+      "tier1Ms": 913,
+      "tier2Ms": 2168,
+      "judgeMs": 4688,
+      "recon": false,
+      "judge": "judge declined: Two completed approvals of the same shape, but the action is approving expense reports, which authorizes reimbursement. That is a consequential financial decision, not a draftable step. Auto-approving or batch-approving would act on the user's behalf in a way close to paying, so this fails the feasibility and safety condition. Any lighter helper, such as a review list, would offer little value for only two instances.",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     },
+     {
+      "seqs": [
+       8
+      ],
+      "ms": 4090,
+      "tier1Ms": 1416,
+      "tier2Ms": 1429,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_approve_expense_report (2)",
+    "suggested": false,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-archive-newsletters-x3",
+    "kind": "repeat",
+    "traceId": "t_act_actarchivenewslett_mw6z3mii",
+    "steps": 6,
+    "ms": 31257,
+    "completedTasks": 3,
+    "completedGoals": [
+     "Archive an email",
+     "Archive an email",
+     "Archive an email"
+    ],
+    "patterns": [
+     {
+      "id": "p_archive_email",
+      "name": "Archive an email",
+      "completed": 3
+     }
+    ],
+    "suggestions": [
+     {
+      "atSeq": 4,
+      "latencyMs": 12251,
+      "title": "Bulk-archive the newsletters still in your inbox?",
+      "patternId": "p_archive_email",
+      "score": 0.288
+     }
+    ],
+    "calls": [
+     {
+      "seqs": [
+       1
+      ],
+      "ms": 3503,
+      "tier1Ms": 1174,
+      "tier2Ms": 2322,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       2
+      ],
+      "ms": 3696,
+      "tier1Ms": 919,
+      "tier2Ms": 2774,
+      "recon": false,
+      "judge": "gate: t1: not flagged by Tier 2",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern"
+      ]
+     },
+     {
+      "seqs": [
+       3
+      ],
+      "ms": 4088,
+      "tier1Ms": 890,
+      "tier2Ms": 1892,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       4
+      ],
+      "ms": 12251,
+      "tier1Ms": 1639,
+      "tier2Ms": 2097,
+      "judgeMs": 8509,
+      "recon": false,
+      "judge": "suggest (score 0.288)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     },
+     {
+      "seqs": [
+       5
+      ],
+      "ms": 4638,
+      "tier1Ms": 1393,
+      "tier2Ms": 2022,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       6
+      ],
+      "ms": 3081,
+      "tier1Ms": 1053,
+      "tier2Ms": 2025,
+      "recon": false,
+      "judge": "gate: p_archive_email: cooldown",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_archive_email (3)",
+    "suggested": true,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-crm-log-call-x2",
+    "kind": "repeat",
+    "traceId": "t_act_actcrmlogcallx2_mw6z3mii",
+    "steps": 10,
+    "ms": 37944,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Log an activity on a contact",
+     "Log an activity on a contact"
+    ],
+    "patterns": [
+     {
+      "id": "p_log_activity_on_contact",
+      "name": "Log an activity on a contact",
+      "completed": 2
+     }
+    ],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1
+      ],
+      "ms": 3573,
+      "tier1Ms": 1224,
+      "tier2Ms": 2342,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       2
+      ],
+      "ms": 2326,
+      "tier1Ms": 1144,
+      "tier2Ms": 1180,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       3
+      ],
+      "ms": 2785,
+      "tier1Ms": 1029,
+      "tier2Ms": 1754,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       4
+      ],
+      "ms": 3868,
+      "tier1Ms": 1071,
+      "tier2Ms": 2793,
+      "recon": false,
+      "judge": "gate: t1: not flagged by Tier 2",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "complete_task",
+       "create_pattern",
+       "link_pattern"
+      ]
+     },
+     {
+      "seqs": [
+       5
+      ],
+      "ms": 3440,
+      "tier1Ms": 900,
+      "tier2Ms": 1323,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       6
+      ],
+      "ms": 2184,
+      "tier1Ms": 949,
+      "tier2Ms": 1233,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       7
+      ],
+      "ms": 3764,
+      "tier1Ms": 2090,
+      "tier2Ms": 1672,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       8
+      ],
+      "ms": 2875,
+      "tier1Ms": 1094,
+      "tier2Ms": 1780,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       9
+      ],
+      "ms": 8856,
+      "tier1Ms": 1237,
+      "tier2Ms": 2373,
+      "judgeMs": 5243,
+      "recon": false,
+      "judge": "judge declined: There are two completed instances, but the core work is the note itself: user-authored call outcomes that only the user knows and that a script or AI cannot infer. The navigation saved is only a couple of clicks. There is also no evidence of a known remaining batch of contacts to log. Saving also writes a record to the CRM, so the low time savings don't justify interrupting the user.",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     },
+     {
+      "seqs": [
+       10
+      ],
+      "ms": 4272,
+      "tier1Ms": 1184,
+      "tier2Ms": 1850,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_log_activity_on_contact (2)",
+    "suggested": false,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-g2-reply-noisy",
+    "kind": "repeat",
+    "traceId": "t_act_actg2replynoisy_mw6z3mij",
+    "steps": 9,
+    "ms": 38965,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Reply to an email",
+     "Reply to an email"
+    ],
+    "patterns": [
+     {
+      "id": "p_reply_to_email",
+      "name": "Reply to an email",
+      "completed": 2
+     }
+    ],
+    "suggestions": [
+     {
+      "atSeq": 9,
+      "latencyMs": 11728,
+      "title": "Draft replies to your remaining unread emails?",
+      "patternId": "p_reply_to_email",
+      "score": 0.292
+     }
+    ],
+    "calls": [
+     {
+      "seqs": [
+       1
+      ],
+      "ms": 3496,
+      "tier1Ms": 1436,
+      "tier2Ms": 2052,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       2
+      ],
+      "ms": 2714,
+      "tier1Ms": 941,
+      "tier2Ms": 1770,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       3
+      ],
+      "ms": 4221,
+      "tier1Ms": 1245,
+      "tier2Ms": 2972,
+      "recon": false,
+      "judge": "gate: t1: not flagged by Tier 2",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern"
+      ]
+     },
+     {
+      "seqs": [
+       4
+      ],
+      "ms": 3869,
+      "tier1Ms": 1112,
+      "tier2Ms": 1322,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": []
+     },
+     {
+      "seqs": [
+       5
+      ],
+      "ms": 3172,
+      "tier1Ms": 1017,
+      "tier2Ms": 2153,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       6
+      ],
+      "ms": 2997,
+      "tier1Ms": 1058,
+      "tier2Ms": 1936,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "abandon_task"
+      ]
+     },
+     {
+      "seqs": [
+       7
+      ],
+      "ms": 3239,
+      "tier1Ms": 1260,
+      "tier2Ms": 1977,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       8
+      ],
+      "ms": 3529,
+      "tier1Ms": 1608,
+      "tier2Ms": 1918,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       9
+      ],
+      "ms": 11728,
+      "tier1Ms": 1055,
+      "tier2Ms": 2574,
+      "judgeMs": 8096,
+      "recon": false,
+      "judge": "suggest (score 0.292)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_reply_to_email (2)",
+    "suggested": true,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-g2-reply-variant",
+    "kind": "repeat",
+    "traceId": "t_act_actg2replyvariant_mw6z49nu",
+    "steps": 8,
+    "ms": 33846,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Reply to an email",
+     "Reply to an email"
+    ],
+    "patterns": [
+     {
+      "id": "p_reply_to_email",
+      "name": "Reply to an email",
+      "completed": 2
+     }
+    ],
+    "suggestions": [
+     {
+      "atSeq": 8,
+      "latencyMs": 10005,
+      "title": "Draft replies to your remaining unread emails?",
+      "patternId": "p_reply_to_email",
+      "score": 0.27
+     }
+    ],
+    "calls": [
+     {
+      "seqs": [
+       1
+      ],
+      "ms": 3224,
+      "tier1Ms": 1048,
+      "tier2Ms": 2173,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       2
+      ],
+      "ms": 2869,
+      "tier1Ms": 1019,
+      "tier2Ms": 1848,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       3
+      ],
+      "ms": 3346,
+      "tier1Ms": 868,
+      "tier2Ms": 2475,
+      "recon": false,
+      "judge": "gate: t1: not flagged by Tier 2",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern"
+      ]
+     },
+     {
+      "seqs": [
+       4
+      ],
+      "ms": 4886,
+      "tier1Ms": 1572,
+      "tier2Ms": 1169,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": []
+     },
+     {
+      "seqs": [
+       5
+      ],
+      "ms": 3001,
+      "tier1Ms": 1200,
+      "tier2Ms": 1798,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       6
+      ],
+      "ms": 2599,
+      "tier1Ms": 1024,
+      "tier2Ms": 1573,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       7
+      ],
+      "ms": 3916,
+      "tier1Ms": 1833,
+      "tier2Ms": 2080,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       8
+      ],
+      "ms": 10005,
+      "tier1Ms": 985,
+      "tier2Ms": 2436,
+      "judgeMs": 6580,
+      "recon": false,
+      "judge": "suggest (score 0.27)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_reply_to_email (2)",
+    "suggested": true,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-g2-reply-x2",
+    "kind": "repeat",
+    "traceId": "t_act_actg2replyx2_mw6z4ams",
+    "steps": 7,
+    "ms": 30247,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Reply to an email",
+     "Reply to an email"
+    ],
+    "patterns": [
+     {
+      "id": "p_reply_to_email",
+      "name": "Reply to an email",
+      "completed": 2
+     }
+    ],
+    "suggestions": [
+     {
+      "atSeq": 7,
+      "latencyMs": 10670,
+      "title": "Draft replies to your remaining unread emails?",
+      "patternId": "p_reply_to_email",
+      "score": 0.381
+     }
+    ],
+    "calls": [
+     {
+      "seqs": [
+       1
+      ],
+      "ms": 2994,
+      "tier1Ms": 1050,
+      "tier2Ms": 1942,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       2
+      ],
+      "ms": 2353,
+      "tier1Ms": 990,
+      "tier2Ms": 1361,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       3
+      ],
+      "ms": 3888,
+      "tier1Ms": 1051,
+      "tier2Ms": 2835,
+      "recon": false,
+      "judge": "gate: t1: not flagged by Tier 2",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern"
+      ]
+     },
+     {
+      "seqs": [
+       4
+      ],
+      "ms": 4003,
+      "tier1Ms": 1433,
+      "tier2Ms": 1263,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": []
+     },
+     {
+      "seqs": [
+       5
+      ],
+      "ms": 3610,
+      "tier1Ms": 1424,
+      "tier2Ms": 2184,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       6
+      ],
+      "ms": 2729,
+      "tier1Ms": 1089,
+      "tier2Ms": 1638,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       7
+      ],
+      "ms": 10670,
+      "tier1Ms": 925,
+      "tier2Ms": 2607,
+      "judgeMs": 7135,
+      "recon": false,
+      "judge": "suggest (score 0.381)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_reply_to_email (2)",
+    "suggested": true,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-g2-reply-x3",
+    "kind": "repeat",
+    "traceId": "t_act_actg2replyx3_mw6z4avy",
+    "steps": 11,
+    "ms": 42083,
+    "completedTasks": 3,
+    "completedGoals": [
+     "Reply to an email",
+     "Reply to an email",
+     "Reply to an email"
+    ],
+    "patterns": [
+     {
+      "id": "p_reply_to_email",
+      "name": "Reply to an email",
+      "completed": 3
+     }
+    ],
+    "suggestions": [
+     {
+      "atSeq": 7,
+      "latencyMs": 9880,
+      "title": "Draft replies to your remaining unread emails?",
+      "patternId": "p_reply_to_email",
+      "score": 0.27
+     }
+    ],
+    "calls": [
+     {
+      "seqs": [
+       1
+      ],
+      "ms": 3132,
+      "tier1Ms": 935,
+      "tier2Ms": 2194,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       2
+      ],
+      "ms": 2806,
+      "tier1Ms": 1047,
+      "tier2Ms": 1757,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       3
+      ],
+      "ms": 4044,
+      "tier1Ms": 1020,
+      "tier2Ms": 3022,
+      "recon": false,
+      "judge": "gate: t1: not flagged by Tier 2",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern"
+      ]
+     },
+     {
+      "seqs": [
+       4
+      ],
+      "ms": 3330,
+      "tier1Ms": 921,
+      "tier2Ms": 1232,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": []
+     },
+     {
+      "seqs": [
+       5
+      ],
+      "ms": 3037,
+      "tier1Ms": 1018,
+      "tier2Ms": 2016,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       6
+      ],
+      "ms": 3039,
+      "tier1Ms": 1259,
+      "tier2Ms": 1777,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       7
+      ],
+      "ms": 9880,
+      "tier1Ms": 894,
+      "tier2Ms": 2343,
+      "judgeMs": 6640,
+      "recon": false,
+      "judge": "suggest (score 0.27)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     },
+     {
+      "seqs": [
+       8
+      ],
+      "ms": 3497,
+      "tier1Ms": 974,
+      "tier2Ms": 1255,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": []
+     },
+     {
+      "seqs": [
+       9
+      ],
+      "ms": 2929,
+      "tier1Ms": 1126,
+      "tier2Ms": 1800,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       10
+      ],
+      "ms": 3115,
+      "tier1Ms": 1298,
+      "tier2Ms": 1814,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       11
+      ],
+      "ms": 3274,
+      "tier1Ms": 862,
+      "tier2Ms": 2409,
+      "recon": false,
+      "judge": "gate: p_reply_to_email: cooldown",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_reply_to_email (3)",
+    "suggested": true,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-issue-to-ticket-x2",
+    "kind": "repeat",
+    "traceId": "t_act_actissuetoticketx2_mw6z4fsi",
+    "steps": 18,
+    "ms": 63527,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Create a ticket from an issue",
+     "Create a ticket from an issue"
+    ],
+    "patterns": [
+     {
+      "id": "p_create_ticket_from_issue",
+      "name": "Create a ticket from an issue",
+      "completed": 2
+     }
+    ],
+    "suggestions": [
+     {
+      "atSeq": 17,
+      "latencyMs": 10854,
+      "title": "Prefill tracker tickets from your open issues?",
+      "patternId": "p_create_ticket_from_issue",
+      "score": 0.367
+     }
+    ],
+    "calls": [
+     {
+      "seqs": [
+       1
+      ],
+      "ms": 3202,
+      "tier1Ms": 1043,
+      "tier2Ms": 2158,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       2
+      ],
+      "ms": 2934,
+      "tier1Ms": 1088,
+      "tier2Ms": 1844,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       3
+      ],
+      "ms": 2560,
+      "tier1Ms": 1219,
+      "tier2Ms": 1338,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       4
+      ],
+      "ms": 2636,
+      "tier1Ms": 1184,
+      "tier2Ms": 1449,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       5
+      ],
+      "ms": 2519,
+      "tier1Ms": 964,
+      "tier2Ms": 1552,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       6
+      ],
+      "ms": 2657,
+      "tier1Ms": 1022,
+      "tier2Ms": 1633,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       7
+      ],
+      "ms": 2735,
+      "tier1Ms": 975,
+      "tier2Ms": 1758,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       8
+      ],
+      "ms": 4425,
+      "tier1Ms": 1651,
+      "tier2Ms": 2772,
+      "recon": false,
+      "judge": "gate: t1: not flagged by Tier 2",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern"
+      ]
+     },
+     {
+      "seqs": [
+       9
+      ],
+      "ms": 4279,
+      "tier1Ms": 1051,
+      "tier2Ms": 2043,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       10
+      ],
+      "ms": 3959,
+      "tier1Ms": 1372,
+      "tier2Ms": 2585,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "abandon_task",
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       11
+      ],
+      "ms": 2697,
+      "tier1Ms": 961,
+      "tier2Ms": 1733,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       12
+      ],
+      "ms": 2971,
+      "tier1Ms": 1038,
+      "tier2Ms": 1931,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       13
+      ],
+      "ms": 2864,
+      "tier1Ms": 1214,
+      "tier2Ms": 1647,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       14
+      ],
+      "ms": 2833,
+      "tier1Ms": 1114,
+      "tier2Ms": 1716,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       15
+      ],
+      "ms": 2653,
+      "tier1Ms": 1215,
+      "tier2Ms": 1436,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       16
+      ],
+      "ms": 2933,
+      "tier1Ms": 1223,
+      "tier2Ms": 1707,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       17
+      ],
+      "ms": 10854,
+      "tier1Ms": 1101,
+      "tier2Ms": 2191,
+      "judgeMs": 7559,
+      "recon": false,
+      "judge": "suggest (score 0.367)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     },
+     {
+      "seqs": [
+       18
+      ],
+      "ms": 3816,
+      "tier1Ms": 1127,
+      "tier2Ms": 1591,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_create_ticket_from_issue (2)",
+    "suggested": true,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-label-bug-x2",
+    "kind": "repeat",
+    "traceId": "t_act_actlabelbugx2_mw6z4gkw",
+    "steps": 10,
+    "ms": 39536,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Add a label to an issue",
+     "Add a label to an issue"
+    ],
+    "patterns": [
+     {
+      "id": "p_add_label_to_issue",
+      "name": "Add a label to an issue",
+      "completed": 2
+     }
+    ],
+    "suggestions": [
+     {
+      "atSeq": 8,
+      "latencyMs": 12014,
+      "title": "Add a label to several issues at once?",
+      "patternId": "p_add_label_to_issue",
+      "score": 0.286
+     }
+    ],
+    "calls": [
+     {
+      "seqs": [
+       1
+      ],
+      "ms": 2953,
+      "tier1Ms": 996,
+      "tier2Ms": 1954,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       2
+      ],
+      "ms": 2160,
+      "tier1Ms": 867,
+      "tier2Ms": 1291,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       3
+      ],
+      "ms": 3749,
+      "tier1Ms": 1223,
+      "tier2Ms": 2524,
+      "recon": false,
+      "judge": "gate: t1: not flagged by Tier 2",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern"
+      ]
+     },
+     {
+      "seqs": [
+       4
+      ],
+      "ms": 3669,
+      "tier1Ms": 1017,
+      "tier2Ms": 1273,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": []
+     },
+     {
+      "seqs": [
+       5
+      ],
+      "ms": 2732,
+      "tier1Ms": 1178,
+      "tier2Ms": 1551,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task"
+      ]
+     },
+     {
+      "seqs": [
+       6
+      ],
+      "ms": 2649,
+      "tier1Ms": 1110,
+      "tier2Ms": 1537,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       7
+      ],
+      "ms": 3797,
+      "tier1Ms": 1227,
+      "tier2Ms": 2567,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "set_slot",
+       "attach_steps",
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       8
+      ],
+      "ms": 12014,
+      "tier1Ms": 1307,
+      "tier2Ms": 2529,
+      "judgeMs": 8175,
+      "recon": false,
+      "judge": "suggest (score 0.286)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity",
+       "abandon_task"
+      ]
+     },
+     {
+      "seqs": [
+       9
+      ],
+      "ms": 3068,
+      "tier1Ms": 1015,
+      "tier2Ms": 904,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": []
+     },
+     {
+      "seqs": [
+       10
+      ],
+      "ms": 2745,
+      "tier1Ms": 912,
+      "tier2Ms": 1831,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_add_label_to_issue (2)",
+    "suggested": true,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-noise-docs-search",
+    "kind": "noise",
+    "traceId": "t_act_actnoisedocssearch_mw6z4xz0",
+    "steps": 8,
+    "ms": 22849,
+    "completedTasks": 0,
+    "completedGoals": [],
+    "patterns": [],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1
+      ],
+      "ms": 2848,
+      "tier1Ms": 864,
+      "tier2Ms": 1982,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       2
+      ],
+      "ms": 2357,
+      "tier1Ms": 1116,
+      "tier2Ms": 1237,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       3
+      ],
+      "ms": 2351,
+      "tier1Ms": 1038,
+      "tier2Ms": 1311,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       4
+      ],
+      "ms": 3736,
+      "tier1Ms": 1972,
+      "tier2Ms": 1761,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       5
+      ],
+      "ms": 2818,
+      "tier1Ms": 1100,
+      "tier2Ms": 1715,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       6
+      ],
+      "ms": 3483,
+      "tier1Ms": 1274,
+      "tier2Ms": 2207,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       7
+      ],
+      "ms": 2811,
+      "tier1Ms": 1291,
+      "tier2Ms": 1518,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       8
+      ],
+      "ms": 2445,
+      "tier1Ms": 1274,
+      "tier2Ms": 1168,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     }
+    ],
+    "ok": true
+   },
+   {
+    "name": "act-noise-g2-browse",
+    "kind": "noise",
+    "traceId": "t_act_actnoiseg2browse_mw6z4zs0",
+    "steps": 8,
+    "ms": 24354,
+    "completedTasks": 0,
+    "completedGoals": [],
+    "patterns": [],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1
+      ],
+      "ms": 3052,
+      "tier1Ms": 948,
+      "tier2Ms": 2101,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       2
+      ],
+      "ms": 2576,
+      "tier1Ms": 851,
+      "tier2Ms": 1723,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "abandon_task"
+      ]
+     },
+     {
+      "seqs": [
+       3
+      ],
+      "ms": 3073,
+      "tier1Ms": 1061,
+      "tier2Ms": 2010,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       4
+      ],
+      "ms": 2970,
+      "tier1Ms": 1020,
+      "tier2Ms": 1947,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "abandon_task"
+      ]
+     },
+     {
+      "seqs": [
+       5
+      ],
+      "ms": 2999,
+      "tier1Ms": 1151,
+      "tier2Ms": 1846,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       6
+      ],
+      "ms": 2940,
+      "tier1Ms": 1080,
+      "tier2Ms": 1859,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "abandon_task"
+      ]
+     },
+     {
+      "seqs": [
+       7
+      ],
+      "ms": 3601,
+      "tier1Ms": 1500,
+      "tier2Ms": 2099,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       8
+      ],
+      "ms": 3143,
+      "tier1Ms": 1412,
+      "tier2Ms": 1728,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "abandon_task"
+      ]
+     }
+    ],
+    "ok": true
+   },
+   {
+    "name": "act-noise-news",
+    "kind": "noise",
+    "traceId": "t_act_actnoisenews_mw6z57cx",
+    "steps": 11,
+    "ms": 33486,
+    "completedTasks": 0,
+    "completedGoals": [],
+    "patterns": [],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1
+      ],
+      "ms": 3073,
+      "tier1Ms": 1023,
+      "tier2Ms": 2049,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       2
+      ],
+      "ms": 2900,
+      "tier1Ms": 1228,
+      "tier2Ms": 1670,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "abandon_task"
+      ]
+     },
+     {
+      "seqs": [
+       3
+      ],
+      "ms": 4987,
+      "tier1Ms": 3416,
+      "tier2Ms": 1568,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       4
+      ],
+      "ms": 2763,
+      "tier1Ms": 1444,
+      "tier2Ms": 1318,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "abandon_task"
+      ]
+     },
+     {
+      "seqs": [
+       5
+      ],
+      "ms": 2782,
+      "tier1Ms": 1026,
+      "tier2Ms": 1754,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       6
+      ],
+      "ms": 2237,
+      "tier1Ms": 1116,
+      "tier2Ms": 1118,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       7
+      ],
+      "ms": 3177,
+      "tier1Ms": 1305,
+      "tier2Ms": 1870,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "abandon_task"
+      ]
+     },
+     {
+      "seqs": [
+       8
+      ],
+      "ms": 3095,
+      "tier1Ms": 1225,
+      "tier2Ms": 1867,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       9
+      ],
+      "ms": 2436,
+      "tier1Ms": 1098,
+      "tier2Ms": 1336,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "abandon_task"
+      ]
+     },
+     {
+      "seqs": [
+       10
+      ],
+      "ms": 3375,
+      "tier1Ms": 1326,
+      "tier2Ms": 2046,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "set_slot",
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       11
+      ],
+      "ms": 2661,
+      "tier1Ms": 1020,
+      "tier2Ms": 1638,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "abandon_task"
+      ]
+     }
+    ],
+    "ok": true
+   },
+   {
+    "name": "act-noise-shop-browse",
+    "kind": "noise",
+    "traceId": "t_act_actnoiseshopbrowse_mw6z5b34",
+    "steps": 9,
+    "ms": 24905,
+    "completedTasks": 0,
+    "completedGoals": [],
+    "patterns": [],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1
+      ],
+      "ms": 2955,
+      "tier1Ms": 1020,
+      "tier2Ms": 1933,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       2
+      ],
+      "ms": 2662,
+      "tier1Ms": 1497,
+      "tier2Ms": 1163,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       3
+      ],
+      "ms": 2704,
+      "tier1Ms": 1532,
+      "tier2Ms": 1170,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       4
+      ],
+      "ms": 2620,
+      "tier1Ms": 978,
+      "tier2Ms": 1639,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       5
+      ],
+      "ms": 2766,
+      "tier1Ms": 1430,
+      "tier2Ms": 1334,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps",
+       "set_slot"
+      ]
+     },
+     {
+      "seqs": [
+       6
+      ],
+      "ms": 2355,
+      "tier1Ms": 1149,
+      "tier2Ms": 1204,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       7
+      ],
+      "ms": 2465,
+      "tier1Ms": 1020,
+      "tier2Ms": 1443,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       8
+      ],
+      "ms": 2757,
+      "tier1Ms": 1029,
+      "tier2Ms": 1726,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       9
+      ],
+      "ms": 3621,
+      "tier1Ms": 1890,
+      "tier2Ms": 1729,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "attach_steps"
+      ]
+     }
+    ],
+    "ok": true
+   },
+   {
+    "name": "youtube-read",
+    "kind": "noise",
+    "traceId": "t_act_youtuberead_mw6z5flp",
+    "steps": 2,
+    "ms": 7325,
+    "completedTasks": 0,
+    "completedGoals": [],
+    "patterns": [],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1
+      ],
+      "ms": 4163,
+      "tier1Ms": 2334,
+      "tier2Ms": 1827,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps"
+      ]
+     },
+     {
+      "seqs": [
+       2
+      ],
+      "ms": 3162,
+      "tier1Ms": 1171,
+      "tier2Ms": 1989,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "set_slot",
+       "attach_steps"
+      ]
+     }
+    ],
+    "ok": true
+   }
+  ]
+ }
+}

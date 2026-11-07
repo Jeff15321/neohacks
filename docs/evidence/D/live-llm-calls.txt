@@ -1,0 +1,10 @@
+stage|model|effort|n|avg_ms|max_ms|parse_fail|avg_out_tok
+generate.widget|claude-opus-5-5|high|3|186825.0|255949|0|22313.0
+inference|claude-sonnet-5-5|low|2|1277.0|1287|0|42.0
+observe.activity|claude-sonnet-5-5|low|571|2079.0|8821|0|192.0
+observe.activity|claude-sonnet-5-5|medium|3|5691.0|8870|0|947.0
+observe.judge|claude-opus-5-5|low|56|6644.0|10209|0|603.0
+observe.judge|claude-opus-5-5|medium|1|10134.0|10134|0|820.0
+observe.reconsolidate|claude-sonnet-5-5|low|108|1356.0|3340|0|11.0
+observe.reconsolidate|claude-sonnet-5-5|medium|2|1543.0|1611|0|10.0
+steps.interpret|claude-haiku-5-5|low|620|1251.0|4522|0|130.0
