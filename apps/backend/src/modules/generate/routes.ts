@@ -5,6 +5,7 @@ import { createGenerateService } from './service.js';
 
 export const registerGenerate: RegisterModule = (app, deps) => {
   const svc = createGenerateService(deps);
+  deps.services.provide('generate.widget', (body, traceId) => svc.generateWidget(body, traceId)); // Phase D: jobs runner
   app.post('/api/generate-widget', async (req, reply) => {
     const body = parseOr400(GenerateWidgetRequest, req.body, 'POST /api/generate-widget');
     const res = await svc.generateWidget(body, req.traceId);

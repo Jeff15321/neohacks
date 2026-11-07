@@ -5,7 +5,7 @@ import { openDb } from './store/db.js';
 import { createCallModel, makeProvider } from './llm/callModel.js';
 import { registerPlugins } from './plugins/index.js';
 import { registerFixtures } from './fixtures/index.js';
-import type { ModuleDeps, RegisterModule } from './modules/types.js';
+import { ServiceRegistry, type ModuleDeps, type RegisterModule } from './modules/types.js';
 import { registerGenerate } from './modules/generate/routes.js';
 import { registerInference } from './modules/inference/routes.js';
 import { registerDebug } from './modules/debug/routes.js';
@@ -24,7 +24,7 @@ const MODULES: RegisterModule[] = [
 export async function buildApp(cfg: Config = loadConfig(), opts: { logger?: boolean } = {}): Promise<{ app: FastifyInstance; deps: ModuleDeps }> {
   const db = openDb(cfg.dataDbPath);
   const provider = makeProvider(cfg);
-  const deps: ModuleDeps = { cfg, db, callModel: createCallModel(provider, db) };
+  const deps: ModuleDeps = { cfg, db, callModel: createCallModel(provider, db), services: new ServiceRegistry() };
   const app = Fastify({
     logger: opts.logger === false ? false : { level: process.env.LOG_LEVEL ?? 'info' },
     disableRequestLogging: true,
