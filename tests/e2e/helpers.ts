@@ -14,7 +14,8 @@ export const YT_URL = `${BASE}/fixture-yt/index.html`;
 export const NET_URL = `${BASE}/fixture-net/index.html`;
 export const EXT_ID = 'jbdmmaojlbiclmjbafphlchlnppplpen'; // from manifest key
 export const TOKEN = 'dev-token-change-me';
-const PROFILE = path.join(DIR, '.pw-profile');
+/** PW_PROFILE lets a tools/ script run next to another browser session (default: the shared E2E profile). */
+const PROFILE = process.env.PW_PROFILE ?? path.join(DIR, '.pw-profile');
 const HEADED = process.env.HEADED === '1';
 
 interface LaunchOpts { recordVideoDir?: string; headed?: boolean; }

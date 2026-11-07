@@ -1,0 +1,6 @@
+{
+  "description": "Demo 1 with noise: detour to Drafts and back, opens a read newsletter and goes back, then replies to the first unread email.",
+  "tier1": { "1": "open|view|navigate|go|click|check|switch", "2": "back|return|navigate|go|close", "3": "open|read|view", "4": "back|return|navigate|go|close", "5": "open|read|view", "6": "reply|compose", "7": "type|write|enter|draft|compose|reply" },
+  "navigationOnly": [2, 4],
+  "spec": { "goal": "unread|repl", "minSlots": 1, "consequential": "send", "mustCite": [6, 7], "noise": [1, 2, 3], "maxQuestions": 3 }
+}

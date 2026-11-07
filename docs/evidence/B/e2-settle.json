@@ -1,0 +1,62 @@
+{
+ "gmail2": {
+  "clicks": 20,
+  "steps": 20,
+  "reasons": {
+   "quiet": 20
+  },
+  "unsettled": 0,
+  "timeToQuietMs": {
+   "p50": 0,
+   "p90": 1,
+   "max": 1
+  },
+  "stepDurationMs": {
+   "p50": 400,
+   "p90": 401
+  },
+  "withNet": 0,
+  "withRegions": 20,
+  "lateEffects": 0,
+  "samples": [
+   "1:Nov 6 Q4 launch ch:quiet:0ms:net0",
+   "2:Back to Inbox:quiet:0ms:net0",
+   "3:Drafts (0):quiet:0ms:net0",
+   "4:Back to Inbox:quiet:1ms:net0",
+   "5:Nov 6 Dinner Satur:quiet:0ms:net0",
+   "6:Reply:quiet:0ms:net0",
+   "7:Back to Inbox:quiet:0ms:net0",
+   "8:Nov 6 Dinner Satur:quiet:0ms:net0"
+  ]
+ },
+ "netmail": {
+  "clicks": 20,
+  "steps": 20,
+  "reasons": {
+   "quiet": 20
+  },
+  "unsettled": 0,
+  "timeToQuietMs": {
+   "p50": 16,
+   "p90": 17,
+   "max": 19
+  },
+  "stepDurationMs": {
+   "p50": 416,
+   "p90": 417
+  },
+  "withNet": 17,
+  "withRegions": 20,
+  "lateEffects": 0,
+  "samples": [
+   "21:priya@example.com:quiet:16ms:net2",
+   "22:Back to Inbox:quiet:16ms:net1",
+   "23:Drafts (0):quiet:15ms:net1",
+   "24:Back to Inbox:quiet:13ms:net1",
+   "25:Compose:quiet:1ms:net0",
+   "26:Inbox:quiet:16ms:net1",
+   "27:devon@example.com:quiet:16ms:net2",
+   "28:Back to Inbox:quiet:17ms:net1"
+  ]
+ }
+}

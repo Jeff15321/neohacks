@@ -1,0 +1,5 @@
+{
+  "description": "Demo 1: open the first unread email, Reply, type a reply (auto-saved: 'Draft saved').",
+  "tier1": { "1": "open|read|view|select", "2": "reply|compose", "3": "type|write|enter|draft|compose|reply" },
+  "spec": { "goal": "unread", "minSlots": 1, "slot": "email|thread|message", "consequential": "send", "mustCite": [1, 2, 3], "maxQuestions": 3 }
+}

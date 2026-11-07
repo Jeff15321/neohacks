@@ -1,0 +1,282 @@
+{
+ "backend": "http://127.0.0.1:8802",
+ "provider": "anthropic",
+ "at": "2026-11-07T21:27:11.173Z",
+ "traces": 4,
+ "checks": "42/43",
+ "tier1Accuracy": 1,
+ "specCheckRate": 0.957,
+ "results": [
+  {
+   "name": "gmail2-browse",
+   "steps": 4,
+   "checks": [
+    {
+     "id": "tier1#1",
+     "ok": true,
+     "detail": "want /open|read|view/ got \"open email from Priya Nair\""
+    },
+    {
+     "id": "tier1#2",
+     "ok": true,
+     "detail": "want /back|return|navigate|go|close/ got \"go back inbox list from email view\""
+    },
+    {
+     "id": "tier1#3",
+     "ok": true,
+     "detail": "want /open|read|view/ got \"open email from Priya Nair\""
+    },
+    {
+     "id": "tier1#4",
+     "ok": true,
+     "detail": "want /back|return|navigate|go|close/ got \"go back inbox list from email view\""
+    },
+    {
+     "id": "tier1#2:navOnly",
+     "ok": true,
+     "detail": "isNavigationOnly=true"
+    },
+    {
+     "id": "tier1#4:navOnly",
+     "ok": true,
+     "detail": "isNavigationOnly=true"
+    },
+    {
+     "id": "spec:ok",
+     "ok": true,
+     "detail": 200
+    },
+    {
+     "id": "spec:goalNot",
+     "ok": true,
+     "detail": "Open each unread email in the HardMail inbox to view its message (which marks it as read), then return to the inbox list."
+    }
+   ],
+   "ms": {
+    "tier1": 4784,
+    "spec": 15303
+   },
+   "traceId": "t_eval_gmail2browse_mw6wxfrx",
+   "goal": "Open each unread email in the HardMail inbox to view its message (which marks it as read), then return to the inbox list.",
+   "passed": 8,
+   "total": 8
+  },
+  {
+   "name": "gmail2-reply-noisy",
+   "steps": 7,
+   "checks": [
+    {
+     "id": "tier1#1",
+     "ok": true,
+     "detail": "want /open|view|navigate|go|click|check|switch/ got \"open Drafts folder\""
+    },
+    {
+     "id": "tier1#2",
+     "ok": true,
+     "detail": "want /back|return|navigate|go|close/ got \"go back inbox list\""
+    },
+    {
+     "id": "tier1#3",
+     "ok": true,
+     "detail": "want /open|read|view/ got \"open email 'Weekly digest #482'\""
+    },
+    {
+     "id": "tier1#4",
+     "ok": true,
+     "detail": "want /back|return|navigate|go|close/ got \"go back inbox list\""
+    },
+    {
+     "id": "tier1#5",
+     "ok": true,
+     "detail": "want /open|read|view/ got \"open email 'Q4 launch checklist' from Priya Nair\""
+    },
+    {
+     "id": "tier1#6",
+     "ok": true,
+     "detail": "want /reply|compose/ got \"reply reply composer for Q4 launch checklist\""
+    },
+    {
+     "id": "tier1#7",
+     "ok": true,
+     "detail": "want /type|write|enter|draft|compose|reply/ got \"type reply draft in message body\""
+    },
+    {
+     "id": "tier1#2:navOnly",
+     "ok": true,
+     "detail": "isNavigationOnly=true"
+    },
+    {
+     "id": "tier1#4:navOnly",
+     "ok": true,
+     "detail": "isNavigationOnly=true"
+    },
+    {
+     "id": "spec:ok",
+     "ok": true,
+     "detail": 200
+    },
+    {
+     "id": "spec:goal",
+     "ok": true,
+     "detail": "For each unread email in the HardMail inbox, open it, write an AI-generated reply in the reply composer, and leave it auto-saved as a draft (never sent)."
+    },
+    {
+     "id": "spec:slots",
+     "ok": true,
+     "detail": "email thread, email content (sender, subject, body), reply text"
+    },
+    {
+     "id": "spec:consequential",
+     "ok": true,
+     "detail": "Send email (Send button div[role=button][aria-label='Send'] in the composer) — the widget must NEVER press Send; the user only saved a draft"
+    },
+    {
+     "id": "spec:cites#6",
+     "ok": true,
+     "detail": "1,2,3,4,5,6,7"
+    },
+    {
+     "id": "spec:cites#7",
+     "ok": true,
+     "detail": "1,2,3,4,5,6,7"
+    },
+    {
+     "id": "spec:noise#1",
+     "ok": true,
+     "detail": "essential cites 5,6,7,2,4"
+    },
+    {
+     "id": "spec:noise#2",
+     "ok": false,
+     "detail": "essential cites 5,6,7,2,4"
+    },
+    {
+     "id": "spec:noise#3",
+     "ok": true,
+     "detail": "essential cites 5,6,7,2,4"
+    },
+    {
+     "id": "spec:questions",
+     "ok": true,
+     "detail": "3 questions"
+    }
+   ],
+   "ms": {
+    "tier1": 8246,
+    "spec": 21052
+   },
+   "traceId": "t_eval_gmail2replynoisy_mw6wxv9w",
+   "goal": "For each unread email in the HardMail inbox, open it, write an AI-generated reply in the reply composer, and leave it auto-saved as a draft (never sent).",
+   "passed": 18,
+   "total": 19
+  },
+  {
+   "name": "gmail2-reply",
+   "steps": 3,
+   "checks": [
+    {
+     "id": "tier1#1",
+     "ok": true,
+     "detail": "want /open|read|view|select/ got \"open email from Priya Nair\""
+    },
+    {
+     "id": "tier1#2",
+     "ok": true,
+     "detail": "want /reply|compose/ got \"reply reply composer for email\""
+    },
+    {
+     "id": "tier1#3",
+     "ok": true,
+     "detail": "want /type|write|enter|draft|compose|reply/ got \"type reply message body\""
+    },
+    {
+     "id": "spec:ok",
+     "ok": true,
+     "detail": 200
+    },
+    {
+     "id": "spec:goal",
+     "ok": true,
+     "detail": "For each unread email in the HardMail inbox, open it, start a reply, and write a short, context-appropriate AI-drafted response that auto-saves as a draft, without ever sending it."
+    },
+    {
+     "id": "spec:slots",
+     "ok": true,
+     "detail": "email thread, email content (sender name, subject, body)"
+    },
+    {
+     "id": "spec:slotName",
+     "ok": true,
+     "detail": "email thread, email content (sender name, subject, body)"
+    },
+    {
+     "id": "spec:consequential",
+     "ok": true,
+     "detail": "Send email (the Send button appears in the composer) — the widget must NEVER press Send; it only leaves replies as saved drafts"
+    },
+    {
+     "id": "spec:cites#1",
+     "ok": true,
+     "detail": "1,2,3"
+    },
+    {
+     "id": "spec:cites#2",
+     "ok": true,
+     "detail": "1,2,3"
+    },
+    {
+     "id": "spec:cites#3",
+     "ok": true,
+     "detail": "1,2,3"
+    },
+    {
+     "id": "spec:questions",
+     "ok": true,
+     "detail": "2 questions"
+    }
+   ],
+   "ms": {
+    "tier1": 3713,
+    "spec": 13930
+   },
+   "traceId": "t_eval_gmail2reply_mw6wyhvq",
+   "goal": "For each unread email in the HardMail inbox, open it, start a reply, and write a short, context-appropriate AI-drafted response that auto-saves as a draft, without ever sending it.",
+   "passed": 12,
+   "total": 12
+  },
+  {
+   "name": "youtube-read",
+   "steps": 2,
+   "checks": [
+    {
+     "id": "tier1#1",
+     "ok": true,
+     "detail": "want /subscribe|click|follow/ got \"subscribe FixtureTube channel\""
+    },
+    {
+     "id": "tier1#2",
+     "ok": true,
+     "detail": "want /copy/ got \"copy comment by @rustfan on borrow checker\""
+    },
+    {
+     "id": "spec:ok",
+     "ok": true,
+     "detail": 200
+    },
+    {
+     "id": "spec:goalNot",
+     "ok": true,
+     "detail": "On a FixtureTube video page, subscribe to the video's channel (if not already subscribed) and copy the top comment's author and text to the clipboard."
+    }
+   ],
+   "ms": {
+    "tier1": 2410,
+    "spec": 12008
+   },
+   "traceId": "t_eval_youtuberead_mw6wyvhu",
+   "goal": "On a FixtureTube video page, subscribe to the video's channel (if not already subscribed) and copy the top comment's author and text to the clipboard.",
+   "passed": 4,
+   "total": 4
+  }
+ ]
+}

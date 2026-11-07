@@ -1,0 +1,101 @@
+{
+ "kind": "wwa-trace",
+ "version": 1,
+ "name": "youtube-read",
+ "exportedAt": "2026-11-07T21:25:25.238Z",
+ "steps": [
+  {
+   "id": "st_mw6wwvc9_1",
+   "origin": "http://127.0.0.1:8802",
+   "url": "http://127.0.0.1:8802/fixture-yt/index.html",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "id",
+       "selector": "#sub-btn",
+       "matches": 1
+      },
+      {
+       "kind": "css",
+       "selector": "button",
+       "matches": 1
+      },
+      {
+       "kind": "text",
+       "selector": "button >> text=\"Subscribe\"",
+       "matches": 1
+      }
+     ],
+     "tag": "button",
+     "accessibleName": "Subscribe"
+    },
+    "accessibleName": "Subscribe"
+   },
+   "effects": {
+    "titleChange": "FixtureTube — Video",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1794086723241,
+   "tEnd": 1794086723641,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 0
+   },
+   "title": "FixtureTube — Video",
+   "seq": 1,
+   "tabId": 107697837,
+   "windowId": 107697832
+  },
+  {
+   "id": "st_mw6wwvvu_2",
+   "origin": "http://127.0.0.1:8802",
+   "url": "http://127.0.0.1:8802/fixture-yt/index.html",
+   "action": {
+    "kind": "copy",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "div.comment:nth-of-type(1) > div.avatar",
+       "matches": 1
+      }
+     ],
+     "tag": "div"
+    },
+    "valuePreview": "@rustfan The borrow checker section finally made lifetimes click for me. Great v…",
+    "valueHash": "6eaa2e52"
+   },
+   "effects": {
+    "titleChange": "FixtureTube — Video",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1794086723946,
+   "tEnd": 1794086724346,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 0
+   },
+   "title": "FixtureTube — Video",
+   "seq": 2,
+   "tabId": 107697837,
+   "windowId": 107697832
+  }
+ ],
+ "labels": {
+  "note": "add hand labels here (see tests/traces/README.md)"
+ }
+}
