@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.local
+.env
+.env.*
+!.env.example
+!.env.test.example
+.DS_Store
+playwright-report/
+test-results/
+poc/profile*/
+poc/node_modules/
+poc/package*.json
+*.tsbuildinfo

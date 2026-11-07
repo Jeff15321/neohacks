@@ -1,0 +1,49 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>FixtureTube — Video</title>
+<style>
+  body { margin: 0; font: 14px/1.5 system-ui, sans-serif; background: #0f0f0f; color: #f1f1f1; }
+  .yt-header { display: flex; align-items: center; gap: 12px; padding: 10px 20px; background: #202020; position: sticky; top: 0; }
+  .yt-header .logo { font-weight: 700; color: #f00; }
+  .wrap { max-width: 1100px; margin: 16px auto; padding: 0 16px; }
+  .player { aspect-ratio: 16/9; background: #000; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #666; }
+  h1 { font-size: 18px; margin: 12px 0; }
+  .meta { color: #aaa; font-size: 13px; margin-bottom: 20px; }
+  .comments h2 { font-size: 15px; margin: 18px 0 8px; }
+  .comment { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #272727; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: #555; flex: none; }
+  .comment .author { font-size: 12px; color: #aaa; }
+  .comment-text { font-size: 14px; }
+</style></head>
+<body>
+  <div class="yt-header"><span class="logo">FixtureTube</span><button id="sub-btn">Subscribe</button></div>
+  <div class="wrap">
+    <div class="player" role="region" aria-label="Video player">[ video player ]</div>
+    <h1 id="video-title">We rebuilt our entire backend in Rust — here's what happened</h1>
+    <div class="meta">1.2M views · 3 days ago</div>
+    <section class="comments" aria-label="Comments">
+      <h2>Comments</h2>
+      <div id="comment-list"></div>
+    </section>
+  </div>
+<script>
+  const COMMENTS = [
+    { a: '@rustfan', t: 'The borrow checker section finally made lifetimes click for me. Great video!' },
+    { a: '@webdev_jane', t: 'Did you benchmark against the old Node service? Numbers would help.' },
+    { a: '@cthulhu', t: 'Rust is overrated, honestly. Go would have been a simpler choice.' },
+    { a: '@kernelpan1c', t: 'What happened to your error handling story? You skipped that part.' },
+    { a: '@data_dave', t: 'The memory reduction graphs were impressive. 40% less RAM!' },
+    { a: '@gopher_gal', t: 'Agree with @cthulhu — the operational complexity seems high for the gains.' },
+    { a: '@neovimmer', t: 'Tutorial on the macro system next please!' },
+    { a: '@scaleup_sam', t: 'How does this hold up under load? p99 latencies?' },
+  ];
+  const list = document.getElementById('comment-list');
+  for (const c of COMMENTS) {
+    const el = document.createElement('div');
+    el.className = 'comment';
+    el.innerHTML = '<div class="avatar"></div><div><div class="author"></div><div class="comment-text"></div></div>';
+    el.querySelector('.author').textContent = c.a;
+    el.querySelector('.comment-text').textContent = c.t;
+    list.appendChild(el);
+  }
+</script>
+</body></html>

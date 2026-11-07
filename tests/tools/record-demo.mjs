@@ -1,0 +1,25 @@
+// Records a headed demo run of the gmail2 workflow to demo.webm.
+import { launchWithExtension, EXT_ID } from '../e2e/helpers.ts';
+const G2 = 'http://127.0.0.1:8787/fixture-g2/index.html';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+const DIR = path.dirname(fileURLToPath(import.meta.url));
+const { context: ctx2 } = await launchWithExtension({ headed: true, recordVideoDir: DIR });
+const page = await ctx2.newPage();
+await page.goto(G2);
+await page.waitForSelector('tr.zA.zE');
+const panel = await ctx2.newPage();
+await panel.goto(`chrome-extension://${EXT_ID}/sidepanel.html`);
+await panel.fill('#req', 'Add a button that reads my two most recent unread emails and writes a friendly AI reply draft for each.');
+await panel.click('#gen-btn');
+await panel.waitForSelector('.card h3', { timeout: 30000 });
+await panel.click('button.primary:has-text("Approve & Run")');
+await page.waitForSelector('div[id^="wwa-"]', { timeout: 15000 });
+await page.locator('div[id^="wwa-"] >> css=button').first().click();
+await page.waitForFunction(() => window.__drafts?.length === 2, undefined, { timeout: 60000 });
+await page.click('#drafts-nav');
+await page.waitForTimeout(2000);
+await ctx2.close();
+const vids = fs.readdirSync(DIR).filter(f => f.endsWith('.webm'));
+console.log('videos:', vids.join(', '));
