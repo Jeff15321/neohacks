@@ -100,6 +100,8 @@ export class RecordService {
     this.persist();
     this.bus.broadcast({ type: 'STEP_ADDED', step, recording: true, traceId: st.session.traceId });
     if (step.tabId >= 0) void this.tellTab(step.tabId); // pill step count
+    // §3: full PageContext at each route change (deduped by url+title)
+    if (step.tabId >= 0 && (step.effects.urlChange || step.action.kind === 'navigate')) void tabs.get(step.tabId).then(t => this.snapshot(t)).catch(() => {});
     void this.interpretStep(step);
   }
 

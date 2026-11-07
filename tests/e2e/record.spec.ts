@@ -63,6 +63,13 @@ test.describe('Recording → WorkflowSpec → widget (Demo 1, mock LLM)', () => 
       await expect(panel.locator('[data-testid="spec-goal"]')).toContainText(/unread/i, { timeout: 15_000 });
       expect(await panel.locator('[data-testid="spec-slot"]').count()).toBeGreaterThanOrEqual(1);
       await expect(panel.locator('[data-testid="spec-consequential"]')).toContainText(/send/i);
+      // answer the open question → re-interpret once (mock clears answered questions)
+      await expect(panel.locator('[data-testid="spec-answer"]')).toHaveCount(1);
+      await panel.fill('[data-testid="spec-answer"]', 'All unread emails.');
+      await panel.click('[data-testid="rec-interpret"]');
+      await expect(panel.locator('[data-testid="spec-answer"]')).toHaveCount(0, { timeout: 15_000 });
+      await expect(panel.locator('[data-testid="rec-status"]')).toHaveText('ready');
+      if (process.env.EVIDENCE_DIR) await panel.screenshot({ path: path.join(process.env.EVIDENCE_DIR, 'record-review.png'), fullPage: true });
       await panel.fill('#rec-instructions', 'Draft only, do all unread emails. Run from a toolbar button.');
       await panel.click('[data-testid="rec-generate"]');
       const card = panel.locator('[data-testid="record-tab"] [data-testid="approval-card"]');
@@ -92,6 +99,7 @@ test.describe('Recording → WorkflowSpec → widget (Demo 1, mock LLM)', () => 
       await expect(panel.locator('[data-testid="llm-call"]').filter({ hasText: 'steps.interpret' }).first()).toBeVisible();
       await expect(panel.locator('[data-testid="llm-call"]').filter({ hasText: 'generate.widget' }).first()).toBeVisible();
       await expect(panel.locator('[data-testid="bus-log"]')).toContainText('REC_START');
+      if (process.env.EVIDENCE_DIR) await panel.screenshot({ path: path.join(process.env.EVIDENCE_DIR, 'inspector.png') });
       const [dl] = await Promise.all([panel.waitForEvent('download'), panel.click('[data-testid="export-bundle"]')]);
       const bundle = JSON.parse(fs.readFileSync((await dl.path())!, 'utf8'));
       expect(bundle.kind).toBe('wwa-debug-bundle');
@@ -128,7 +136,7 @@ test.describe('Recording → WorkflowSpec → widget (Demo 1, mock LLM)', () => 
       await page.keyboard.press('Alt+Shift+R');
       await page.waitForTimeout(800);
       const e1 = await sw.evaluate('globalThis.__wwaRecord.commandLog.length') as number;
-      console.log(`[e2e-rec] E1 headless: chrome.commands.onCommand fired ${e1} time(s) for synthetic Alt+Shift+R`);
+      console.log(`[e2e-rec] E1 ${process.env.HEADED === "1" ? "headed" : "headless"}: chrome.commands.onCommand fired ${e1} time(s) for synthetic Alt+Shift+R`);
       if (e1 % 2 === 1) await msg(panel, { type: 'REC_STOP' }); // if it toggled on, reset
 
       expect((await msg(panel, { type: 'REC_START' })).ok).toBe(true);
