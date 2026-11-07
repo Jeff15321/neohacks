@@ -56,21 +56,28 @@ Run of "AI Reply Drafts" — goal: Write friendly AI reply drafts for the two mo
 +18.1s   running branch "click-respond-link-open-composer" (create) — agent-written branch executed in the widget world.
 +25.7s   branch "click-respond-link-open-composer" did not fix it: no editable reply composer (textarea/contenteditable/role=textbox) appeared.
 +25.7s   ✗ "open-reply-1" expected reply composer is editable but observed no editable reply composer (textarea/contenteditable/role=textbox) appeared (error: Clicked Respond but no editable composer (textarea/contenteditable/role=textbox) appeared).
-+35.4s   agent (escalate, generation model) wrote branch "expand-collapsed-composer-after-respond": The previous branch clicked Respond, which only rendered a collapsed composer stub ('Expand composer', aria-expanded=false) and never expanded it; this branch expands that stub (clicking Respond first…
-+35.4s   running branch "expand-collapsed-composer-after-respond" (escalate) — agent-written branch executed in the widget world.
-+35.4s   branch "expand-collapsed-composer-after-respond" fixed the step.
-+35.4s   ✓ "open-reply-1" postcondition met: via branch expand-collapsed-composer-after-respond.
-+35.4s Step "type-reply-1" started (Put the AI-written reply text into the reply composer).
-+35.4s   new branch "expand-collapsed-composer-after-respond" for "open-reply-1" can be added to the widget.
-+35.4s   ✓ "type-reply-1" postcondition met: reply text is in the composer.
-+35.4s Step "save-draft-1" started (Save the reply as a draft (never send) and confirm the Drafts counter or Draft saved toast).
-+36.0s   ✓ "save-draft-1" postcondition met: draft saved (counter increased or toast shown).
-+36.0s Step "back-to-inbox-1" started (Return to the Inbox grid so the next email can be opened).
-+36.0s   ✓ "back-to-inbox-1" postcondition met: Inbox grid visible again.
-+36.0s Step "open-email-2" started (Open the unread email 'Dinner Saturday?' from the Inbox grid).
-+36.0s   ✓ "open-email-2" postcondition met: message view is open.
-+37.5s Step "open-reply-2" started (Open an editable reply composer for the open email).
-+47.7s   ✗ "open-reply-2" expected re
++35.4s   agent (escalate, generation model) wrote branch "expand-collapsed-composer-after-respond": The previous branch clicked Respond, which only rendered a collapsed composer stub ('Expand composer', aria-expanded=false) and never expanded it; this branch expands
+[… 1898 chars …]
+ composer (textarea/contenteditable/role=textbox) appeared.
++55.5s   ✗ "open-reply-2" expected reply composer is editable but observed no editable reply composer (textarea/contenteditable/role=textbox) appeared.
++56.7s   agent (decide, fast model) chose "keyboard-r": The message view shows a "Respond" span but no composer or textbox appeared after the click, and the r shortcut is an alternate, non-destructive way to open the reply composer.
++56.7s   running branch "keyboard-r" (pre-generated) — reply is reachable via the r keyboard shortcut.
++62.8s   branch "keyboard-r" did not fix it: no editable reply composer (textarea/contenteditable/role=textbox) appeared.
++62.8s   ✗ "open-reply-2" expected reply composer is editable but observed no editable reply composer (textarea/contenteditable/role=textbox) appeared.
++62.8s   stopped: cap: 2 recovery attempts for step "open-reply-2" used
++62.8s FAILED at "open-reply-2": cap: 2 recovery attempts for step "open-reply-2" used
+Why it broke: step "open-reply-2" never reached its postcondition (reply composer is editable); last observed: no editable reply composer (textarea/contenteditable/role=textbox) appeared. Agent's last diagnosis: The message view shows a "Respond" span but no composer or textbox appeared after the click, and the r shortcut is an alternate, non-destructive way to open the reply composer.. Stopped because: cap: 2 recovery attempts for step "open-reply-2" used.
+DOM evidence (last observed, untrusted page content):
+<div.nH role="main">
+  <div id="app">
+    <div.adn.ads role="main">
+      <div.ajy role="button" aria-label="Back to Inbox" tabindex="0"> ←
+      <div.T-I.nX role="button" aria-label="Delete" tabindex="0"> Delete
+      <h2.hP> Dinner Saturday?
+      <span.gD> Devon Cole
+      <span.go> <devon@example.com>
+      <div.a3s.aiL role="presentation"> Hey! A few of us are doing dinner Saturday at 7 at the usual spot. You in? Let m…
+      <span.ams.bkH role="link" aria-label="Respond" tabindex="0"> Respond
 ```
 
 ### seed 6 (collapsed+renamed) — trace `t_uw6ga7y7tqcy`
@@ -88,21 +95,28 @@ Run of "AI Reply Drafts" — goal: Write friendly AI reply drafts for the two mo
 +24.4s   branch "click-respond-link" did not fix it: no editable reply composer (textarea/contenteditable/role=textbox) appeared.
 +24.4s   ✗ "open-reply-1" expected reply composer is editable but observed no editable reply composer (textarea/contenteditable/role=textbox) appeared (error: Clicked Respond but no editable composer appeared).
 +34.5s   agent (escalate, generation model) wrote branch "expand-collapsed-composer": The previous branch only re-clicked Respond, but the DOM shows the composer rendered as a collapsed stub ('Expand composer', aria-expanded=false) that must be clicked to reveal the editable field.
-+34.5s   running branch "expand-collapsed-composer" (escalate) — agent-written branch executed in the widget world.
-+34.5s   branch "expand-collapsed-composer" fixed the step.
-+34.5s   ✓ "open-reply-1" postcondition met: via branch expand-collapsed-composer.
-+34.5s Step "type-reply-1" started (Put the AI-written reply text into the reply composer).
-+34.5s   new branch "expand-collapsed-composer" for "open-reply-1" can be added to the widget.
-+34.5s   ✓ "type-reply-1" postcondition met: reply text is in the composer.
-+34.5s Step "save-draft-1" started (Save the reply as a draft (never send) and confirm the Drafts counter or Draft saved toast).
-+35.1s   ✓ "save-draft-1" postcondition met: draft saved (counter increased or toast shown).
-+35.1s Step "back-to-inbox-1" started (Return to the Inbox grid so the next email can be opened).
-+35.1s   ✓ "back-to-inbox-1" postcondition met: Inbox grid visible again.
-+35.1s Step "open-email-2" started (Open the unread email 'Dinner Saturday?' from the Inbox grid).
-+35.1s   ✓ "open-email-2" postcondition met: message view is open.
-+36.6s Step "open-reply-2" started (Open an editable reply composer for the open email).
-+46.8s   ✗ "open-reply-2" expected reply composer is editable but observed no editable reply composer (textarea/contenteditable/role=textbox) appeared.
-+48.1s   agent (decide, fast model) chose "click-reply-agai
++34.5s   running branch "expand-collapsed-composer" (escalate) — agent-written bra
+[… 1768 chars …]
+.
++54.7s   ✗ "open-reply-2" expected reply composer is editable but observed no editable reply composer (textarea/contenteditable/role=textbox) appeared.
++55.8s   agent (decide, fast model) chose "keyboard-r": The message view shows a 'Respond' control but no composer appeared after the click, and the 'click-reply-again' branch was already tried, so the r shortcut is the remaining listed path to reach the reply.
++55.8s   running branch "keyboard-r" (pre-generated) — reply is reachable via the r keyboard shortcut.
++61.9s   branch "keyboard-r" did not fix it: no editable reply composer (textarea/contenteditable/role=textbox) appeared.
++61.9s   ✗ "open-reply-2" expected reply composer is editable but observed no editable reply composer (textarea/contenteditable/role=textbox) appeared.
++61.9s   stopped: cap: 2 recovery attempts for step "open-reply-2" used
++61.9s FAILED at "open-reply-2": cap: 2 recovery attempts for step "open-reply-2" used
+Why it broke: step "open-reply-2" never reached its postcondition (reply composer is editable); last observed: no editable reply composer (textarea/contenteditable/role=textbox) appeared. Agent's last diagnosis: The message view shows a 'Respond' control but no composer appeared after the click, and the 'click-reply-again' branch was already tried, so the r shortcut is the remaining listed path to reach the reply.. Stopped because: cap: 2 recovery attempts for step "open-reply-2" used.
+DOM evidence (last observed, untrusted page content):
+<div.nH role="main">
+  <div id="app">
+    <div.adn.ads role="main">
+      <div.ajy role="button" aria-label="Back to Inbox" tabindex="0"> ←
+      <div.T-I.nX role="button" aria-label="Delete" tabindex="0"> Delete
+      <h2.hP> Dinner Saturday?
+      <span.gD> Devon Cole
+      <span.go> <devon@example.com>
+      <div.a3s.aiL role="presentation"> Hey! A few of us are doing dinner Saturday at 7 at the usual spot. You in? Let m…
+      <span.ams.bkH role="link" aria-label="Respond" tabindex="0"> Respond
 ```
 
 ### seed 7 (empty) — trace `t_uw6ga7y7tqcy`

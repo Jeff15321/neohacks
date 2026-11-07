@@ -86,7 +86,7 @@ Assist models: decide = fast (Haiku 5.5), create = inference (Sonnet 5.5), escal
 ${rows.join('\n')}
 
 ## Sample failure narratives
-${narratives.slice(0, 3).map(n => `### seed ${n.seed} (${n.faults.join('+')}) — trace \`${n.traceId}\`\n\`\`\`\n${n.narrative.slice(0, 3500)}\n\`\`\``).join('\n\n') || '(no failed runs)'}
+${narratives.slice(0, 3).map(n => `### seed ${n.seed} (${n.faults.join('+')}) — trace \`${n.traceId}\`\n\`\`\`\n${n.narrative.length > 4500 ? n.narrative.slice(0, 2200) + '\n[… ' + (n.narrative.length - 4200) + ' chars …]\n' + n.narrative.slice(-2000) : n.narrative}\n\`\`\``).join('\n\n') || '(no failed runs)'}
 `;
 fs.writeFileSync(path.join(DIR, 'chaos-sweep.md'), md);
 console.log(md.split('## Sample')[0]);

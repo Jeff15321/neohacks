@@ -47,6 +47,7 @@ for (let i = 0; i < RUNS; i++) {
   const seed = SEED0 + i;
   await page.close().catch(() => {});
   page = await context.newPage();
+  page.on('console', m => { if (m.type() === 'error') log('  [page console]', m.text().slice(0, 300)); });
   await page.goto(`${G2_URL}?chaos=${seed}`);
   const faults = await page.evaluate(() => window.__chaos.faults);
   const btn = page.locator('[id^="wwa-"]:not([data-testid]) >> css=button').first();
@@ -77,7 +78,15 @@ for (let i = 0; i < RUNS; i++) {
     Object.assign(res, { drafts: st.d, sent: st.s, deleted: st.x, draftIds: st.ids });
     if (res.status !== 'timeout') res.status = runs.length ? (runs.some(r => r.status === 'failed') ? 'failed' : runs.every(r => r.status === 'completed') ? 'completed' : 'running') : 'no-run';
     res.traceId = runs[0]?.traceId;
-  } catch (e) { res.error = String(e?.message ?? e).slice(0, 300); }
+  } catch (e) {
+    res.error = String(e?.message ?? e).slice(0, 300);
+    if (res.status === 'no-widget') {
+      const busErr = (await sw.evaluate('globalThis.__wwaBus.log.list()')).filter(x => !x.ok).slice(-5);
+      const w = ((await send({ type: 'LIST_WIDGETS' })).widgets ?? [])[0];
+      const regs = await sw.evaluate('chrome.userScripts.getScripts().then(r => r.map(x => ({ id: x.id, matches: x.matches })))').catch(e => String(e));
+      log('  no widget: status', w?.status, 'approved', w?.approved, 'lastError', String(w?.lastError ?? '').slice(0, 300), 'regs', JSON.stringify(regs), 'busErr', JSON.stringify(busErr).slice(0, 600));
+    }
+  }
   results.push(res);
   const iv = (res.runs ?? []).reduce((n, r) => n + r.interventions, 0);
   log(`seed ${seed} [${faults}] → ${res.status} drafts=${res.drafts} sent=${res.sent} interventions=${iv} ${Math.round(res.ms / 1000)}s`);
