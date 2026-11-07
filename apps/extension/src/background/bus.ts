@@ -34,6 +34,8 @@ export interface Services {
   'data.collections': () => Promise<string[]>;
   /** Returns an error string when the user script may not perform this call. */
   'widgets.authorize': (widgetId: string, tabUrl: string, grant?: WidgetGrant) => string | undefined;
+  /** Phase C: new unapproved widget version with `code` (learned branch). Needs approval like every version. */
+  'widgets.newVersion': (widgetId: string, code: string, changeSummary: string, traceId: string) => Promise<WidgetRecord>;
   /** Module on/off flags (settings flag per module, Rules §5). */
   'settings.get': () => Settings;
   /** Phase B (modules/observe): assign the global seq + store a Step (content drafts and SW-made tab/nav Steps). */

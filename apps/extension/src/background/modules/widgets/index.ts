@@ -13,6 +13,7 @@ export function registerWidgets(bus: Bus) {
   bus.provide('widgets.list', () => svc.store.list());
   bus.provide('widgets.get', (id) => svc.store.get(id));
   bus.provide('widgets.authorize', (id, url, grant) => svc.authorize(id, url, grant));
+  bus.provide('widgets.newVersion', async (id, code, summary, traceId) => { await ready; return svc.newVersion(id, code, summary, traceId); });
   bus.provide('widgets.generate', async (request, traceId, opts) => { await ready; return svc.generate(request, traceId, opts); });
   bus.provide('widgets.adopt', async (widget, request, traceId, opts) => { await ready; return svc.adopt(widget, request, traceId, opts); }); // Phase D
 

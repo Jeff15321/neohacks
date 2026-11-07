@@ -20,7 +20,8 @@ export function makeProvider(cfg: { provider: 'anthropic' | 'mock'; anthropicApi
  * THE single entry point for LLM calls (Rules §6). Every call is logged to `llm_calls`
  * (stage, model, effort, latency, tokens, input, output, parse result).
  */
-export function createCallModel(provider: Provider, db: Db): CallModel {
+export function createCallModel(provider: Provider, db: Db, mockStages: string[] = []): CallModel {
+  const forcedMock = new Set(mockStages);
   const insert = db.prepare(`INSERT INTO llm_calls (id, trace_id, stage, provider, model, effort, started_at, input)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`);
   const finish = db.prepare(`UPDATE llm_calls SET latency_ms = ?, input_tokens = ?, output_tokens = ?, output = ?, error = ? WHERE id = ?`);
@@ -40,10 +41,11 @@ export function createCallModel(provider: Provider, db: Db): CallModel {
       stream: input.stream ?? false,
       timeoutMs: input.timeoutMs ?? 120_000,
     };
-    insert.run(id, input.traceId ?? null, input.stage, provider.name, input.model, input.effort ?? null, t0,
+    const useMock = provider.name === 'mock' || forcedMock.has(input.stage);
+    insert.run(id, input.traceId ?? null, input.stage, useMock ? 'mock' : provider.name, input.model, input.effort ?? null, t0,
       clip(JSON.stringify({ system: input.system, messages: input.messages })));
     try {
-      const res = provider.name === 'mock'
+      const res = useMock
         ? { text: input.mock(req) }
         : await provider.complete(req);
       const r = res as { text: string; inputTokens?: number; outputTokens?: number };

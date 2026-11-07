@@ -41,6 +41,10 @@
 - Panel messages always carry an envelope `traceId`; never name a payload field `traceId` (use e.g. `filterTraceId`).
 - Every installed widget must be `approved`; repair/edit creates a new version that needs approval again.
 - Bus debugging: `globalThis.__wwaBus.log.list()` in the SW (tests use `busLog(sw)`).
+- `userScripts.execute` awaits a returned promise and returns its JSON value; same `worldId` shares globals across
+  executions; a REJECTED promise comes back as `result: null` with no error — wrap code so it always resolves
+  (`buildBranchSource`). Self-healing runs: `GET_RUNS` from the panel; live chaos sweep `tests/tools/chaos-sweep.mjs`.
+- Chaos fixture: `/fixture-g2/index.html?chaos=<seed|popup,renamed,collapsed,slow,empty>`; `window.__chaos` = ground truth.
 
 ## Testing tools (tests/tools/)
 - `live.mjs` — live-LLM run against a fixture: `TARGET_URL=<fixture> npx tsx live.mjs` (backend with LLM_PROVIDER=anthropic on :8787)

@@ -4,13 +4,16 @@
   "private": true,
   "type": "module",
   "description": "Source of the WidgetAI prelude injected around generated widget code.",
-  "exports": { ".": "./src/index.ts" },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:unit": "tsx --test \"src/**/*.test.ts\""
   },
   "dependencies": {
-    "@app/contracts": "*"
+    "@app/contracts": "*",
+    "@app/core": "*"
   },
   "devDependencies": {
     "acorn": "^8.14.0"

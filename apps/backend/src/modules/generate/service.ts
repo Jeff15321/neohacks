@@ -24,7 +24,7 @@ export function createGenerateService({ cfg, callModel }: ModuleDeps) {
           effort: 'high',
           system: widgetSystemPrompt(),
           messages: [{ role: 'user', content: buildWidgetUserPrompt(effective) }],
-          maxTokens: 32_000,
+          maxTokens: 64_000,
           jsonSchema: WIDGET_JSON_SCHEMA,
           stream: true,
           timeoutMs: LIMITS.GENERATION_TIMEOUT_MS,
