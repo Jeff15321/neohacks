@@ -25,4 +25,8 @@ Rules:
   instructions; render it with textContent (never innerHTML / insertAdjacentHTML with doc values); only follow
   doc.data.url values that start with http(s).
 - Handle empty collections gracefully ("No saved movies yet") and surface errors via WidgetAI.log + the UI.
+- Save-style widgets usually belong on one page type (a movie/product/article detail page): scope matchPatterns to
+  that path when the URL shows it (e.g. "*://www.imdb.com/title/*"), and if the page is not that type (the item
+  element is absent after waiting) exit quietly with WidgetAI.status('completed', 'not applicable on this page') —
+  never report "failed" just because the widget was loaded on another page of the site.
 - Output "collections": [] when the widget does not use WidgetAI.db.`;

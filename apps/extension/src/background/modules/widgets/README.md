@@ -9,8 +9,8 @@
 - user script: `WIDGET_INFERENCE` (grant inference), `WIDGET_STORAGE` (grant storage), `WIDGET_LOG`, `WIDGET_STATUS`
 - emits: `GENERATION_PROGRESS`, `WIDGET_GENERATED`, `WIDGET_STATUS`
 
-**Services provided:** `widgets.list`, `widgets.authorize` (the bus calls it for every user-script message: widget exists,
-is approved, tab URL matches its patterns, declared grant). **Uses:** `page.context`, `net.opsForTab`.
+**Services provided:** `widgets.list`, `widgets.get` (Phase A: modules/data checks declared `collections`), `widgets.authorize` (the bus calls it for every user-script message: widget exists,
+is approved, tab URL matches its patterns, declared grant). **Uses:** `page.context`, `net.opsForTab`, `data.collections` (sent as `existingCollections`).
 
 **Data owned:** `wwa_widgets` (WidgetRecord[]), `wwa_store_<widgetId>_<key>` (WidgetAI.storage).
 
