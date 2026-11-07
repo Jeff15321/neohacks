@@ -1,12 +1,16 @@
 import { z } from 'zod';
-import { msg, usMsg } from './_msg.js';
+import { msg as m } from './_msg.js';
+import { Job } from '../jobs.js';
 
-/** Owner: Phase D (extension modules/jobs). Add this domain's messages here; messages/index.ts already spreads them. */
-export const panel = [] as const;
+/** Owner: Phase D (extension modules/jobs: JobClient — background generation long-poll). */
+export const panel = [
+  /** Jobs known to the SW (Inspector / Activity). */
+  m('JOBS_LIST', {}),
+  m('JOB_CANCEL', { jobId: z.string() }),
+] as const;
 export const page = [] as const;
 export const toContent = [] as const;
 export const userScript = [] as const;
-export const broadcast = [] as const;
-
-// keep imports referenced until the owner adds messages
-void z; void msg; void usMsg;
+export const broadcast = [
+  m('JOB_UPDATED', { job: Job }),
+] as const;
