@@ -14,6 +14,8 @@ export interface Models {
 export interface Config {
   port: number;
   provider: 'anthropic' | 'mock';
+  /** Stages forced onto their deterministic mock even with a live provider (LLM_MOCK_STAGES=a,b) — live evals of one stage. */
+  mockStages: string[];
   anthropicApiKey?: string;
   models: Models;
   authToken?: string;
@@ -45,6 +47,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   return {
     port: Number(env.BACKEND_PORT ?? 8787),
     provider: env.LLM_PROVIDER === 'mock' ? 'mock' : 'anthropic',
+    mockStages: (env.LLM_MOCK_STAGES ?? '').split(',').map(s => s.trim()).filter(Boolean),
     anthropicApiKey: env.ANTHROPIC_API_KEY,
     models: {
       generation: env.LLM_MODEL_GENERATION ?? 'claude-opus-5-5',

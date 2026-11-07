@@ -24,7 +24,7 @@ const MODULES: RegisterModule[] = [
 export async function buildApp(cfg: Config = loadConfig(), opts: { logger?: boolean } = {}): Promise<{ app: FastifyInstance; deps: ModuleDeps }> {
   const db = openDb(cfg.dataDbPath);
   const provider = makeProvider(cfg);
-  const deps: ModuleDeps = { cfg, db, callModel: createCallModel(provider, db) };
+  const deps: ModuleDeps = { cfg, db, callModel: createCallModel(provider, db, cfg.mockStages) };
   const app = Fastify({
     logger: opts.logger === false ? false : { level: process.env.LOG_LEVEL ?? 'info' },
     disableRequestLogging: true,

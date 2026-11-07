@@ -96,6 +96,9 @@ export function buildRunNarrative(run: Pick<WidgetRun, 'events' | 'startedAt' | 
   out.push(`Run of "${run.widgetName ?? 'widget'}"${start?.detail ? ` — goal: ${start.detail}` : ''}`);
   let lastEvidence = '';
   let failedStep = '';
+  let lastExpected = '';
+  let lastObserved = '';
+  let lastDiagnosis = '';
   for (const e of run.events) {
     const d = (e.data ?? {}) as Record<string, unknown>;
     const at = fmtTime(t0, e.ts);
@@ -105,12 +108,13 @@ export function buildRunNarrative(run: Pick<WidgetRun, 'events' | 'startedAt' | 
       case 'recheck-ok': out.push(`${at}   ✓ re-check: "${e.step}" postcondition already met — not re-acting.`); break;
       case 'expect-fail':
         failedStep = e.step ?? failedStep;
+        lastExpected = s(d.expected, 200); lastObserved = s(d.observed, 300);
         out.push(`${at}   ✗ "${e.step}" expected ${s(d.expected, 200)} but observed ${s(d.observed, 300)}${d.error ? ` (error: ${s(d.error, 200)})` : ''}.`);
         if (d.dom) lastEvidence = s(d.dom, 900);
         break;
-      case 'assist-decide': out.push(`${at}   agent (decide, ${s(d.model ?? 'fast model', 40)}) chose "${s(d.choice, 60)}": ${s(d.reason, 300)}`); break;
-      case 'assist-create': out.push(`${at}   agent (create, ${s(d.model ?? 'inference model', 40)}) wrote new branch "${s(d.branchId, 60)}" (${s(d.when, 120)}): ${s(d.reason, 200)}`); break;
-      case 'assist-escalate': out.push(`${at}   agent (escalate, ${s(d.model ?? 'generation model', 40)}) wrote branch "${s(d.branchId, 60)}": ${s(d.reason, 200)}`); break;
+      case 'assist-decide': lastDiagnosis = s(d.reason, 300); out.push(`${at}   agent (decide, ${s(d.model ?? 'fast model', 40)}) chose "${s(d.choice, 60)}": ${s(d.reason, 300)}`); break;
+      case 'assist-create': lastDiagnosis = s(d.reason, 300); out.push(`${at}   agent (create, ${s(d.model ?? 'inference model', 40)}) wrote new branch "${s(d.branchId, 60)}" (${s(d.when, 120)}): ${s(d.reason, 200)}`); break;
+      case 'assist-escalate': lastDiagnosis = s(d.reason, 300); out.push(`${at}   agent (escalate, ${s(d.model ?? 'generation model', 40)}) wrote branch "${s(d.branchId, 60)}": ${s(d.reason, 200)}`); break;
       case 'branch-run': out.push(`${at}   running branch "${s(d.branchId, 60)}" (${s(d.source, 20)})${e.detail ? ` — ${e.detail}` : ''}.`); break;
       case 'branch-result': out.push(`${at}   branch "${s(d.branchId, 60)}" ${d.ok ? 'fixed the step' : `did not fix it: ${s(d.observed ?? d.error, 300)}`}.`); break;
       case 'danger-blocked': out.push(`${at}   ⛔ danger guard blocked a script ${s(d.what ?? 'action', 30)} on ${s(d.label, 80)}: ${s(d.reason, 200)}`); break;
@@ -123,7 +127,10 @@ export function buildRunNarrative(run: Pick<WidgetRun, 'events' | 'startedAt' | 
     }
   }
   if (run.status === 'failed') {
-    out.push(`Why it broke: ${stopReason ?? 'the step postcondition never held after the allowed recovery attempts'}.`);
+    const why = failedStep && lastExpected
+      ? `step "${failedStep}" never reached its postcondition (${lastExpected}); last observed: ${lastObserved}.`
+      : 'the run did not complete.';
+    out.push(`Why it broke: ${why}${lastDiagnosis ? ` Agent's last diagnosis: ${lastDiagnosis}.` : ''} Stopped because: ${stopReason ?? 'the allowed recovery attempts were used up'}.`);
     if (lastEvidence) out.push(`DOM evidence (last observed, untrusted page content):\n${lastEvidence}`);
   }
   return out.join('\n');

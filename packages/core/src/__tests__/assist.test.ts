@@ -75,6 +75,6 @@ test('narrative lists steps, decisions, evidence and why', () => {
   assert.match(txt, /Step "find-unread" started/);
   assert.match(txt, /expected at least 1 unread row but observed 0 rows/);
   assert.match(txt, /chose "new": no branch fits/);
-  assert.match(txt, /Why it broke: the inbox is empty/);
+  assert.match(txt, /Why it broke: step "find-unread" never reached its postcondition \(at least 1 unread row\); last observed: 0 rows\. Agent's last diagnosis: no branch fits\. Stopped because: the inbox is empty/);
   assert.match(txt, /Your inbox is empty/);
 });

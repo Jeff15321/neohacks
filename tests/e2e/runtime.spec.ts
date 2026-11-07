@@ -112,7 +112,7 @@ test.describe('self-healing runtime (WidgetAI.step / assist / danger guard)', ()
       expect(r.narrative).toMatch(/Step "find-unread" started/);
       expect(r.narrative).toMatch(/chose "new"/);
       expect(r.narrative).toMatch(/escalate/);
-      expect(r.narrative).toMatch(/Why it broke: cap: 2 recovery attempts/);
+      expect(r.narrative).toMatch(/Why it broke: step "find-unread" never reached its postcondition .*Stopped because: cap: 2 recovery attempts/);
       expect(r.narrative).toMatch(/Your inbox is empty/); // DOM evidence
       // shown in the widget (in-page report) and the panel
       await expect(page.locator('[data-testid="wwa-run-report"]')).toContainText('find-unread');

@@ -118,7 +118,7 @@ export class AssistService {
         const res = await backend.post<AssistDecideResponse>('/api/assist/decide', req, traceId);
         decision = res.ok && res.decision ? res.decision : { choice: 'new', reason: `decide failed (${res.error ?? 'no decision'}) → writing a new branch` };
       } catch (e) { decision = { choice: 'new', reason: `decide unavailable (${String((e as Error).message)}) → writing a new branch` }; }
-      this.agentEvent(r, 'assist-decide', report.step, { choice: decision.choice, reason: decision.reason, model: MODEL_LABEL.decide, attempt: report.attempt });
+      this.agentEvent(r, 'assist-decide', report.step, { choice: decision.choice, reason: decision.reason, model: MODEL_LABEL.decide, attempt: report.attempt, branches: report.branches, tried: report.tried, observed: report.observed.slice(0, 300) });
       const resolved = resolveDecision(decision, report);
       if (resolved.kind === 'stop') { this.save(r, traceId); return { action: 'stop', source: 'decide', reason: `agent stopped: ${resolved.reason}` }; }
       if (resolved.kind === 'branch') { this.save(r, traceId); return { action: 'branch', source: 'decide', branchId: resolved.branchId, reason: decision.reason }; }
