@@ -1,0 +1,8 @@
+{
+ "description": "FIXTURE-DERIVED. 2nd reply done differently: keyboard \"r\" + expand trimmed content (enabling).",
+ "activity": {
+  "pattern": "repl(y|ies)|respond|answer",
+  "minCompleted": 2,
+  "expectSuggestion": true
+ }
+}

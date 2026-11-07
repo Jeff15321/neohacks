@@ -61,7 +61,7 @@ export function judgeScore(v: { value: number; confidence: number; feasibility: 
   return +(c(v.value) * c(v.confidence) * c(v.feasibility)).toFixed(3);
 }
 
-export const MIN_JUDGE_SCORE = 0.3;
+export const MIN_JUDGE_SCORE = 0.2;
 
 /** Is a suggestion currently visible on the page (counts toward "at most one visible")? */
 export const isVisible = (s: Suggestion) => (s.status === 'generating' || s.status === 'ready' || s.status === 'failed') && !s.snoozed;

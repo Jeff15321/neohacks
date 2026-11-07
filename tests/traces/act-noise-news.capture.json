@@ -1,0 +1,429 @@
+{
+ "kind": "wwa-trace",
+ "version": 1,
+ "name": "act-noise-news",
+ "synthetic": true,
+ "description": "SYNTHETIC. Reading news: open 4 articles, expand one, go back each time.",
+ "steps": [
+  {
+   "id": "syn_1",
+   "seq": 1,
+   "tabId": 1,
+   "origin": "https://news.example.test",
+   "url": "https://news.example.test/markets-rally",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "a[href=\"/markets-rally\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "a",
+     "role": "link",
+     "accessibleName": "Markets rally on rate hopes"
+    },
+    "accessibleName": "Markets rally on rate hopes",
+    "role": "link"
+   },
+   "effects": {
+    "urlChange": "https://news.example.test/markets-rally",
+    "titleChange": "Markets rally on rate hopes — News",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [
+     {
+      "opId": "op1_0",
+      "method": "GET",
+      "routeTemplate": "/api/article/:slug",
+      "status": 200
+     }
+    ],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000002500,
+   "tEnd": 1700000002950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   },
+   "title": "Markets rally on rate hopes — News"
+  },
+  {
+   "id": "syn_2",
+   "seq": 2,
+   "tabId": 1,
+   "origin": "https://news.example.test",
+   "url": "https://news.example.test/",
+   "action": {
+    "kind": "navigate"
+   },
+   "effects": {
+    "urlChange": "https://news.example.test/",
+    "titleChange": "Front page — News",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000005000,
+   "tEnd": 1700000005450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   },
+   "title": "Front page — News"
+  },
+  {
+   "id": "syn_3",
+   "seq": 3,
+   "tabId": 1,
+   "origin": "https://news.example.test",
+   "url": "https://news.example.test/city-council",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "a[href=\"/city-council\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "a",
+     "role": "link",
+     "accessibleName": "City council approves park"
+    },
+    "accessibleName": "City council approves park",
+    "role": "link"
+   },
+   "effects": {
+    "urlChange": "https://news.example.test/city-council",
+    "titleChange": "City council approves park — News",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [
+     {
+      "opId": "op3_0",
+      "method": "GET",
+      "routeTemplate": "/api/article/:slug",
+      "status": 200
+     }
+    ],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000007500,
+   "tEnd": 1700000007950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   },
+   "title": "City council approves park — News"
+  },
+  {
+   "id": "syn_4",
+   "seq": 4,
+   "tabId": 1,
+   "origin": "https://news.example.test",
+   "url": "https://news.example.test/",
+   "action": {
+    "kind": "navigate"
+   },
+   "effects": {
+    "urlChange": "https://news.example.test/",
+    "titleChange": "Front page — News",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000010000,
+   "tEnd": 1700000010450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   },
+   "title": "Front page — News"
+  },
+  {
+   "id": "syn_5",
+   "seq": 5,
+   "tabId": 1,
+   "origin": "https://news.example.test",
+   "url": "https://news.example.test/weather",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "a[href=\"/weather\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "a",
+     "role": "link",
+     "accessibleName": "Weather"
+    },
+    "accessibleName": "Weather",
+    "role": "link"
+   },
+   "effects": {
+    "urlChange": "https://news.example.test/weather",
+    "titleChange": "Weather — News",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000012500,
+   "tEnd": 1700000012950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   },
+   "title": "Weather — News"
+  },
+  {
+   "id": "syn_6",
+   "seq": 6,
+   "tabId": 1,
+   "origin": "https://news.example.test",
+   "url": "https://news.example.test/weather",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "button.expand",
+       "matches": 1
+      }
+     ],
+     "tag": "button",
+     "accessibleName": "Show 10-day forecast"
+    },
+    "accessibleName": "Show 10-day forecast"
+   },
+   "effects": {
+    "addedRegions": [
+     {
+      "root": "div.forecast",
+      "skeleton": "div.forecast\n  ol (10 days)"
+     }
+    ],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000015000,
+   "tEnd": 1700000015450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 40
+   }
+  },
+  {
+   "id": "syn_7",
+   "seq": 7,
+   "tabId": 1,
+   "origin": "https://news.example.test",
+   "url": "https://news.example.test/",
+   "action": {
+    "kind": "navigate"
+   },
+   "effects": {
+    "urlChange": "https://news.example.test/",
+    "titleChange": "Front page — News",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000017500,
+   "tEnd": 1700000017950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   },
+   "title": "Front page — News"
+  },
+  {
+   "id": "syn_8",
+   "seq": 8,
+   "tabId": 1,
+   "origin": "https://news.example.test",
+   "url": "https://news.example.test/ai-chips",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "a[href=\"/ai-chips\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "a",
+     "role": "link",
+     "accessibleName": "New AI chips announced"
+    },
+    "accessibleName": "New AI chips announced",
+    "role": "link"
+   },
+   "effects": {
+    "urlChange": "https://news.example.test/ai-chips",
+    "titleChange": "New AI chips announced — News",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [
+     {
+      "opId": "op8_0",
+      "method": "GET",
+      "routeTemplate": "/api/article/:slug",
+      "status": 200
+     }
+    ],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000020000,
+   "tEnd": 1700000020450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   },
+   "title": "New AI chips announced — News"
+  },
+  {
+   "id": "syn_9",
+   "seq": 9,
+   "tabId": 1,
+   "origin": "https://news.example.test",
+   "url": "https://news.example.test/",
+   "action": {
+    "kind": "navigate"
+   },
+   "effects": {
+    "urlChange": "https://news.example.test/",
+    "titleChange": "Front page — News",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000022500,
+   "tEnd": 1700000022950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   },
+   "title": "Front page — News"
+  },
+  {
+   "id": "syn_10",
+   "seq": 10,
+   "tabId": 1,
+   "origin": "https://news.example.test",
+   "url": "https://news.example.test/local-sports",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "a[href=\"/local-sports\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "a",
+     "role": "link",
+     "accessibleName": "Local team wins final"
+    },
+    "accessibleName": "Local team wins final",
+    "role": "link"
+   },
+   "effects": {
+    "urlChange": "https://news.example.test/local-sports",
+    "titleChange": "Local team wins final — News",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [
+     {
+      "opId": "op10_0",
+      "method": "GET",
+      "routeTemplate": "/api/article/:slug",
+      "status": 200
+     }
+    ],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000025000,
+   "tEnd": 1700000025450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   },
+   "title": "Local team wins final — News"
+  },
+  {
+   "id": "syn_11",
+   "seq": 11,
+   "tabId": 1,
+   "origin": "https://news.example.test",
+   "url": "https://news.example.test/",
+   "action": {
+    "kind": "navigate"
+   },
+   "effects": {
+    "urlChange": "https://news.example.test/",
+    "titleChange": "Front page — News",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000027500,
+   "tEnd": 1700000027950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   },
+   "title": "Front page — News"
+  }
+ ]
+}

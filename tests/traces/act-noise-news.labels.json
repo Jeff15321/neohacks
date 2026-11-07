@@ -1,0 +1,6 @@
+{
+ "description": "SYNTHETIC. Reading news: open 4 articles, expand one, go back each time.",
+ "activity": {
+  "noise": true
+ }
+}

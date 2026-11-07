@@ -1,0 +1,8 @@
+{
+ "description": "SYNTHETIC. Log a call note on 2 CRM contacts (\"Activity logged\", POST 201).",
+ "activity": {
+  "pattern": "log|activity|note|call",
+  "minCompleted": 2,
+  "expectSuggestion": true
+ }
+}

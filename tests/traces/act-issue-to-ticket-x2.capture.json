@@ -1,0 +1,675 @@
+{
+ "kind": "wwa-trace",
+ "version": 1,
+ "name": "act-issue-to-ticket-x2",
+ "synthetic": true,
+ "description": "SYNTHETIC cross-site. Copy issue title+body → paste into tracker Create dialog → \"Issue TRK-… created\" (POST 201), twice.",
+ "steps": [
+  {
+   "id": "syn_1",
+   "seq": 1,
+   "tabId": 1,
+   "origin": "https://issues.example.test",
+   "url": "https://issues.example.test/acme/repo/issues/41",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "a[href=\"/acme/repo/issues/41\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "a",
+     "role": "link",
+     "accessibleName": "#41 Settings page crashes on save"
+    },
+    "accessibleName": "#41 Settings page crashes on save",
+    "role": "link"
+   },
+   "effects": {
+    "urlChange": "https://issues.example.test/acme/repo/issues/41",
+    "titleChange": "Issues · acme/repo",
+    "addedRegions": [
+     {
+      "root": "div.issue",
+      "skeleton": "h1.title \"Settings page crashes on save\"\n  div.body \"Steps to reproduce…\""
+     }
+    ],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000002500,
+   "tEnd": 1700000002950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 40
+   },
+   "title": "Issues · acme/repo"
+  },
+  {
+   "id": "syn_2",
+   "seq": 2,
+   "tabId": 1,
+   "origin": "https://issues.example.test",
+   "url": "https://issues.example.test/acme/repo/issues/41",
+   "action": {
+    "kind": "copy",
+    "target": {
+     "candidates": [],
+     "tag": "h1",
+     "accessibleName": "Settings page crashes on save"
+    },
+    "accessibleName": "Settings page crashes on save",
+    "valuePreview": "Settings page crashes on save",
+    "valueHash": "a1f3c9d2"
+   },
+   "effects": {
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000005000,
+   "tEnd": 1700000005450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   }
+  },
+  {
+   "id": "syn_3",
+   "seq": 3,
+   "tabId": 1,
+   "origin": "https://issues.example.test",
+   "url": "https://issues.example.test/acme/repo/issues/41",
+   "action": {
+    "kind": "copy",
+    "target": {
+     "candidates": [],
+     "tag": "div",
+     "accessibleName": "Issue body"
+    },
+    "accessibleName": "Issue body",
+    "valuePreview": "Steps to reproduce: open settings, click save…",
+    "valueHash": "b7e21f04"
+   },
+   "effects": {
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000007500,
+   "tEnd": 1700000007950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   }
+  },
+  {
+   "id": "syn_4",
+   "seq": 4,
+   "tabId": 2,
+   "origin": "https://tracker.example.test",
+   "url": "https://tracker.example.test/board",
+   "action": {
+    "kind": "tab-switch"
+   },
+   "effects": {
+    "titleChange": "Board · Tracker",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000010000,
+   "tEnd": 1700000010450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   },
+   "title": "Board · Tracker"
+  },
+  {
+   "id": "syn_5",
+   "seq": 5,
+   "tabId": 2,
+   "origin": "https://tracker.example.test",
+   "url": "https://tracker.example.test/board",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "id",
+       "selector": "#create-button",
+       "matches": 1
+      }
+     ],
+     "tag": "button",
+     "accessibleName": "Create"
+    },
+    "accessibleName": "Create"
+   },
+   "effects": {
+    "addedRegions": [
+     {
+      "root": "div[role=dialog]",
+      "skeleton": "div[role=dialog][aria-label=\"Create issue\"]\n  input[name=summary]\n  textarea[name=description]\n  button \"Create\""
+     }
+    ],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000012500,
+   "tEnd": 1700000012950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 40
+   }
+  },
+  {
+   "id": "syn_6",
+   "seq": 6,
+   "tabId": 2,
+   "origin": "https://tracker.example.test",
+   "url": "https://tracker.example.test/board",
+   "action": {
+    "kind": "paste",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "input[name=\"summary\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "input",
+     "accessibleName": "Summary"
+    },
+    "accessibleName": "Summary",
+    "valuePreview": "Settings page crashes on save",
+    "valueHash": "a1f3c9d2"
+   },
+   "effects": {
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000015000,
+   "tEnd": 1700000015450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   }
+  },
+  {
+   "id": "syn_7",
+   "seq": 7,
+   "tabId": 2,
+   "origin": "https://tracker.example.test",
+   "url": "https://tracker.example.test/board",
+   "action": {
+    "kind": "paste",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "textarea[name=\"description\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "textarea",
+     "accessibleName": "Description"
+    },
+    "accessibleName": "Description",
+    "valuePreview": "Steps to reproduce: open settings…",
+    "valueHash": "b7e21f04"
+   },
+   "effects": {
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000017500,
+   "tEnd": 1700000017950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   }
+  },
+  {
+   "id": "syn_8",
+   "seq": 8,
+   "tabId": 2,
+   "origin": "https://tracker.example.test",
+   "url": "https://tracker.example.test/board",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "button[type=\"submit\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "button",
+     "accessibleName": "Create"
+    },
+    "accessibleName": "Create"
+   },
+   "effects": {
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [
+     "Issue TRK-141 created"
+    ],
+    "net": [
+     {
+      "opId": "op8_0",
+      "method": "POST",
+      "routeTemplate": "/rest/api/3/issue",
+      "status": 201
+     }
+    ],
+    "mutatingOk": true
+   },
+   "settled": true,
+   "tStart": 1700000020000,
+   "tEnd": 1700000020450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 40
+   }
+  },
+  {
+   "id": "syn_9",
+   "seq": 9,
+   "tabId": 1,
+   "origin": "https://issues.example.test",
+   "url": "https://issues.example.test/acme/repo/issues/41",
+   "action": {
+    "kind": "tab-switch"
+   },
+   "effects": {
+    "titleChange": "Settings page crashes on save · Issue #41",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000022500,
+   "tEnd": 1700000022950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   },
+   "title": "Settings page crashes on save · Issue #41"
+  },
+  {
+   "id": "syn_10",
+   "seq": 10,
+   "tabId": 1,
+   "origin": "https://issues.example.test",
+   "url": "https://issues.example.test/acme/repo/issues/42",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "a[href=\"/acme/repo/issues/42\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "a",
+     "role": "link",
+     "accessibleName": "#42 Dark mode toggle ignored"
+    },
+    "accessibleName": "#42 Dark mode toggle ignored",
+    "role": "link"
+   },
+   "effects": {
+    "urlChange": "https://issues.example.test/acme/repo/issues/42",
+    "titleChange": "Issues · acme/repo",
+    "addedRegions": [
+     {
+      "root": "div.issue",
+      "skeleton": "h1.title \"Dark mode toggle ignored\"\n  div.body \"Steps to reproduce…\""
+     }
+    ],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000025000,
+   "tEnd": 1700000025450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 40
+   },
+   "title": "Issues · acme/repo"
+  },
+  {
+   "id": "syn_11",
+   "seq": 11,
+   "tabId": 1,
+   "origin": "https://issues.example.test",
+   "url": "https://issues.example.test/acme/repo/issues/42",
+   "action": {
+    "kind": "copy",
+    "target": {
+     "candidates": [],
+     "tag": "h1",
+     "accessibleName": "Dark mode toggle ignored"
+    },
+    "accessibleName": "Dark mode toggle ignored",
+    "valuePreview": "Dark mode toggle ignored",
+    "valueHash": "c3d4e5f6"
+   },
+   "effects": {
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000027500,
+   "tEnd": 1700000027950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   }
+  },
+  {
+   "id": "syn_12",
+   "seq": 12,
+   "tabId": 1,
+   "origin": "https://issues.example.test",
+   "url": "https://issues.example.test/acme/repo/issues/42",
+   "action": {
+    "kind": "copy",
+    "target": {
+     "candidates": [],
+     "tag": "div",
+     "accessibleName": "Issue body"
+    },
+    "accessibleName": "Issue body",
+    "valuePreview": "Steps to reproduce: open settings, click save…",
+    "valueHash": "d9a8b7c6"
+   },
+   "effects": {
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000030000,
+   "tEnd": 1700000030450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   }
+  },
+  {
+   "id": "syn_13",
+   "seq": 13,
+   "tabId": 2,
+   "origin": "https://tracker.example.test",
+   "url": "https://tracker.example.test/board",
+   "action": {
+    "kind": "tab-switch"
+   },
+   "effects": {
+    "titleChange": "Board · Tracker",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000032500,
+   "tEnd": 1700000032950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   },
+   "title": "Board · Tracker"
+  },
+  {
+   "id": "syn_14",
+   "seq": 14,
+   "tabId": 2,
+   "origin": "https://tracker.example.test",
+   "url": "https://tracker.example.test/board",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "id",
+       "selector": "#create-button",
+       "matches": 1
+      }
+     ],
+     "tag": "button",
+     "accessibleName": "Create"
+    },
+    "accessibleName": "Create"
+   },
+   "effects": {
+    "addedRegions": [
+     {
+      "root": "div[role=dialog]",
+      "skeleton": "div[role=dialog][aria-label=\"Create issue\"]\n  input[name=summary]\n  textarea[name=description]\n  button \"Create\""
+     }
+    ],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000035000,
+   "tEnd": 1700000035450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 40
+   }
+  },
+  {
+   "id": "syn_15",
+   "seq": 15,
+   "tabId": 2,
+   "origin": "https://tracker.example.test",
+   "url": "https://tracker.example.test/board",
+   "action": {
+    "kind": "paste",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "input[name=\"summary\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "input",
+     "accessibleName": "Summary"
+    },
+    "accessibleName": "Summary",
+    "valuePreview": "Dark mode toggle ignored",
+    "valueHash": "c3d4e5f6"
+   },
+   "effects": {
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000037500,
+   "tEnd": 1700000037950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   }
+  },
+  {
+   "id": "syn_16",
+   "seq": 16,
+   "tabId": 2,
+   "origin": "https://tracker.example.test",
+   "url": "https://tracker.example.test/board",
+   "action": {
+    "kind": "paste",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "textarea[name=\"description\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "textarea",
+     "accessibleName": "Description"
+    },
+    "accessibleName": "Description",
+    "valuePreview": "Steps to reproduce: open settings…",
+    "valueHash": "d9a8b7c6"
+   },
+   "effects": {
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000040000,
+   "tEnd": 1700000040450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   }
+  },
+  {
+   "id": "syn_17",
+   "seq": 17,
+   "tabId": 2,
+   "origin": "https://tracker.example.test",
+   "url": "https://tracker.example.test/board",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "button[type=\"submit\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "button",
+     "accessibleName": "Create"
+    },
+    "accessibleName": "Create"
+   },
+   "effects": {
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [
+     "Issue TRK-142 created"
+    ],
+    "net": [
+     {
+      "opId": "op17_0",
+      "method": "POST",
+      "routeTemplate": "/rest/api/3/issue",
+      "status": 201
+     }
+    ],
+    "mutatingOk": true
+   },
+   "settled": true,
+   "tStart": 1700000042500,
+   "tEnd": 1700000042950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 40
+   }
+  },
+  {
+   "id": "syn_18",
+   "seq": 18,
+   "tabId": 1,
+   "origin": "https://issues.example.test",
+   "url": "https://issues.example.test/acme/repo/issues/42",
+   "action": {
+    "kind": "tab-switch"
+   },
+   "effects": {
+    "titleChange": "Dark mode toggle ignored · Issue #42",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000045000,
+   "tEnd": 1700000045450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 0,
+    "lastActivityMs": 40
+   },
+   "title": "Dark mode toggle ignored · Issue #42"
+  }
+ ]
+}

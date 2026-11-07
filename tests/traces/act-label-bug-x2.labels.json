@@ -1,0 +1,8 @@
+{
+ "description": "SYNTHETIC. Add the \"bug\" label to 2 issues (PATCH 200, \"Label added\").",
+ "activity": {
+  "pattern": "label|bug|triage|tag",
+  "minCompleted": 2,
+  "expectSuggestion": true
+ }
+}

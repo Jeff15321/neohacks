@@ -1,0 +1,8 @@
+{
+ "description": "SYNTHETIC cross-site. Copy issue title+body → paste into tracker Create dialog → \"Issue TRK-… created\" (POST 201), twice.",
+ "activity": {
+  "pattern": "ticket|issue|tracker|transfer|jira",
+  "minCompleted": 2,
+  "expectSuggestion": true
+ }
+}

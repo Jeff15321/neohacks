@@ -12,7 +12,7 @@ export const registerObserve: RegisterModule = (app, deps) => {
   const uid = (u?: string) => u ?? 'anon';
   app.post('/api/observe/steps', async (req) => {
     const body = parseOr400(ObserveStepsRequest, req.body, 'POST /api/observe/steps');
-    return svc.processSteps(uid(req.userId), body.steps, req.traceId);
+    return svc.processSteps(uid(req.userId), body.steps, req.traceId, body.eval);
   });
   app.get('/api/observe/state', async (req) => {
     const s = svc.state(uid(req.userId));

@@ -1,6 +1,6 @@
 import {
   PatchOp, SemanticStep, WorkingMemory, z,
-  type ObserveStepsResponse, type Step, type SuggestionCandidate, type TaskInstance, type WorkflowSpec,
+  type ObserveStepsRequest, type ObserveStepsResponse, type Step, type SuggestionCandidate, type TaskInstance, type WorkflowSpec,
 } from '@app/contracts';
 import {
   MIN_JUDGE_SCORE, completedInstances, dismissPattern, emptyMemory, gateJudge, judgeScore, randomId, reduceActivity, restorePattern,
@@ -161,9 +161,9 @@ export function createObserveService({ cfg, db, callModel, services }: ModuleDep
     }));
   }
 
-  async function llmOps(stage: string, system: string, user: string, mock: typeof activityMock, traceId: string, now: number) {
+  async function llmOps(stage: string, system: string, user: string, mock: typeof activityMock, traceId: string, now: number, effort: 'low' | 'medium' = 'low') {
     const res = await callModel({
-      stage, model: cfg.models.inference, effort: 'low', system, messages: [{ role: 'user', content: user }],
+      stage, model: cfg.models.inference, effort, system, messages: [{ role: 'user', content: user }],
       maxTokens: 4096, jsonSchema: OPS_JSON_SCHEMA, timeoutMs: 60_000, traceId, mock,
     });
     let parsed: { ops: PatchOp[]; errors: string[] };
@@ -185,7 +185,7 @@ export function createObserveService({ cfg, db, callModel, services }: ModuleDep
     const current = instances.find(t => t.id === cand.taskId) ?? instances.at(-1);
     const site = current?.sites[0] ?? snap.views.at(-1)?.site ?? '';
     const res = await callModel({
-      stage: 'observe.judge', model: cfg.models.generation, effort: 'medium', system: JUDGE_SYSTEM,
+      stage: 'observe.judge', model: cfg.models.generation, effort: 'low', system: JUDGE_SYSTEM,
       messages: [{ role: 'user', content: judgeUser({
         site, pattern, instances: instView, completedInstances: cand.instances, mechanicalEvidence: { lineageEdges: lineage[cand.taskId] ?? 0 },
         flagReason: cand.flagReason, pageTitle: snap.views.at(-1)?.title,
@@ -215,7 +215,7 @@ export function createObserveService({ cfg, db, callModel, services }: ModuleDep
     };
   }
 
-  async function processSteps(userId: string, steps: Step[], traceId: string): Promise<ObserveStepsResponse> {
+  async function processSteps(userId: string, steps: Step[], traceId: string, ev: ObserveStepsRequest['eval'] = {}): Promise<ObserveStepsResponse> {
     const snap = get(userId);
     const now = Date.now();
     const seen = new Set(snap.seenIds);
@@ -225,7 +225,7 @@ export function createObserveService({ cfg, db, callModel, services }: ModuleDep
 
     // Tier 1 (parallel, stateless + 5-label window)
     let t0 = Date.now();
-    const sem = await tier1(fresh, snap.semantic, traceId);
+    const sem = ev.noTier1 ? [] : await tier1(fresh, snap.semantic, traceId);
     diag.tier1Ms = Date.now() - t0;
     const views = fresh.map((s, i) => activityStep(s, sem[i]));
     for (const s of fresh) {
@@ -239,9 +239,9 @@ export function createObserveService({ cfg, db, callModel, services }: ModuleDep
     // Tier 2 (stateful: WorkingMemory + last ~12 steps + NEW steps → patch ops)
     t0 = Date.now();
     const lineageHint = lineageByTask(snap, snap.memory.activeTasks);
-    const t2 = await llmOps('observe.activity', ACTIVITY_SYSTEM, activityUser(snap.memory, recent, views, { lineageEdgesByActiveTask: lineageHint, completedInstancesByPattern: Object.fromEntries(snap.memory.patterns.map(p => [p.id, completedInstances(snap.memory, p.id)])) }), activityMock, traceId, now);
+    const t2 = await llmOps('observe.activity', ACTIVITY_SYSTEM, activityUser(snap.memory, recent, views, { lineageEdgesByActiveTask: lineageHint, completedInstancesByPattern: Object.fromEntries(snap.memory.patterns.map(p => [p.id, completedInstances(snap.memory, p.id)])) }), activityMock, traceId, now, ev.effort);
     diag.tier2Ms = Date.now() - t0;
-    let r = reduceActivity(snap.memory, t2.ops, now);
+    const r = reduceActivity(snap.memory, t2.ops, now);
     diag.opErrors.push(...t2.errors, ...r.errors);
     snap.memory = r.memory;
     snap.opLog.push({ at: now, ops: t2.ops, source: 'tier2' });
@@ -249,19 +249,19 @@ export function createObserveService({ cfg, db, callModel, services }: ModuleDep
     const allOps = [...t2.ops];
     snap.stepsSinceRecon += fresh.length;
 
-    // Reconsolidation: on task completion and every 25 Steps (corrects drift; cannot flag)
-    if (events.some(e => e.type === 'completed') || snap.stepsSinceRecon >= OBSERVE_LIMITS.RECON_EVERY) {
-      const rc = await llmOps('observe.reconsolidate', RECONSOLIDATE_SYSTEM, reconsolidateUser(snap.memory, snap.views.slice(-OBSERVE_LIMITS.HISTORY)), reconsolidateMock, traceId, now);
-      const ops = rc.ops.filter(o => o.op !== 'flag_opportunity');
-      r = reduceActivity(snap.memory, ops, now);
-      diag.opErrors.push(...rc.errors, ...r.errors);
-      snap.memory = r.memory;
-      snap.opLog.push({ at: now, ops, source: 'recon' });
-      events.push(...r.events.filter(e => e.type !== 'flag'));
-      allOps.push(...ops);
-      snap.stepsSinceRecon = 0;
+    // Reconsolidation: on task completion and every 25 Steps (corrects drift; cannot flag). Inline (before the gate)
+    // only when a task completed WITHOUT a pattern link — the one case where it can change the gate's decision;
+    // otherwise it runs right after the response, still serialized per user (keeps suggestion latency down, E10).
+    const completedNow = events.filter((e): e is Extract<ReduceEvent, { type: 'completed' }> => e.type === 'completed');
+    const needRecon = completedNow.length > 0 || snap.stepsSinceRecon >= OBSERVE_LIMITS.RECON_EVERY;
+    const unlinked = completedNow.some(e => e.status === 'completed' && !snap.memory.recentCompleted.find(t => t.id === e.taskId)?.patternId);
+    if (needRecon && unlinked) {
+      const rc = await reconsolidate(snap, traceId, now, ev.effort);
+      events.push(...rc.events);
+      allOps.push(...rc.ops);
+      diag.opErrors.push(...rc.errors);
       diag.reconsolidated = true;
-    }
+    } else if (needRecon) diag.reconDeferred = true;
 
     // Tier 3: deterministic gate, then the Judge
     const suggestions: SuggestionCandidate[] = [];
@@ -275,11 +275,27 @@ export function createObserveService({ cfg, db, callModel, services }: ModuleDep
       if (j.suggestion) { suggestions.push(j.suggestion); snap.suggested.push({ patternId: j.suggestion.patternId, at: now }); }
     }
     put(userId, snap);
+    if (diag.reconDeferred) void serial(userId, async () => {
+      const later = get(userId);
+      await reconsolidate(later, traceId, Date.now(), ev.effort).catch(() => null);
+      put(userId, later);
+    });
     return { ok: true, state: snap.memory, semantic: sem, ops: allOps, suggestions, diag };
   }
 
+  /** Reconsolidation call + reduce, applied to `snap` in place. */
+  async function reconsolidate(snap: Snapshot, traceId: string, now: number, effort?: 'low' | 'medium') {
+    const rc = await llmOps('observe.reconsolidate', RECONSOLIDATE_SYSTEM, reconsolidateUser(snap.memory, snap.views.slice(-OBSERVE_LIMITS.HISTORY)), reconsolidateMock, traceId, now, effort);
+    const ops = rc.ops.filter(o => o.op !== 'flag_opportunity');
+    const r = reduceActivity(snap.memory, ops, now);
+    snap.memory = r.memory;
+    snap.opLog.push({ at: now, ops, source: 'recon' });
+    snap.stepsSinceRecon = 0;
+    return { ops, events: r.events.filter(e => e.type !== 'flag'), errors: [...rc.errors, ...r.errors] };
+  }
+
   return {
-    processSteps: (userId: string, steps: Step[], traceId: string) => serial(userId, () => processSteps(userId, steps, traceId)),
+    processSteps: (userId: string, steps: Step[], traceId: string, ev?: ObserveStepsRequest['eval']) => serial(userId, () => processSteps(userId, steps, traceId, ev)),
     state(userId: string) { const s = get(userId); return { memory: s.memory, semantic: s.semantic, opLog: s.opLog }; },
     dismiss: (userId: string, patternId: string, reason: string) => serial(userId, async () => {
       const s = get(userId);

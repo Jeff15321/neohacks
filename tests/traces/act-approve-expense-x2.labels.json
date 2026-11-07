@@ -1,0 +1,8 @@
+{
+ "description": "SYNTHETIC. Approve 2 expense reports (confirm dialog, \"Report approved\").",
+ "activity": {
+  "pattern": "approv|expense|report",
+  "minCompleted": 2,
+  "expectSuggestion": true
+ }
+}

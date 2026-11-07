@@ -35,7 +35,7 @@ test('observe: 1st completed reply → no suggestion; 2nd → Judge suggestion w
   assert.equal(b1.suggestions.length, 0);
   assert.equal(b1.state.recentCompleted.filter((t: any) => t.status === 'completed').length, 1);
   assert.equal(b1.state.patterns[0].instanceIds.length, 1);
-  assert.equal(b1.diag.reconsolidated, true);
+  assert.equal(b1.diag.reconsolidated || b1.diag.reconDeferred, true); // linked by Tier 2 → recon runs right after the response
   assert.match(b1.diag.judge, /gate: .*not flagged|1 completed/);
   // duplicate delivery of the same Steps is a no-op
   assert.equal((await post(reply(1, 'm1', 'Q4 launch checklist'))).json().diag.judge, 'duplicate steps');

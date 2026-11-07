@@ -1,0 +1,6 @@
+{
+ "description": "SYNTHETIC. Docs reading: search docs (input + submit = navigation only), open results, copy a snippet — nothing written anywhere.",
+ "activity": {
+  "noise": true
+ }
+}

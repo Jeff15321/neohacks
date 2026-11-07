@@ -108,6 +108,8 @@ export type SuggestionCandidate = z.infer<typeof SuggestionCandidate>;
 
 export const ObserveStepsRequest = z.object({
   steps: z.array(Step).min(1).max(60),
+  /** Eval-only knobs (tests/tools/trace-eval.mjs E3/E10 ablations). The extension never sends these. */
+  eval: z.object({ noTier1: z.boolean().optional(), effort: z.enum(['low', 'medium']).optional() }).optional(),
 });
 export type ObserveStepsRequest = z.infer<typeof ObserveStepsRequest>;
 
@@ -118,7 +120,7 @@ export const ObserveStepsResponse = z.object({
   ops: z.array(PatchOp),
   suggestions: z.array(SuggestionCandidate),
   /** Pipeline diagnostics (Inspector): which tiers ran and why the Judge did / did not run. */
-  diag: z.object({ tier1Ms: z.number(), tier2Ms: z.number(), judgeMs: z.number().optional(), reconsolidated: z.boolean(), judge: z.string(), opErrors: z.array(z.string()) }),
+  diag: z.object({ tier1Ms: z.number(), tier2Ms: z.number(), judgeMs: z.number().optional(), reconsolidated: z.boolean(), reconDeferred: z.boolean().optional(), judge: z.string(), opErrors: z.array(z.string()) }),
   error: z.string().optional(),
 });
 export type ObserveStepsResponse = z.infer<typeof ObserveStepsResponse>;

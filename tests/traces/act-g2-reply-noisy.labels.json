@@ -1,0 +1,8 @@
+{
+ "description": "FIXTURE-DERIVED. Reply m1; detour (open m2, read, back); reply m3.",
+ "activity": {
+  "pattern": "repl(y|ies)|respond|answer",
+  "minCompleted": 2,
+  "expectSuggestion": true
+ }
+}

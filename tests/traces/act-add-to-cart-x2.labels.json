@@ -1,0 +1,8 @@
+{
+ "description": "SYNTHETIC. Add 2 products to cart from search results (\"Added to cart\").",
+ "activity": {
+  "pattern": "cart|add|buy|shop|purchase",
+  "minCompleted": 2,
+  "expectSuggestion": null
+ }
+}
