@@ -71,7 +71,8 @@
       body: document.getElementById('cm-body').value,
     });
     document.getElementById('cm-save').addEventListener('click', () => {
-      api('/fixture-api/drafts', j(fields())).then(r => {
+      // rotating single-use CSRF token: fetch a fresh one for every save
+      api('/fixture-api/csrf').then(({ token }) => api('/fixture-api/drafts', j({ ...fields(), csrf: token }))).then(r => {
         if (r.ok) { flash('Draft saved'); refreshCount(); }
         else flash('Save failed');
       });

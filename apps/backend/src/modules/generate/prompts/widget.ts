@@ -2,6 +2,7 @@ import type { GenerateWidgetRequest } from '@app/contracts';
 import { WidgetGrant } from '@app/contracts';
 import { WIDGET_PROMPT_SECTIONS } from './sections/index.js';
 import { renderSpecForPrompt } from './sections/spec.js';
+import { renderNetOpAnalysis } from './sections/network.js';
 
 /**
  * Widget generator prompt. Every DOM/waiting/safety rule below was learned from a real Gmail failure
@@ -133,7 +134,7 @@ export const widgetSystemPrompt = () => [BASE, ...WIDGET_PROMPT_SECTIONS].join('
 export const WIDGET_JSON_SCHEMA: Record<string, unknown> = {
   type: 'object',
   additionalProperties: false,
-  required: ['name', 'description', 'matchPatterns', 'grants', 'insertionHint', 'code', 'warnings', 'plan', 'changeSummary', 'consequentialActions'],
+  required: ['name', 'description', 'matchPatterns', 'grants', 'insertionHint', 'code', 'warnings', 'plan', 'changeSummary', 'consequentialActions', 'collections'],
   properties: {
     name: { type: 'string' },
     description: { type: 'string' },
@@ -145,6 +146,8 @@ export const WIDGET_JSON_SCHEMA: Record<string, unknown> = {
     plan: { type: 'array', items: { type: 'string' } },
     changeSummary: { type: 'string' },
     consequentialActions: { type: 'array', items: { type: 'string' } },
+    /** Phase A: WidgetAI.db collections the widget reads/writes ([] when unused). */
+    collections: { type: 'array', items: { type: 'string' } },
   },
 };
 
@@ -164,6 +167,8 @@ export function buildWidgetUserPrompt(req: GenerateWidgetRequest): string {
     if (o.status !== undefined) bits.push(`→ ${o.status}`);
     if (o.confirmed === false) bits.push('· UNCONFIRMED (not replayable)');
     if (o.triggerText) bits.push(`· after ${o.triggerText}`);
+    const analysis = renderNetOpAnalysis(o); // Phase E: template/tokens/dependsOn/tier
+    if (analysis) bits.push(analysis);
     if (o.requestBodyTemplate) bits.push(`· req ${o.requestBodyTemplate.slice(0, 700).replace(/\s+/g, ' ')}`);
     if (o.responseBodySample) bits.push(`· resp ${o.responseBodySample.slice(0, 300).replace(/\s+/g, ' ')}`);
     return bits.join(' ');
@@ -193,6 +198,9 @@ ${pc.textSample.slice(0, 3000)}
 
 USER REQUEST: ${req.request}`;
   if (req.spec) p += renderSpecForPrompt(req.spec, req.evidence); // Phase B: recorded workflow
+  if (req.existingCollections) { // Phase A
+    p += `\n\nEXISTING DATA COLLECTIONS (this user's WidgetAI.db — reuse one when it fits the request):\n${req.existingCollections.slice(0, 100).map(c => `- ${c}`).join('\n') || '(none yet)'}`;
+  }
   if (req.history?.length) {
     p += `\n\nCONVERSATION SO FAR (oldest first):\n${req.history.map(h => `${h.role}: ${h.text.slice(0, 600)}`).join('\n')}`;
   }

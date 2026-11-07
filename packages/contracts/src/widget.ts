@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { WorkflowSpec } from './workflow.js';
+import { DATA_LIMITS, DataCollectionName } from './data.js';
 
 /** Capabilities a generated widget may request via `grants`. Later phases extend this enum (data, flow). */
 export const WidgetGrant = z.enum([
@@ -7,6 +8,7 @@ export const WidgetGrant = z.enum([
   'log',       // may emit status/log lines to the extension UI
   'storage',   // may use WidgetAI.storage (chrome.storage.local sandbox, per widget)
   'network',   // may inspect captured ops and invoke same-origin requests via WidgetAI.net
+  'data',      // may read/write the user's WidgetAI.db collections it declares in `collections` (Phase A)
 ]);
 export type WidgetGrant = z.infer<typeof WidgetGrant>;
 
@@ -28,6 +30,8 @@ export const GeneratedWidget = z.object({
   changeSummary: z.string().max(400).optional(),
   /** Anything the widget may do that sends/publishes/deletes (flagged on the approval card). */
   consequentialActions: z.array(z.string().max(200)).max(10).optional(),
+  /** WidgetAI.db collections the widget reads/writes (grant "data"); shown on the approval card (Phase A). */
+  collections: z.array(DataCollectionName).max(DATA_LIMITS.MAX_DECLARED_COLLECTIONS).optional(),
 });
 export type GeneratedWidget = z.infer<typeof GeneratedWidget>;
 

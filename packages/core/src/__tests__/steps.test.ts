@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   SettleMachine, isSignificantMutation, isTimestampTick, type ClosedStep, type LateEffects,
   buildLocatorBundle, rankCandidates, looksGeneratedId, bestSelector,
-  redactTypedValue, isSecretField, redactStepForExport, REDACTED,
+  redactTypedValue, isSecretInput, redactStepForExport, REDACTED,
   hashValue, lineageEdges,
 } from '../index.js';
 
@@ -173,7 +173,7 @@ test('redaction: password / secret fields never leave; tokens and card numbers m
   assert.equal(redactTypedValue('hunter2', { type: 'password' }), REDACTED);
   assert.equal(redactTypedValue('123456', { autocomplete: 'one-time-code' }), REDACTED);
   assert.equal(redactTypedValue('abc', { name: 'api_key' }), REDACTED);
-  assert.ok(isSecretField({ ariaLabel: 'Password' }));
+  assert.ok(isSecretInput({ ariaLabel: 'Password' }));
   assert.equal(redactTypedValue('sk-ant-api03-Zx9Qw8Er7Ty6Ui5Op4As3Df2Gh1Jk0L'), REDACTED);
   assert.equal(redactTypedValue('pay with 4111 1111 1111 1111 thanks').includes('4111'), false);
   assert.equal(redactTypedValue('Thanks Priya, I will review it by Friday.'), 'Thanks Priya, I will review it by Friday.');

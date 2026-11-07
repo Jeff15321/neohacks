@@ -1,9 +1,11 @@
-import type { InvokeRequestSpec, NetInvokeOverrides, NetInvokeResult, NetRequestRecord } from '@app/contracts';
-import { NetLog, buildDirectRequest, buildInvokeRequest, randomId, sameOrigin } from '@app/core';
+import type { InvokeRequestSpec, NetInvokeOverrides, NetInvokeResult, NetRequestRecord, NetVerifyEvidence } from '@app/contracts';
+import { NetLog, buildDirectRequest, buildInvokeRequest, randomId, sameOrigin, type TierState } from '@app/core';
 import { storage, tabs } from '../../platform/index.js';
 
 /** storage.session keys owned by modules/net. */
 const netKey = (tabId: number) => `wwa_net_${tabId}`;
+/** Verification tiers per op template (all tabs/origins). */
+const TIERS_KEY = 'wwa_net_tiers';
 
 /**
  * Per-tab network observation state (ported from MVP sw.ts + netlog.ts), hydrated from storage.session so
@@ -15,7 +17,14 @@ export class NetService {
   private hydrated = new Set<number>();
   private persistTimers = new Map<number, ReturnType<typeof setTimeout>>();
 
+  private tiersHydrated = false;
+
   async hydrate(tabId: number) {
+    if (!this.tiersHydrated) {
+      this.tiersHydrated = true;
+      const t = await storage.session.get<Array<[string, TierState]>>(TIERS_KEY);
+      if (Array.isArray(t)) this.log.hydrateTiers(t);
+    }
     if (this.hydrated.has(tabId)) return;
     this.hydrated.add(tabId);
     const records = await storage.session.get<NetRequestRecord[]>(netKey(tabId));
@@ -57,8 +66,22 @@ export class NetService {
     if (!record.confirmed) throw new Error(`operation ${opId} is unconfirmed (no matching browser-level request was seen) — not replayable`);
     const spec = buildInvokeRequest(record, overrides);
     if (!sameOrigin(spec.url, tabUrl)) throw new Error('replay restricted to the page origin');
-    return this.pageFetch(tabId, spec);
+    const result = await this.pageFetch(tabId, spec);
+    // tier promotion (doc §4 item 4): only when the replay targeted the op's own template (no url/method override)
+    if (overrides.url === undefined && overrides.method === undefined) {
+      const before = this.log.tierOf(this.log.templateKeyOf(tabId, opId) ?? '').tier;
+      if (this.log.noteReplay(tabId, opId, result) !== before) this.persistTiers();
+    }
+    return result;
   }
+
+  reportVerified(tabId: number, opId: string, evidence: NetVerifyEvidence) {
+    const r = this.log.reportVerified(tabId, opId, evidence);
+    if (r.ok) this.persistTiers();
+    return r;
+  }
+
+  private persistTiers() { void storage.session.set(TIERS_KEY, this.log.tierSnapshot()); }
 
   async direct(tabId: number, tabUrl: string, req: Parameters<typeof buildDirectRequest>[0]) {
     const spec = buildDirectRequest(req, tabUrl);

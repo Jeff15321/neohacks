@@ -1,0 +1,60 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>CineBase — Movie</title>
+<style>
+  /* CineBase — IMDb-like movie detail page for the WidgetAI.db E2E (served at /fixture-movies/). */
+  body { margin:0; font:14px/1.45 system-ui, sans-serif; color:#111; background:#f5f5f1; }
+  header.site-header { display:flex; align-items:center; gap:16px; padding:10px 20px; background:#121212; color:#fff; }
+  header.site-header a { color:#f5c518; text-decoration:none; font-weight:600; }
+  .logo { background:#f5c518; color:#000 !important; padding:2px 8px; border-radius:4px; font-weight:800 !important; }
+  main.movie-detail { max-width:900px; margin:24px auto; background:#fff; border-radius:8px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+  .movie-title { margin:0; font-size:30px; }
+  .movie-meta { color:#555; margin:4px 0 12px; display:flex; gap:12px; }
+  .genres span { display:inline-block; border:1px solid #ccc; border-radius:12px; padding:1px 10px; margin-right:6px; font-size:12px; }
+  .movie-actions { display:flex; align-items:center; gap:8px; margin:16px 0; }
+  .movie-actions button { font:13px system-ui; padding:7px 14px; border-radius:18px; border:1px solid #ccc; background:#fff; cursor:pointer; }
+  .more-like-this ul { list-style:none; padding:0; display:flex; gap:12px; }
+  .more-like-this a { color:#136cb2; }
+  .not-found { padding:24px; color:#a00; }
+</style></head>
+<body>
+  <header class="site-header" role="banner">
+    <a class="logo" href="index.html">CineBase</a>
+    <nav role="navigation" aria-label="Site">
+      <a href="index.html">Browse</a>
+      <a id="watchlist-link" href="watchlist.html">Watchlist</a>
+    </nav>
+  </header>
+  <main class="movie-detail" role="main" id="movie"></main>
+  <script src="movies.js"></script>
+  <script>
+    (function () {
+      const id = new URLSearchParams(location.search).get('id') || 'dune';
+      const m = window.CINEBASE[id];
+      const main = document.getElementById('movie');
+      if (!m) { main.innerHTML = '<div class="not-found">Movie not found.</div>'; return; }
+      document.title = 'CineBase — ' + m.title + ' (' + m.year + ')';
+      main.setAttribute('data-movie-id', id);
+      main.innerHTML =
+        '<h1 class="movie-title"></h1>' +
+        '<div class="movie-meta"><span class="movie-year"></span><span class="movie-runtime"></span><span class="movie-rating" aria-label="Rating"></span></div>' +
+        '<div class="genres"></div>' +
+        '<p class="movie-director">Director: <b></b></p>' +
+        '<p class="movie-plot"></p>' +
+        '<div class="movie-actions" role="toolbar" aria-label="Movie actions"><button type="button" class="trailer-btn">&#9654; Trailer</button><button type="button" class="share-btn">Share</button></div>' +
+        '<section class="more-like-this" aria-label="More like this"><h2>More like this</h2><ul></ul></section>';
+      main.querySelector('.movie-title').textContent = m.title;
+      main.querySelector('.movie-year').textContent = String(m.year);
+      main.querySelector('.movie-runtime').textContent = m.runtime;
+      main.querySelector('.movie-rating').textContent = '\u2605 ' + m.rating;
+      main.querySelector('.movie-director b').textContent = m.director;
+      main.querySelector('.movie-plot').textContent = m.plot;
+      for (const g of m.genres) { const s = document.createElement('span'); s.textContent = g; main.querySelector('.genres').appendChild(s); }
+      for (const [oid, o] of Object.entries(window.CINEBASE)) {
+        if (oid === id) continue;
+        const li = document.createElement('li'); const a = document.createElement('a');
+        a.href = 'movie.html?id=' + encodeURIComponent(oid); a.className = 'similar-link'; a.textContent = o.title;
+        li.appendChild(a); main.querySelector('.more-like-this ul').appendChild(li);
+      }
+    })();
+  </script>
+</body></html>

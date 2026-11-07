@@ -19,7 +19,7 @@ const SECRET_FIELD = /pass|pwd|secret|token|otp|one.?time|2fa|mfa|cvv|cvc|ssn|pi
 const SECRET_AUTOCOMPLETE = /^(current-password|new-password|one-time-code|cc-number|cc-csc|cc-exp.*)$/i;
 
 /** True when the field itself is sensitive (its value must never leave the page, even partially). */
-export function isSecretField(f: FieldInfo): boolean {
+export function isSecretInput(f: FieldInfo): boolean {
   if ((f.type ?? '').toLowerCase() === 'password') return true;
   if (f.autocomplete && SECRET_AUTOCOMPLETE.test(f.autocomplete.trim())) return true;
   return [f.name, f.id, f.ariaLabel, f.placeholder].some(s => !!s && SECRET_FIELD.test(s));
@@ -30,7 +30,7 @@ const CARDISH = /\b(?:\d[ -]?){13,19}\b/g;
 
 /** Redacted, clipped preview of a committed input value. */
 export function redactTypedValue(value: string, field: FieldInfo = {}, maxChars = 200): string {
-  if (isSecretField(field)) return REDACTED;
+  if (isSecretInput(field)) return REDACTED;
   let v = value.replace(/\s+/g, ' ').trim();
   if (looksSecret(v)) return REDACTED;
   v = v.replace(CARDISH, REDACTED);

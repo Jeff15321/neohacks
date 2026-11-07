@@ -43,6 +43,11 @@ export class WidgetService {
     return pageContext;
   }
 
+  /** Phase A: the user's WidgetAI.db collection names so the generator reuses them (absent if the data module/backend fails). */
+  private async existingCollections(): Promise<string[] | undefined> {
+    try { return await this.bus.use('data.collections')(); } catch { return undefined; }
+  }
+
   /** `opts` (Phase B): generation conditioned on a recorded WorkflowSpec + Step evidence, on the recording's tab. */
   async generate(request: string, traceId: string, opts: { spec?: WorkflowSpec; evidence?: EvidenceStep[]; tabId?: number } = {}): Promise<WidgetRecord> {
     const tab = opts.tabId !== undefined ? await tabs.get(opts.tabId).catch(() => tabs.findTarget()) : await tabs.findTarget();
@@ -50,7 +55,9 @@ export class WidgetService {
     this.bus.broadcast({ type: 'GENERATION_PROGRESS', stage: 'context', detail: 'extracting page context', traceId });
     const pageContext = await this.contextFor(tab);
     this.bus.broadcast({ type: 'GENERATION_PROGRESS', stage: 'llm', detail: 'generating widget code', traceId });
-    const res = await backend.post<GenerateWidgetResponse>('/api/generate-widget', { request, pageContext, spec: opts.spec, evidence: opts.evidence } satisfies GenerateWidgetRequest, traceId);
+    const res = await backend.post<GenerateWidgetResponse>('/api/generate-widget', {
+      request, pageContext, existingCollections: await this.existingCollections(), spec: opts.spec, evidence: opts.evidence,
+    } satisfies GenerateWidgetRequest, traceId);
     if (!res.ok || !res.widget) throw new Error(res.error ?? 'generation failed');
     const w: WidgetRecord = {
       ...res.widget, id: randomId('w'), version: 1, createdAt: now(), origin: pageContext.origin,
@@ -76,6 +83,7 @@ export class WidgetService {
       pageContext,
       prior: { code: w.code, error: instruction ? undefined : (w.lastError ?? 'widget failed at runtime'), feedback: instruction },
       history: (w.thread ?? []).slice(-10).map(t => ({ role: t.role, text: t.text })),
+      existingCollections: await this.existingCollections(),
       spec: w.spec,
     } satisfies GenerateWidgetRequest, traceId);
     if (!res.ok || !res.widget) throw new Error(res.error ?? 'repair generation failed');

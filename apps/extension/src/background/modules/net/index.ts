@@ -34,7 +34,11 @@ export function registerNet(bus: Bus) {
     const tab = await tabs.findTarget();
     if (!tab?.id || !tab.url) throw new Error('no eligible tab');
     await svc.hydrate(tab.id);
-    return { tabId: tab.id, ops: svc.log.ops(tab.id, 60, originOf(tab.url)), probeAlive: svc.probeAlive.has(tab.id), enabled: enabled() };
+    const origin = originOf(tab.url);
+    return {
+      tabId: tab.id, ops: svc.log.ops(tab.id, 60, origin), probeAlive: svc.probeAlive.has(tab.id), enabled: enabled(),
+      browserOnly: svc.log.browserOnly(tab.id, origin),
+    };
   });
   bus.on('NET_REPLAY', async (m) => {
     const tab = await tabs.findTarget();
@@ -50,5 +54,12 @@ export function registerNet(bus: Bus) {
   }, 'network');
   bus.onUserScript('WIDGET_NET_INVOKE', async (m, ctx) => ({ result: await svc.replay(needTab(ctx), ctx.tabUrl, m.opId, m.overrides) }), 'network');
   bus.onUserScript('WIDGET_NET_REQUEST', async (m, ctx) => ({ result: await svc.direct(needTab(ctx), ctx.tabUrl, m.request) }), 'network');
+  bus.onUserScript('WIDGET_NET_REPORT_VERIFIED', async (m, ctx) => {
+    const tabId = needTab(ctx);
+    await svc.hydrate(tabId);
+    // never throws: widgets branch on {verified:false} (e.g. to their DOM fallback)
+    const r = svc.reportVerified(tabId, m.opId, m.evidence);
+    return { verified: r.ok, tier: r.tier, error: r.error };
+  }, 'network');
   return svc;
 }
