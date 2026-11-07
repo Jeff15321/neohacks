@@ -1,5 +1,5 @@
 import type { CompleteOptions, LLMProvider } from './provider.js';
-import { MOCK_WIDGET_CODE, MOCK_WIDGET_CODE_YT, MOCK_REPLY, MOCK_TOPICS } from './mockdata.js';
+import { MOCK_WIDGET_CODE, MOCK_WIDGET_CODE_YT, MOCK_WIDGET_CODE_G2, MOCK_REPLY, MOCK_TOPICS } from './mockdata.js';
 
 /**
  * Deterministic provider for automated tests. No network.
@@ -12,6 +12,17 @@ export class MockProvider implements LLMProvider {
   async complete(opts: CompleteOptions): Promise<string> {
     if (opts.system?.includes('WIDGET-GEN')) {
       const userMsg = opts.messages[0]?.content ?? '';
+      if (/fixture-g2|hardmail/i.test(userMsg)) {
+        return JSON.stringify({
+          name: 'Unread Reply Drafter',
+          description: 'Toolbar button that drafts AI replies to the 2 most recent unread emails.',
+          matchPatterns: ['*://127.0.0.1/*', '*://localhost/*', '*://mail.google.com/*'],
+          grants: ['inference', 'log'],
+          insertionHint: 'Inserts a button into the main toolbar.',
+          code: MOCK_WIDGET_CODE_G2,
+          warnings: ['mock provider: deterministic g2 widget'],
+        });
+      }
       if (/comment|topic|youtube|video/i.test(userMsg)) {
         return JSON.stringify({
           name: 'Comment Topic Analyzer',

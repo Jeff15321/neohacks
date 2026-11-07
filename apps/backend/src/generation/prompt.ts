@@ -43,9 +43,15 @@ NOT available: page JS variables/functions, fetch() to the platform backend, chr
 === INTERACTION RULES ===
 - The site is a live SPA. NEVER assume elements exist — poll for them with a waitFor helper (timeout ~8s).
 - GROUND YOUR SELECTORS in the provided page context (ids, classes, roles, aria-labels, row/listitem structures). Do NOT invent generic heuristics like "elements containing '@'" when a concrete selector is visible in the context.
-- Elements that only appear AFTER an interaction (composers, dialogs, message views) cannot be seen in the context snapshot — CLICK first, then wait for the revealed element. NEVER invent class names for them (e.g. ".message-view" when the snapshot shows ".msg-*" naming). Discovery pattern:
-    * wait for structural change: poll until the previous view's container is gone OR a new large child appears under the main region (main/#app/[role=main]);
-    * then query inside the CURRENT view for generic affordances: buttons containing the action word ("Reply", "Compose"), editable regions ([contenteditable="true"], textarea), headings matching the expected subject.
+- Elements that only appear AFTER an interaction (composers, dialogs, message views) cannot be seen in the context snapshot — CLICK first, then wait for the revealed element. NEVER invent class names for them (e.g. ".message-view" when the snapshot shows ".msg-*" naming).
+- WAIT/CHANGE-DETECTION RECIPE (use this, not ad-hoc text-length checks):
+    * Before clicking, capture a signature element of the CURRENT view (e.g. const listEl = document.querySelector('<the list>')).
+    * After clicking, poll until EITHER listEl.isConnected === false (SPAs detach old nodes on re-render — most reliable signal) OR an expected affordance appears: [contenteditable="true"], textarea, or an element whose aria-label/text contains the expected action ("Reply", "Compose", "Back").
+    * Then query inside the CURRENT top-level view for the affordances you need — prefer aria-label/role/text matching over guessed class names.
+    * Action affordances are often NOT <button>: search the broad set [role="button"], [role="link"], [tabindex], a, button, [aria-label] and match by aria-label or textContent against the action word (e.g. /reply/i).
+- Filtering: when the request mentions "unread"/"recent"/"selected", filter rows by the distinguishing class/attribute visible in the context (e.g. .zE vs .zA) — do not just take the first N rows.
+- LISTS THAT SHRINK WHILE YOU PROCESS THEM: when the action changes item state (unread -> read, pending -> done), a positional index into a re-filtered list skips items. Instead capture a STABLE KEY per target up front (a data-* id such as data-legacy-message-id, or the row's subject text), then each iteration re-query the UNFILTERED list and find the row matching that key.
+- Element references die across SPA re-renders: re-query items each iteration, and re-query the list after returning to it.
 - ONLY standard CSS selectors work in querySelector/querySelectorAll. :has-text(), :contains(), :visible, :text() do NOT exist. To match by text: iterate elements and check textContent/innerText.
 - Prefer dispatching real DOM events: el.dispatchEvent(new MouseEvent('click',{bubbles:true})), InputEvent for editable fields (inputType:'insertText'), focus() first. Plain el.click() also works.
 - For contenteditable composers: set textContent/innerText THEN dispatch InputEvent — frameworks only commit state on input events.
@@ -66,7 +72,7 @@ NOT available: page JS variables/functions, fetch() to the platform backend, chr
 export function buildGenerationUserPrompt(req: GenerateWidgetRequest): string {
   const pc = req.pageContext;
   const landmarks = pc.landmarks.slice(0, 60).map(l =>
-    `- <${l.tag}> ${[l.id && '#' + l.id, l.classes && '.' + l.classes.split(' ').filter(Boolean).join('.'), l.role && `role=${l.role}`, l.ariaLabel && `aria-label="${l.ariaLabel}"`, l.text && `"${l.text.slice(0, 60)}"`].filter(Boolean).join(' ')}`).join('\n');
+    `- <${l.tag}> ${[l.id && '#' + l.id, l.classes && '.' + l.classes.split(' ').filter(Boolean).join('.'), l.role && `role=${l.role}`, l.ariaLabel && `aria-label="${l.ariaLabel}"`, l.dataAttrs && Object.entries(l.dataAttrs).map(([k, v]) => `${k}="${v}"`).join(' '), l.text && `"${l.text.slice(0, 60)}"`].filter(Boolean).join(' ')}`).join('\n');
   const candidates = pc.insertionCandidates.slice(0, 12).map(l =>
     `- <${l.tag}> ${[l.id && '#' + l.id, l.classes && '.' + l.classes.split(' ').filter(Boolean).join('.'), l.role && `role=${l.role}`, l.ariaLabel && `aria-label="${l.ariaLabel}"`].filter(Boolean).join(' ')}`).join('\n');
   const interactive = pc.interactive.slice(0, 40).map(l =>

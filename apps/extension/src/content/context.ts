@@ -8,9 +8,16 @@ const visible = (el: Element): boolean => {
 const toLandmark = (el: Element): Landmark => {
   const e = el as HTMLElement;
   const r = e.getBoundingClientRect?.();
+  const dataAttrs: Record<string, string> = {};
+  for (const a of Array.from(e.attributes ?? [])) {
+    if (a.name.startsWith('data-') && Object.keys(dataAttrs).length < 3) {
+      dataAttrs[a.name] = a.value.slice(0, 40);
+    }
+  }
   return {
     tag: e.tagName.toLowerCase(),
     id: e.id || undefined,
+    ...(Object.keys(dataAttrs).length ? { dataAttrs } : {}),
     classes: (typeof e.className === 'string' ? e.className : '').split(/\s+/).filter(Boolean).slice(0, 6).join(' ') || undefined,
     role: e.getAttribute?.('role') ?? undefined,
     ariaLabel: e.getAttribute?.('aria-label') ?? undefined,

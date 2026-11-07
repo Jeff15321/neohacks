@@ -1,4 +1,4 @@
-import { launchWithExtension, FIXTURE_URL } from './helpers.ts';
+import { launchWithExtension, FIXTURE_URL } from '../e2e/helpers.ts';
 const { context, sw } = await launchWithExtension();
 const page = await context.newPage();
 await page.goto(FIXTURE_URL);

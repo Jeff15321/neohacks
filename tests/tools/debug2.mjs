@@ -1,4 +1,4 @@
-import { launchWithExtension, FIXTURE_URL, EXT_ID } from './helpers.ts';
+import { launchWithExtension, FIXTURE_URL, EXT_ID } from '../e2e/helpers.ts';
 const { context, sw } = await launchWithExtension();
 const page = await context.newPage();
 page.on('console', m => { const t = m.text(); if (!/404|favicon/.test(t)) console.log('[page]', t.slice(0,250)); });

@@ -65,6 +65,8 @@ export interface Landmark {
   classes?: string;
   role?: string;
   ariaLabel?: string;
+  /** up to 3 data-* attributes, e.g. {"data-legacy-message-id": "m1"} */
+  dataAttrs?: Record<string, string>;
   text?: string;          // truncated visible text
   rect?: { x: number; y: number; w: number; h: number };
 }

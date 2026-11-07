@@ -1,8 +1,9 @@
-import { launchWithExtension, FIXTURE_URL, EXT_ID } from './helpers.ts';
+import { launchWithExtension, FIXTURE_URL, EXT_ID } from '../e2e/helpers.ts';
 const { context, sw } = await launchWithExtension();
 const page = await context.newPage();
-await page.goto(FIXTURE_URL);
-await page.waitForSelector('.msg-row');
+const TARGET = process.env.TARGET_URL || FIXTURE_URL;
+await page.goto(TARGET);
+await page.waitForLoadState('domcontentloaded'); await page.waitForTimeout(800);
 const panel = await context.newPage();
 await panel.goto(`chrome-extension://${EXT_ID}/sidepanel.html`);
 await panel.waitForSelector('#req');

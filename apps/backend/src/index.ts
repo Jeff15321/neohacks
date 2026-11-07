@@ -32,6 +32,10 @@ await app.register(fastifyStatic, {
   root: path.resolve(DIR, '../../fixture-youtube'),
   prefix: '/fixture-yt/', decorateReply: false,
 });
+await app.register(fastifyStatic, {
+  root: path.resolve(DIR, '../../fixture-gmail2'),
+  prefix: '/fixture-g2/', decorateReply: false,
+});
 
 const port = cfg.port;
 try {

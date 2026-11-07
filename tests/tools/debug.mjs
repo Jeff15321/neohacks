@@ -1,4 +1,4 @@
-import { launchWithExtension, FIXTURE_URL, EXT_ID } from './helpers.ts';
+import { launchWithExtension, FIXTURE_URL, EXT_ID } from '../e2e/helpers.ts';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
