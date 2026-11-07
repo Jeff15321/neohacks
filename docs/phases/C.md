@@ -224,7 +224,7 @@ static branch review, draft-only all as before):
 Reading the numbers (honest):
 - Again ONE live-generated widget per sweep, so this is not a controlled A/B. Almost all of the gain comes from the
   generator change: the sweep-3 widget matches the reply control with `/\b(reply|respond|answer)\b/i` and checks
-  `open-message` by "subject heading visible / list row gone", so all 9 `renamed` seeds needed no agent for the rename
+  `open-message` by "subject heading visible / list row gone", so none of the 10 `renamed` seeds needed the agent for the rename
   (seeds 11/14/18: 0 interventions), and it shipped a `dismiss-overlay` branch on every click step and an
   `expand-collapsed-stub` branch, which Haiku picked correctly every time (popup 7/7, collapsed 20/20 step-level picks).
 - The create/escalate path was never exercised (0 calls), so the create-prompt rewrite and `stateShape` are NOT
