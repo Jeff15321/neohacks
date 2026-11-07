@@ -6,7 +6,7 @@ import { PanelProvider, usePanel } from './state.js';
 import { CreateTab } from '../tabs/Create.js';
 import { WidgetsTab } from '../tabs/Widgets.js';
 import { InspectorTab } from '../tabs/Inspector.js';
-import { RecordTab } from '../tabs/Record.js';
+import { RecordButton, RecordTab } from '../tabs/Record.js';
 import { ActivityTab } from '../tabs/Activity.js';
 import { DataTab } from '../tabs/Data.js';
 
@@ -32,7 +32,7 @@ function Header() {
       <div className="ml-auto flex items-center gap-1">
         <Button size="sm" variant={settings?.observe ? 'accent' : 'outline'} className="h-6" title="Passive observation (Phase D)"
           onClick={() => void setSettings({ observe: !settings?.observe })}>Observe {settings?.observe ? 'on' : 'off'}</Button>
-        <Button size="sm" variant="outline" className="h-6" title="Record (Alt+Shift+R) — Phase B" disabled>● Record</Button>
+        <RecordButton />
       </div>
     </header>
   );
