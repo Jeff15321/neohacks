@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { WorkflowSpec } from './workflow.js';
 import { DATA_LIMITS, DataCollectionName } from './data.js';
+import { WidgetPart } from './flow.js';
 
 /** Capabilities a generated widget may request via `grants`. Later phases extend this enum (data, flow). */
 export const WidgetGrant = z.enum([
@@ -9,6 +10,7 @@ export const WidgetGrant = z.enum([
   'storage',   // may use WidgetAI.storage (chrome.storage.local sandbox, per widget)
   'network',   // may inspect captured ops and invoke same-origin requests via WidgetAI.net
   'data',      // may read/write the user's WidgetAI.db collections it declares in `collections` (Phase A)
+  'flow',      // may run its bundle parts on other sites via WidgetAI.flow (Phase F)
 ]);
 export type WidgetGrant = z.infer<typeof WidgetGrant>;
 
@@ -32,6 +34,8 @@ export const GeneratedWidget = z.object({
   consequentialActions: z.array(z.string().max(200)).max(10).optional(),
   /** WidgetAI.db collections the widget reads/writes (grant "data"); shown on the approval card (Phase A). */
   collections: z.array(DataCollectionName).max(DATA_LIMITS.MAX_DECLARED_COLLECTIONS).optional(),
+  /** Phase F (doc §5): extra parts on other sites (main code/matchPatterns = the "home" part). Grant "flow". */
+  parts: z.array(WidgetPart).max(4).optional(),
 });
 export type GeneratedWidget = z.infer<typeof GeneratedWidget>;
 

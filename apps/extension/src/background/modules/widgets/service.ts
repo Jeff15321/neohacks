@@ -29,9 +29,18 @@ export class WidgetService {
   }
 
   authorize(widgetId: string, tabUrl: string, grant?: WidgetGrant): string | undefined {
-    const w = this.store.get(widgetId);
+    // Phase F: bundle parts run as "<widgetId>#<role>" and are confined to the PART's own match patterns
+    const [baseId, role] = widgetId.split('#', 2) as [string, string | undefined];
+    const w = this.store.get(baseId);
     if (!w) return 'unknown widget';
     if (!w.approved) return 'widget not approved';
+    if (role !== undefined) {
+      const part = w.parts?.find(p => p.role === role);
+      if (!part) return `unknown part "${role}"`;
+      if (!matchesAny(part.matchPatterns, tabUrl)) return `origin not allowed for part "${role}" (tab=${tabUrl})`;
+      if (grant && !w.grants.includes(grant)) return `grant "${grant}" not declared by widget`;
+      return undefined;
+    }
     if (w.matchPatterns.length && !matchesAny(w.matchPatterns, tabUrl)) return `origin not allowed for widget (tab=${tabUrl})`;
     if (grant && !w.grants.includes(grant)) return `grant "${grant}" not declared by widget`;
     return undefined;
@@ -166,7 +175,7 @@ export class WidgetService {
   }
 
   mustGet(id: string) {
-    const w = this.store.get(id);
+    const w = this.store.get(id.split('#')[0]!); // Phase F: part ids "<widgetId>#<role>" log to their widget
     if (!w) throw new Error('widget not found');
     return w;
   }

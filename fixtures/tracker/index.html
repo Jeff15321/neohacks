@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TRK board · Tracker</title>
+<link rel="stylesheet" href="tracker.css">
+</head>
+<body>
+<header class="top" role="banner"><b>Tracker</b> · Project TRK</header>
+<main role="main">
+  <section class="create" aria-label="Create issue">
+    <h2>Create issue</h2>
+    <form id="create-form" name="create-issue" aria-label="Create issue form">
+      <label for="summary">Summary</label>
+      <input id="summary" name="summary" data-testid="summary" autocomplete="off" required>
+      <label for="description">Description</label>
+      <textarea id="description" name="description" data-testid="description" rows="8"></textarea>
+      <label for="labels">Labels (comma separated)</label>
+      <input id="labels" name="labels" data-testid="labels" autocomplete="off">
+      <div class="row"><button type="submit" id="create-btn" data-testid="create-btn">Create</button><span id="form-msg" role="status"></span></div>
+    </form>
+  </section>
+  <section aria-label="Board">
+    <h2>Board</h2>
+    <ul id="board" data-testid="board"></ul>
+  </section>
+</main>
+<script>
+  // Jira-like tracker (Phase F flow sink). Create → REST POST → full navigation to the ticket page.
+  const API = '/fixture-tracker-api/rest/api/2';
+  async function loadBoard() {
+    const r = await fetch(API + '/search'); const j = await r.json();
+    document.getElementById('board').innerHTML = j.issues.map(i =>
+      '<li><a href="ticket.html?key=' + i.key + '">' + i.key + '</a> ' + i.fields.summary.replace(/</g, '&lt;') + '</li>').join('') || '<li class="empty">No issues yet</li>';
+  }
+  document.getElementById('create-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('create-btn'); btn.disabled = true;
+    const msg = document.getElementById('form-msg'); msg.textContent = 'Creating…';
+    // a little latency, like a real tracker
+    await new Promise(r => setTimeout(r, 250));
+    const labels = document.getElementById('labels').value.split(',').map(s => s.trim()).filter(Boolean);
+    const res = await fetch(API + '/issue', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ fields: { summary: document.getElementById('summary').value, description: document.getElementById('description').value, labels } }) });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) { btn.disabled = false; msg.textContent = 'Error: ' + JSON.stringify(j.errors || j); return; }
+    location.href = 'ticket.html?key=' + encodeURIComponent(j.key);
+  });
+  loadBoard();
+</script>
+</body>
+</html>

@@ -13,6 +13,7 @@ const GRANT_TEXT: Record<string, string> = {
   storage: 'Remember its own settings in this browser',
   network: "Re-send this site's own requests (same site only, with your login)",
   data: 'Read and save your personal data (only the collections listed below)',
+  flow: 'Open and act on the other sites listed below, using your login there (Phase F)',
 };
 
 const STATUS_VARIANT: Record<string, 'default' | 'accent' | 'success' | 'warning' | 'destructive'> = {
@@ -24,6 +25,8 @@ export function StatusBadge({ status }: { status: string }) {
 }
 
 const sites = (w: WidgetRecord) => w.matchPatterns.map(p => p.replace(/^\*:\/\//, '').replace(/\/\*$/, '')).join(', ');
+/** Phase F: every origin a bundle touches (home + parts), each needing explicit approval. */
+const partSites = (w: WidgetRecord) => (w.parts ?? []).map(p => ({ role: p.role, sites: p.matchPatterns.map(m => m.replace(/^\*:\/\//, '').replace(/\/\*$/, '')).join(', '), handlers: p.handlers ?? [] }));
 
 /** Approval card: plain-language plan, sites, grants, consequential actions, code (collapsed). */
 export function ApprovalCard({ w }: { w: WidgetRecord }) {
@@ -52,6 +55,12 @@ export function ApprovalCard({ w }: { w: WidgetRecord }) {
           </div>
         )}
         <div className="text-xs"><span className="text-muted-foreground">Sites: </span>{sites(w)}</div>
+        {!!w.parts?.length && ( /* Phase F: cross-site bundle */
+          <div data-testid="bundle-sites" className="rounded-md border border-accent/40 p-2 text-xs">
+            <div className="mb-0.5 font-semibold">Also acts on other sites:</div>
+            <ul className="m-0 list-disc pl-4">{partSites(w).map(p => <li key={p.role} data-testid="bundle-part"><span className="font-mono">{p.sites}</span> — {p.role}{p.handlers.length ? ` (${p.handlers.join(', ')})` : ''}</li>)}</ul>
+          </div>
+        )}
         {w.grants.length > 0 && (
           <ul className="m-0 list-disc space-y-0.5 pl-4 text-xs text-muted-foreground">{w.grants.map(g => <li key={g}>{GRANT_TEXT[g] ?? g}</li>)}</ul>
         )}
@@ -69,6 +78,7 @@ export function ApprovalCard({ w }: { w: WidgetRecord }) {
           <Button variant="ghost" data-testid="reject" onClick={reject}>Reject</Button>
         </div>
         <Disclosure title="View code"><pre className="m-0 max-h-72 overflow-auto text-[11px] leading-snug whitespace-pre-wrap">{w.code}</pre></Disclosure>
+        {(w.parts ?? []).map(p => <Disclosure key={p.role} title={`View code: ${p.role}`}><pre className="m-0 max-h-72 overflow-auto text-[11px] leading-snug whitespace-pre-wrap">{p.code}</pre></Disclosure>)}
       </CardContent>
     </Card>
   );

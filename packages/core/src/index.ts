@@ -12,3 +12,5 @@ export * from './lineage.js';
 export * from './activity.js';
 export * from './suggest.js';
 export * from './job-machine.js';
+export * from './bundle.js';
+export * from './flow-machine.js';

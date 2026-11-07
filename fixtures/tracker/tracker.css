@@ -1,0 +1,11 @@
+body { margin: 0; font: 14px/1.5 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: #172b4d; background: #f4f5f7; }
+.top { background: #0052cc; color: #fff; padding: 10px 24px; }
+.top a { color: #fff; }
+main { max-width: 860px; margin: 20px auto; padding: 0 24px; }
+section, .ticket { background: #fff; border-radius: 4px; box-shadow: 0 1px 2px rgba(9,30,66,.25); padding: 16px 20px; margin-bottom: 16px; }
+label { display: block; font-size: 12px; font-weight: 600; color: #5e6c84; margin: 10px 0 4px; }
+input, textarea { width: 100%; box-sizing: border-box; font: inherit; border: 2px solid #dfe1e6; border-radius: 3px; padding: 6px 8px; }
+.row { margin-top: 12px; display: flex; gap: 12px; align-items: center; }
+button { font: inherit; background: #0052cc; color: #fff; border: 0; border-radius: 3px; padding: 6px 14px; cursor: pointer; }
+.desc { white-space: pre-wrap; }
+.crumbs { color: #5e6c84; font-size: 12px; }

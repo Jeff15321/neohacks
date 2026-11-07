@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Issues · acme/rocket</title>
+<style>
+  body { margin: 0; font: 14px/1.5 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: #1f2328; background: #fff; }
+  header.AppHeader { background: #f6f8fa; border-bottom: 1px solid #d1d9e0; padding: 12px 24px; font-weight: 600; }
+  main { max-width: 900px; margin: 24px auto; padding: 0 24px; }
+  .gh-header { border-bottom: 1px solid #d1d9e0; padding-bottom: 12px; margin-bottom: 16px; }
+  .gh-header-show { display: flex; align-items: flex-start; gap: 12px; }
+  .gh-header-title { flex: 1; margin: 0; font-size: 28px; font-weight: 400; }
+  .gh-header-number { color: #59636e; font-weight: 300; }
+  .gh-header-actions { display: flex; gap: 6px; }
+  .gh-header-meta { color: #59636e; margin-top: 6px; }
+  .State { display: inline-block; background: #1f883d; color: #fff; border-radius: 2em; padding: 2px 10px; font-size: 13px; margin-right: 6px; }
+  .btn { font: inherit; font-size: 13px; padding: 4px 12px; border: 1px solid #d1d9e0; border-radius: 6px; background: #f6f8fa; cursor: pointer; }
+  .timeline-comment { border: 1px solid #d1d9e0; border-radius: 6px; }
+  .timeline-comment-header { background: #f6f8fa; border-bottom: 1px solid #d1d9e0; padding: 8px 16px; color: #59636e; }
+  .comment-body { padding: 16px; white-space: pre-wrap; }
+  .IssueLabel { display: inline-block; border-radius: 2em; padding: 0 8px; font-size: 12px; background: #ddf4ff; color: #0969da; margin-right: 4px; }
+  nav.issues { margin-bottom: 16px; }
+  nav.issues a { margin-right: 12px; color: #0969da; }
+</style>
+</head>
+<body>
+<header class="AppHeader" role="banner">acme / rocket — Issues</header>
+<main role="main">
+  <nav class="issues" aria-label="Issues">
+    <a href="?n=101" data-testid="issue-link">#101</a>
+    <a href="?n=102" data-testid="issue-link">#102</a>
+    <a href="?n=103" data-testid="issue-link">#103</a>
+  </nav>
+  <div class="gh-header" id="partial-discussion-header">
+    <div class="gh-header-show">
+      <h1 class="gh-header-title"><bdi class="js-issue-title markdown-title" data-testid="issue-title"></bdi> <span class="gh-header-number" data-testid="issue-number"></span></h1>
+      <div class="gh-header-actions" data-testid="issue-header-actions">
+        <button class="btn" type="button" aria-label="Edit issue title">Edit</button>
+      </div>
+    </div>
+    <div class="gh-header-meta"><span class="State" data-testid="issue-state">Open</span> <span id="author"></span> opened this issue · <span id="labels"></span></div>
+  </div>
+  <div class="timeline-comment">
+    <div class="timeline-comment-header" id="comment-author"></div>
+    <div class="comment-body markdown-body js-comment-body" data-testid="issue-body"></div>
+  </div>
+</main>
+<script>
+  // GitHub-like issue pages (Phase F flow home). Ground truth for tests: window.__issue.
+  const ISSUES = {
+    101: { title: 'Login button unresponsive on Safari 17', author: 'mira', labels: ['bug', 'auth'],
+      body: 'Steps to reproduce:\n1. Open the login page in Safari 17\n2. Click "Sign in"\n\nExpected: the form submits.\nActual: nothing happens; console shows a TypeError in auth.js:88.' },
+    102: { title: 'Crash when exporting a report with an empty date range', author: 'tomas', labels: ['bug', 'reports'],
+      body: 'Exporting a report with no start/end date throws "RangeError: Invalid time value" and the export dialog never closes.\n\nVersion: 3.4.1' },
+    103: { title: 'Add dark mode to the settings page', author: 'lee', labels: ['enhancement'],
+      body: 'The settings page ignores the OS dark theme. Please follow prefers-color-scheme.' },
+  };
+  const n = Number(new URLSearchParams(location.search).get('n') || 101);
+  const it = ISSUES[n] || ISSUES[101];
+  window.__issue = { number: n, ...it };
+  document.title = it.title + ' · Issue #' + n + ' · acme/rocket';
+  document.querySelector('[data-testid="issue-title"]').textContent = it.title;
+  document.querySelector('[data-testid="issue-number"]').textContent = '#' + n;
+  document.getElementById('author').textContent = it.author;
+  document.getElementById('comment-author').textContent = it.author + ' commented';
+  document.getElementById('labels').innerHTML = it.labels.map(l => '<span class="IssueLabel">' + l + '</span>').join('');
+  document.querySelector('[data-testid="issue-body"]').textContent = it.body;
+</script>
+</body>
+</html>
