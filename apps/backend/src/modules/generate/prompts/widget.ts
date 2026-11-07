@@ -1,6 +1,7 @@
 import type { GenerateWidgetRequest } from '@app/contracts';
 import { WidgetGrant } from '@app/contracts';
 import { WIDGET_PROMPT_SECTIONS } from './sections/index.js';
+import { renderNetOpAnalysis } from './sections/network.js';
 
 /**
  * Widget generator prompt. Every DOM/waiting/safety rule below was learned from a real Gmail failure
@@ -165,6 +166,8 @@ export function buildWidgetUserPrompt(req: GenerateWidgetRequest): string {
     if (o.status !== undefined) bits.push(`→ ${o.status}`);
     if (o.confirmed === false) bits.push('· UNCONFIRMED (not replayable)');
     if (o.triggerText) bits.push(`· after ${o.triggerText}`);
+    const analysis = renderNetOpAnalysis(o); // Phase E: template/tokens/dependsOn/tier
+    if (analysis) bits.push(analysis);
     if (o.requestBodyTemplate) bits.push(`· req ${o.requestBodyTemplate.slice(0, 700).replace(/\s+/g, ' ')}`);
     if (o.responseBodySample) bits.push(`· resp ${o.responseBodySample.slice(0, 300).replace(/\s+/g, ' ')}`);
     return bits.join(' ');

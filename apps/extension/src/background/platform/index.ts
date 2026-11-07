@@ -71,7 +71,7 @@ export const webRequest = {
   onCompleted(fn: (tabId: number, w: WebRequestSeen) => void) {
     if (!chrome.webRequest?.onCompleted) return;
     chrome.webRequest.onCompleted.addListener(
-      (d) => { if (d.tabId >= 0) fn(d.tabId, { url: d.url, method: d.method, ts: d.timeStamp, statusCode: d.statusCode }); },
+      (d) => { if (d.tabId >= 0) fn(d.tabId, { url: d.url, method: d.method, ts: d.timeStamp, statusCode: d.statusCode, type: d.type }); },
       { urls: ['http://*/*', 'https://*/*'], types: ['xmlhttprequest', 'ping', 'other'] },
     );
   },

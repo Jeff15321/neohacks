@@ -31,11 +31,12 @@ function PaneHeader({ title, onRefresh, testId, extra }: { title: string; onRefr
 
 function NetworkPane() {
   const [ops, setOps] = useState<NetOpSummary[]>([]);
+  const [browserOnly, setBrowserOnly] = useState<NetOpSummary[]>([]);
   const [alive, setAlive] = useState<boolean | null>(null);
   const [replay, setReplay] = useState<Record<string, string>>({});
   const load = useCallback(() => {
-    void send<{ ops?: NetOpSummary[]; probeAlive?: boolean }>({ type: 'GET_NET_OPS' }).then(r => {
-      setOps(r.ok ? r.ops ?? [] : []); setAlive(r.ok ? !!r.probeAlive : null);
+    void send<{ ops?: NetOpSummary[]; probeAlive?: boolean; browserOnly?: NetOpSummary[] }>({ type: 'GET_NET_OPS' }).then(r => {
+      setOps(r.ok ? r.ops ?? [] : []); setAlive(r.ok ? !!r.probeAlive : null); setBrowserOnly(r.ok ? r.browserOnly ?? [] : []);
     });
   }, []);
   useEffect(load, [load]);
@@ -47,6 +48,7 @@ function NetworkPane() {
       load();
     });
   };
+  const tierVariant = (t?: string) => (t === 'verified' ? 'success' : t === 'replayed' ? 'default' : 'outline') as 'success' | 'default' | 'outline';
   return (
     <section data-testid="net-ops">
       <PaneHeader title="Network" testId="net-refresh" onRefresh={load}
@@ -55,17 +57,28 @@ function NetworkPane() {
       <div className="space-y-1">
         {ops.map(op => (
           <Disclosure key={op.id} title={
-            <span className="flex min-w-0 items-center gap-1.5 font-mono text-[11px] text-foreground">
+            <span className="flex min-w-0 items-center gap-1.5 font-mono text-[11px] text-foreground" data-op-id={op.id}>
               <b className={cn(op.method !== 'GET' && 'text-accent')}>{op.method}</b>
               <span className="truncate">{op.path}</span>
               <Badge variant={op.status && op.status < 400 ? 'success' : 'destructive'}>{op.status ?? (op.ok === false ? 'ERR' : '…')}</Badge>
               {op.replay && <Badge variant="outline">replay</Badge>}
               {op.confirmed === false && <Badge variant="warning">unconfirmed</Badge>}
+              {op.tier && <Badge variant={tierVariant(op.tier)} data-testid="net-tier" title={op.tierEvidence}>{op.tier}</Badge>}
               {op.triggerText && <span className="truncate text-muted-foreground">← {op.triggerText}</span>}
             </span>
           }>
             <div className="space-y-1 text-[11px]">
               <div className="break-all text-muted-foreground">{op.url}</div>
+              {op.analysis && (
+                <div className="space-y-0.5 font-mono" data-testid="net-analysis">
+                  <div>template <b>{op.analysis.templateKey}</b> · {op.analysis.captures} capture{op.analysis.captures === 1 ? '' : 's'}{op.stepId ? ` · step ${op.stepId}` : ''}{op.attribution ? ` · by ${op.attribution}` : ''}</div>
+                  {op.analysis.tokenFields.length > 0 && <div>tokens: {op.analysis.tokenFields.join(', ')}</div>}
+                  {op.analysis.paramFields.length > 0 && <div>params: {op.analysis.paramFields.join(', ')}</div>}
+                  {op.analysis.dependsOn.map(d => <div key={d.field + d.opId}>depends: {d.field} ← {d.fromTemplate} .{d.path}</div>)}
+                  {op.analysis.idempotencyHint && <div className="text-muted-foreground">{op.analysis.idempotencyHint}</div>}
+                  {op.tierEvidence && <div className="text-muted-foreground">tier evidence: {op.tierEvidence}</div>}
+                </div>
+              )}
               {op.requestBodyTemplate && <pre className="m-0 max-h-32 overflow-auto rounded bg-muted p-1.5 whitespace-pre-wrap">{op.requestBodyTemplate}</pre>}
               {op.responseBodySample && <pre className="m-0 max-h-32 overflow-auto rounded bg-muted p-1.5 whitespace-pre-wrap">{op.responseBodySample}</pre>}
               <div className="flex items-center gap-2">
@@ -76,6 +89,12 @@ function NetworkPane() {
           </Disclosure>
         ))}
       </div>
+      {browserOnly.length > 0 && (
+        <div className="mt-1.5 space-y-0.5 font-mono text-[10.5px] text-muted-foreground" data-testid="net-browser-only">
+          <div className="font-sans text-[11px]">Browser-seen only (no body, not replayable):</div>
+          {browserOnly.map(o => <div key={o.id} className="truncate">{o.method} {o.path} {o.status ?? ''}</div>)}
+        </div>
+      )}
     </section>
   );
 }

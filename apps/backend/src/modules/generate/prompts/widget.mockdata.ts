@@ -109,16 +109,21 @@ btn.addEventListener('click', async () => {
 });
 `;
 
-// NetMail fixture widget — uses the NETWORK surface: finds the captured
-// POST /fixture-api/drafts operation and replays it with modified params,
-// then verifies via a read-back request. Mirrors what the LLM is expected to
-// produce when OBSERVED NETWORK OPERATIONS are present in the context.
+// NetMail fixture widget — uses the NETWORK surface (Phase E): finds the captured, browser-confirmed
+// POST /fixture-api/drafts op, resolves its token dependency (analysis.dependsOn → GET /fixture-api/csrf,
+// a rotating single-use token) by re-fetching it, replays the draft POST with the fresh token via
+// mergeBody/headers, reads the drafts list back, then WidgetAI.net.reportVerified → tier "verified".
+// DOM fallback when the network path fails before anything was created. Mirrors what the LLM is expected to
+// produce when OBSERVED NETWORK OPERATIONS (with op analysis) are present in the context.
 export const MOCK_WIDGET_CODE_NET = `
 const waitFor = async (fn, timeout = 8000) => {
   const t0 = Date.now();
   while (Date.now() - t0 < timeout) { const v = fn(); if (v) return v; await new Promise(r => setTimeout(r, 120)); }
   return null;
 };
+const parseJson = (t) => { try { return JSON.parse(t || ''); } catch (e) { return null; } };
+const getPath = (obj, path) => String(path).replace(/\\[(\\d+)\\]/g, '.$1').split('.').filter(Boolean)
+  .reduce((o, k) => (o == null ? undefined : o[k]), obj);
 const toolbar = await waitFor(() => document.getElementById('nm-toolbar'));
 const host = document.createElement('div');
 host.id = 'wwa-net-drafter';
@@ -132,32 +137,74 @@ const btn = root.getElementById('go');
 const st = root.getElementById('st');
 const say = (m) => { st.textContent = m; WidgetAI.log(m); };
 
+const DRAFT = {
+  to: 'devin+api@example.com',
+  subject: 'API-authored draft',
+  body: 'This draft was created by replaying the captured save-draft request via WidgetAI.net.invoke with a re-fetched CSRF token — no UI clicks.',
+};
+
+async function viaNetwork() {
+  say('Looking for the captured draft operation…');
+  const ops = await WidgetAI.net.operations();
+  const op = ops.find(o => o.method === 'POST' && /\\/fixture-api\\/drafts$/.test(o.path) && o.confirmed && !o.replay && o.ok);
+  if (!op) throw new Error('no confirmed POST /fixture-api/drafts — save a draft via the UI once first');
+  const a = op.analysis || { dependsOn: [], tokenFields: [] };
+  WidgetAI.log('op ' + (a.templateKey || op.path) + ' tier=' + op.tier + ' tokenFields=' + (a.tokenFields || []).join(','));
+  const mergeBody = { to: DRAFT.to, subject: DRAFT.subject, body: DRAFT.body };
+  const headers = {};
+  for (const dep of a.dependsOn || []) {
+    const depOp = ops.find(o => o.id === dep.opId) || ops.find(o => o.analysis && o.analysis.templateKey === dep.fromTemplate);
+    if (!depOp || depOp.method !== 'GET') throw new Error('cannot safely re-fetch dependency ' + dep.fromTemplate);
+    say('Re-fetching ' + dep.fromTemplate + ' for a fresh ' + dep.field + '…');
+    const fresh = await WidgetAI.net.invoke(depOp.id);
+    if (!fresh.ok) throw new Error('dependency re-fetch failed: HTTP ' + fresh.status);
+    const value = getPath(parseJson(fresh.bodyText), dep.path);
+    if (value === undefined || value === null) throw new Error('dependency value missing at ' + dep.path);
+    if (dep.field.startsWith('body.')) mergeBody[dep.field.slice(5)] = value;
+    else if (dep.field.startsWith('header.')) headers[dep.field.slice(7)] = String(value);
+  }
+  say('Replaying ' + op.method + ' ' + op.path + ' with new parameters…');
+  const res = await WidgetAI.net.invoke(op.id, { mergeBody, headers });
+  if (!res.ok) throw new Error('invoke failed: HTTP ' + res.status + ' ' + String(res.bodyText || '').slice(0, 120));
+  created = true;
+  say('Verifying via read-back request…');
+  const list = await WidgetAI.net.request({ url: '/fixture-api/drafts' });
+  const drafts = (parseJson(list.bodyText) || {}).drafts || [];
+  if (!list.ok || !drafts.some(d => d.subject === DRAFT.subject && d.to === DRAFT.to)) throw new Error('draft not present in read-back list');
+  const v = await WidgetAI.net.reportVerified(op.id, { readBack: 'GET /fixture-api/drafts contains "' + DRAFT.subject + '"' });
+  WidgetAI.log('reportVerified → ' + (v.verified ? 'verified' : 'refused: ' + v.error) + ' (tier ' + v.tier + ')');
+  return v.tier;
+}
+
+async function viaDom() {
+  const setVal = (el, v) => { el.focus(); el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); };
+  document.getElementById('compose-btn').click();
+  const to = await waitFor(() => document.getElementById('cm-to'));
+  if (!to) throw new Error('composer did not open');
+  setVal(to, DRAFT.to);
+  setVal(document.getElementById('cm-subject'), DRAFT.subject);
+  setVal(document.getElementById('cm-body'), 'Created through the UI (DOM fallback).');
+  document.getElementById('cm-save').click();
+  const ok = await waitFor(() => { const t = document.getElementById('toast'); return t && !t.hidden && /Draft saved/.test(t.textContent) ? t : null; });
+  if (!ok) throw new Error('DOM fallback: "Draft saved" confirmation not seen');
+}
+
+let created = false;
 btn.addEventListener('click', async () => {
   btn.disabled = true;
+  created = false;
   try {
-    say('Looking for the captured draft operation…');
-    const ops = await WidgetAI.net.operations();
-    const op = ops.find(o => o.method === 'POST' && /\\/fixture-api\\/drafts$/.test(o.path));
-    if (!op) throw new Error('no captured POST /fixture-api/drafts — save a draft via the UI once first');
-    say('Replaying ' + op.method + ' ' + op.path + ' with new parameters…');
-    const res = await WidgetAI.net.invoke(op.id, {
-      mergeBody: {
-        to: 'devin+api@example.com',
-        subject: 'API-authored draft',
-        body: 'This draft was created by replaying the captured save-draft request via WidgetAI.net.invoke — no UI clicks.',
-      },
-    });
-    if (!res.ok) throw new Error('invoke failed: HTTP ' + res.status + ' ' + String(res.bodyText || '').slice(0, 120));
-    say('Verifying via read-back request…');
-    const list = await WidgetAI.net.request({ url: '/fixture-api/drafts' });
-    if (!list.ok || !(list.bodyText || '').includes('API-authored draft')) {
-      throw new Error('draft not present in read-back list');
-    }
-    say('Draft created and verified via the API.');
-    WidgetAI.status('completed', 'draft created via network replay');
+    const tier = await viaNetwork();
+    say('Draft created and verified via the API (tier ' + tier + ').');
+    WidgetAI.status('completed', 'draft created via network replay (tier ' + tier + ')');
   } catch (e) {
-    say('Error: ' + (e?.message ?? e));
-    WidgetAI.status('failed', String(e?.message ?? e));
+    const why = String(e && e.message || e);
+    if (created) { say('Error: ' + why); WidgetAI.status('failed', why); }
+    else {
+      say('Network path failed (' + why + ') — falling back to the UI…');
+      try { await viaDom(); say('Draft created via the UI (DOM fallback).'); WidgetAI.status('completed', 'draft created via DOM fallback'); }
+      catch (e2) { const m = String(e2 && e2.message || e2); say('Error: ' + m); WidgetAI.status('failed', why + '; ' + m); }
+    }
   } finally { btn.disabled = false; }
 });
 `;

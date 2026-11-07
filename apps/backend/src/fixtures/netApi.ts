@@ -1,9 +1,14 @@
 import type { FastifyInstance } from 'fastify';
+import { randomBytes } from 'node:crypto';
 
 /**
  * Real REST backend for the NetMail fixture app (fixtures/net). In-memory,
  * no auth — it exists so the extension's network observation/replay pipeline
  * has genuine request/response traffic and server-side state to verify.
+ *
+ * Rotating CSRF (Phase E): GET /fixture-api/csrf issues a fresh single-use token (invalidating the previous one);
+ * POST /fixture-api/drafts requires the LATEST token (body `csrf` or header `x-csrf-token`) — a stale/replayed
+ * token gets 403. A verbatim replay of a captured save therefore fails; widgets must re-fetch the token first.
  */
 interface Msg { id: string; from: string; fromName: string; subject: string; body: string; date: string; unread: boolean; }
 interface Draft { id: number; to: string; subject: string; body: string; ts: number; }
@@ -19,6 +24,8 @@ function seed() {
     ] as Msg[],
     drafts: [] as Draft[],
     sent: [] as Sent[],
+    csrf: null as string | null,
+    csrfRejected: 0,
   };
 }
 
@@ -43,9 +50,22 @@ export function registerFixtureApiRoutes(app: FastifyInstance) {
     return { ok: !!m };
   });
 
+  app.get('/fixture-api/csrf', async () => {
+    state.csrf = 'c' + randomBytes(16).toString('hex');
+    return { token: state.csrf };
+  });
+  app.get('/fixture-api/__csrf-stats', async () => ({ rejected: state.csrfRejected }));
+
   app.get('/fixture-api/drafts', async () => ({ drafts: state.drafts }));
 
-  app.post<{ Body: { to?: string; subject?: string; body?: string } }>('/fixture-api/drafts', async (req, reply) => {
+  app.post<{ Body: { to?: string; subject?: string; body?: string; csrf?: string } }>('/fixture-api/drafts', async (req, reply) => {
+    const token = req.body?.csrf ?? (req.headers['x-csrf-token'] as string | undefined);
+    if (!token || !state.csrf || token !== state.csrf) {
+      state.csrfRejected++;
+      reply.code(403);
+      return { ok: false, error: 'invalid or stale csrf token — GET /fixture-api/csrf first' };
+    }
+    state.csrf = null; // single-use
     const { to, subject, body } = req.body ?? {};
     if (typeof to !== 'string' || typeof subject !== 'string' || typeof body !== 'string' || !to.trim()) {
       reply.code(400);

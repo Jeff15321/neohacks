@@ -19,7 +19,9 @@ export const widgetMock: MockFn = (req) => {
     return out({
       name: 'API Draft Creator', description: 'Button that creates an email draft by replaying the captured save-draft network call.',
       matchPatterns: LOCAL, grants: ['network', 'log'], insertionHint: 'Inserts a button into the main toolbar.', code: MOCK_WIDGET_CODE_NET,
-      plan: ['Add a button to the toolbar', 'Replay the captured "save draft" request with new values', 'Read the drafts list back to confirm'],
+      plan: ['Add a button to the toolbar', 'Strategy: network (confirmed op, JSON body, CSRF dependency resolvable) with a DOM fallback',
+        'Re-fetch the CSRF token the save-draft request depends on', 'Replay the captured "save draft" request with new values and the fresh token',
+        'Read the drafts list back to confirm, then mark the operation verified'],
     });
   }
   if (/fixture-g2|hardmail/i.test(user)) {
