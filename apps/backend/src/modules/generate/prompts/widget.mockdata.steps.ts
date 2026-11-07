@@ -69,7 +69,7 @@ btn.addEventListener('click', async () => {
         run: async (s, h) => { h.typeText(h.$('[contenteditable="true"]'), reply); return s; },
         expect: { check: () => [...document.querySelectorAll('.vh')].some(e => !e.hidden && /draft saved/i.test(e.textContent)) || 'no "Draft saved" toast', description: '"Draft saved" toast visible' },
       });
-      state = { ...state, done: [...state.done, id] };
+      state.done.push(id); // mutate the run state in place (it is the object steps receive)
       say('Draft ' + (i + 1) + ' saved.');
       state = await WidgetAI.step('back-to-inbox', {
         goal: 'return to the inbox list', timeoutMs: 4000,

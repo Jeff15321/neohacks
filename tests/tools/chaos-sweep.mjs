@@ -49,7 +49,7 @@ for (let i = 0; i < RUNS; i++) {
   page = await context.newPage();
   await page.goto(`${G2_URL}?chaos=${seed}`);
   const faults = await page.evaluate(() => window.__chaos.faults);
-  const btn = page.locator('.G-atb div[id^="wwa-"] >> css=button').first();
+  const btn = page.locator('[id^="wwa-"]:not([data-testid]) >> css=button').first();
   const res = { seed, faults, status: 'no-widget', drafts: 0, sent: 0, deleted: 0, ms: 0 };
   try {
     await btn.waitFor({ timeout: 20_000 });

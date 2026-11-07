@@ -22,6 +22,13 @@ const __actions = [];
 let __run = null;
 const __rid = () => 'r_' + Math.random().toString(36).slice(2, 10);
 const __clone = (v) => v === undefined ? undefined : JSON.parse(JSON.stringify(v));
+/** Replace the run state's CONTENTS (identity kept, so callers holding the object always see the latest state). */
+const __adopt = (r, v) => {
+  if (!v || typeof v !== 'object' || v === r.state) return;
+  const next = __clone(v);
+  for (const k of Object.keys(r.state)) delete r.state[k];
+  Object.assign(r.state, next);
+};
 const __clip = (s, n) => { s = typeof s === 'string' ? s : (s === undefined ? '' : JSON.stringify(s)); return s.length > n ? s.slice(0, n) + '…' : s; };
 const __act = (a) => { __actions.push(__clip(a, 280)); if (__actions.length > 12) __actions.shift(); };
 
@@ -69,6 +76,17 @@ const __skeleton = (root) => {
     for (const c of el.children) walk(c, interesting ? depth + 1 : depth);
   };
   try { walk(root, 0); } catch (e) { out.push('(skeleton error: ' + e.message + ')'); }
+  // overlays (dialogs, modals, fixed high-z layers) outside the region often ARE the problem — always include them
+  try {
+    const seen = new Set();
+    const cands = [...document.querySelectorAll('[role="dialog"],[role="alertdialog"],[aria-modal="true"],dialog[open]')];
+    for (const el of document.body ? document.body.children : []) {
+      const cs = getComputedStyle(el);
+      if ((cs.position === 'fixed' || cs.position === 'absolute') && Number(cs.zIndex) >= 10) cands.push(el);
+    }
+    const extra = cands.filter(el => !root.contains(el) && !(el.id && el.id.indexOf('wwa-') === 0) && __H.visible(el) && !seen.has(el) && seen.add(el));
+    if (extra.length) { out.push('--- overlays outside the region (may cover the page) ---'); len += 60; for (const el of extra.slice(0, 4)) walk(el, 0); }
+  } catch (e) {}
   return out.join('\\n').slice(0, __AL.DOM);
 };
 
@@ -155,6 +173,8 @@ __api.addBranch = (step, b) => {
 __api.step = async (name, spec) => {
   if (!spec || typeof spec.run !== 'function') throw new Error('WidgetAI.step(name, {run, expect}) requires run');
   const run = __ensureRun();
+  // the caller's state object is the run state (mutations between steps are kept); spec.state overrides explicitly
+  if (spec.state && typeof spec.state === 'object') __adopt(run, spec.state);
   const branches = [...(spec.branches || []), ...(__LEARNED[name] || [])].filter(b => b && b.id && typeof b.run === 'function');
   const info = branches.map(b => ({ id: String(b.id).slice(0, 80), when: String(b.when || '').slice(0, 300) }));
   const timeoutMs = spec.timeoutMs ?? 6000;
@@ -164,8 +184,9 @@ __api.step = async (name, spec) => {
   const ctx = { t0: Date.now(), before: __snapshot(spec.expect) };
   const exec = async (fn) => {
     try {
-      const out = await fn(__clone(run.state), __H);
-      if (out !== undefined) run.state = __clone(out);
+      const arg = __clone(run.state);
+      const out = await fn(arg, __H);
+      __adopt(run, out === undefined ? arg : out); // returning nothing keeps in-place mutations of the argument
       return null;
     } catch (e) { return String((e && e.message) || e).slice(0, 1000); }
   };
@@ -214,7 +235,7 @@ __api.step = async (name, spec) => {
       error = b ? await exec(b.run) : 'unknown branch ' + branchId;
     } else {
       const res = act.result || { ok: false, error: 'no result' };
-      if (res.ok && res.state !== undefined) run.state = __clone(res.state);
+      if (res.ok && res.state !== undefined) __adopt(run, res.state);
       if (!res.ok) error = res.error || 'branch failed';
     }
     const r2 = await __waitExpect(spec.expect, ctx2, error ? Math.min(1500, timeoutMs) : timeoutMs);
@@ -233,15 +254,15 @@ __api.run = async (goal, fn, opts) => {
   if (__run && !__run.ended) await __finish('completed', null, 'superseded by a new run');
   __run = null;
   const r = __ensureRun(goal);
-  if (opts.state !== undefined) r.state = __clone(opts.state);
+  if (opts.state !== undefined) __adopt(r, opts.state);
   const timeoutMs = Math.min(opts.timeoutMs || __AL.RUN_TIMEOUT_MS, __AL.RUN_TIMEOUT_MS);
   let timer;
   try {
     const out = await Promise.race([
-      Promise.resolve().then(() => fn(__clone(r.state), __H)),
+      Promise.resolve().then(() => fn(r.state, __H)),
       new Promise((_, rej) => { timer = setTimeout(() => rej(new Error('run timed out after ' + Math.round(timeoutMs / 1000) + ' s')), timeoutMs); }),
     ]);
-    if (out !== undefined) r.state = __clone(out);
+    if (out !== undefined) __adopt(r, out);
     await __finish('completed', null, opts.summary ? opts.summary(r.state) : 'all steps passed');
     return { ok: true, state: r.state };
   } catch (e) {

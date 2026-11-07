@@ -99,6 +99,7 @@ export function buildRunNarrative(run: Pick<WidgetRun, 'events' | 'startedAt' | 
   let lastExpected = '';
   let lastObserved = '';
   let lastDiagnosis = '';
+  let codeError = '';
   for (const e of run.events) {
     const d = (e.data ?? {}) as Record<string, unknown>;
     const at = fmtTime(t0, e.ts);
@@ -120,17 +121,22 @@ export function buildRunNarrative(run: Pick<WidgetRun, 'events' | 'startedAt' | 
       case 'danger-blocked': out.push(`${at}   ⛔ danger guard blocked a script ${s(d.what ?? 'action', 30)} on ${s(d.label, 80)}: ${s(d.reason, 200)}`); break;
       case 'danger-allowed': out.push(`${at}   danger guard: user allowed ${s(d.label, 80)}.`); break;
       case 'cap': out.push(`${at}   stopped: ${e.detail}`); break;
-      case 'final-failure': out.push(`${at} FAILED at "${e.step ?? failedStep}": ${e.detail ?? ''}`); break;
+      case 'final-failure':
+        if (!e.step) codeError = e.detail ?? 'unknown error';
+        out.push(`${at} FAILED${e.step ? ` at "${e.step}"` : ' (the widget code threw outside any step)'}: ${e.detail ?? ''}`);
+        break;
       case 'completed': out.push(`${at} Completed${e.detail ? `: ${e.detail}` : ''}.`); break;
       case 'learned-branch': out.push(`${at}   new branch "${s(d.branchId, 60)}" for "${e.step}" can be added to the widget.`); break;
       default: break;
     }
   }
   if (run.status === 'failed') {
-    const why = failedStep && lastExpected
+    const why = codeError
+      ? `the widget's own code threw "${s(codeError, 300)}" after its last checked step (not a step postcondition).`
+      : failedStep && lastExpected
       ? `step "${failedStep}" never reached its postcondition (${lastExpected}); last observed: ${lastObserved}.`
       : 'the run did not complete.';
-    out.push(`Why it broke: ${why}${lastDiagnosis ? ` Agent's last diagnosis: ${lastDiagnosis}.` : ''} Stopped because: ${stopReason ?? 'the allowed recovery attempts were used up'}.`);
+    out.push(`Why it broke: ${why}${lastDiagnosis ? ` Agent's last diagnosis: ${lastDiagnosis}.` : ''} ${codeError ? '' : `Stopped because: ${stopReason ?? 'the allowed recovery attempts were used up'}.`}`);
     if (lastEvidence) out.push(`DOM evidence (last observed, untrusted page content):\n${lastEvidence}`);
   }
   return out.join('\n');

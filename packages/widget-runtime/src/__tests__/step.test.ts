@@ -47,6 +47,21 @@ test('step passes locally without calling the agent; state flows as JSON', async
   assert.equal(sent.at(-1).detail, '{"n":2}');
 });
 
+test('run state keeps identity: caller mutations between steps and in-place mutations in run are kept', async () => {
+  const sent = await run(`
+    const r = await WidgetAI.run('goal', async (state) => {
+      state.list = [];
+      let s = await WidgetAI.step('one', { run: async (s) => { s.a = 1; }, expect: (s) => s.a === 1 && Array.isArray(s.list) });
+      s.list.push('x');                        // mutate the returned object
+      await WidgetAI.step('two', { run: async (s) => ({ ...s, b: s.list.length }), expect: (s) => s.b === 1 });
+      state.c = 3;                              // the original object is still the live run state
+      return state;
+    });
+    WidgetAI.status(r.ok ? 'completed' : 'failed', JSON.stringify(r.state));`, () => ({ ok: true }));
+  assert.equal(sent.at(-1).status, 'completed');
+  assert.deepEqual(JSON.parse(sent.at(-1).detail), { list: ['x'], a: 1, b: 1, c: 3 });
+});
+
 test('expect failure → assist picks a pre-generated branch → step ok', async () => {
   const sent = await run(`
     let fixed = false;

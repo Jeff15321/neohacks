@@ -18,6 +18,8 @@ agent when a step's postcondition fails, so every step MUST declare what success
   })
   - state is plain JSON passed explicitly from step to step (never rely on closures for data the recovery agent
     needs; agent-written branches only receive (state, h)). Keep it small (ids, extracted text).
+    Between steps, MUTATE the object returned by the last step (state.x = …); do not replace it with a new object
+    (or pass it explicitly: WidgetAI.step(name, { state, run, expect })). Steps return the new run state.
   - expect kinds (all listed must hold; polled until timeoutMs):
       { exists: 'selector' } · { gone: 'selector' } · { count: { selector, min } } · { text: { selector, match: 'regex' } }
       { textChanged: 'selector' } · { net: { method: 'POST', path: '/drafts' } } (2xx since the step began; needs "network")
