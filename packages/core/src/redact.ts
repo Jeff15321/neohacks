@@ -7,6 +7,10 @@ export const REDACTED = '[REDACTED]';
 const SECRET_HEADER = /^(authorization|cookie|set-cookie|proxy-authorization|x-[\w-]*token[\w-]*|[\w-]*csrf[\w-]*|[\w-]*xsrf[\w-]*|x-api-key|api-key)$/i;
 const SECRET_FIELD = /pass|secret|token|otp|cvv|ssn|csrf|xsrf|api[-_]?key|auth/i;
 
+/** Secret-named header / body field (shared with op-analysis token detection). */
+export const isSecretHeader = (name: string) => SECRET_HEADER.test(name);
+export const isSecretField = (name: string) => SECRET_FIELD.test(name);
+
 /** Shannon entropy in bits/char. */
 export function entropy(s: string): number {
   if (!s) return 0;

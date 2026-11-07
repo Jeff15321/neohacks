@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { msg, usMsg } from './_msg.js';
-import { InvokeRequestSpec, NetDirectRequest, NetInvokeOverrides, NetRequestRecord, NetTrigger } from '../net.js';
+import { InvokeRequestSpec, NetDirectRequest, NetInvokeOverrides, NetRequestRecord, NetTrigger, NetVerifyEvidence } from '../net.js';
 
 /** Owner: extension modules/net (+ content/netbridge, page/netprobe). */
 export const panel = [
@@ -25,6 +25,8 @@ export const userScript = [
   usMsg('WIDGET_NET_OPS', {}),
   usMsg('WIDGET_NET_INVOKE', { opId: z.string(), overrides: NetInvokeOverrides.optional() }),
   usMsg('WIDGET_NET_REQUEST', { request: NetDirectRequest }),
+  /** Widget run read back its success criterion after using op `opId` → template tier `verified` (doc §4 item 4). */
+  usMsg('WIDGET_NET_REPORT_VERIFIED', { opId: z.string(), evidence: NetVerifyEvidence }),
 ] as const;
 
 export const broadcast = [] as const;
