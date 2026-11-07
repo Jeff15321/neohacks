@@ -204,7 +204,8 @@ async function doInvoke(invokeId: string, request: { url: string; method: string
   replayDepth++;
   const t0 = Date.now();
   try {
-    const resp = await ((window as any).__wwaFetch as typeof fetch)(request.url, {
+    const f = ((window as any).__wwaFetch as typeof fetch | undefined) ?? window.fetch.bind(window);
+    const resp = await f(request.url, {
       method: request.method,
       headers: request.headers,
       body: request.method === 'GET' || request.method === 'HEAD' ? undefined : request.body,
