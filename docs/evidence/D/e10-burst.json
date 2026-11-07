@@ -1,0 +1,132 @@
+[
+ {
+  "effort": "low",
+  "gapMs": 300,
+  "steps": 30,
+  "traceId": "t_e10_low_mw6ync0b",
+  "totalMs": 30800,
+  "calls": 3,
+  "meanBatch": 10,
+  "maxQueueDepth": 19,
+  "callMs": {
+   "mean": 10166,
+   "max": 20808
+  },
+  "drainMsAfterLastArrival": 21749,
+  "suggestions": [
+   {
+    "title": "Prefill tracker tickets from issues automatically?",
+    "patternId": "p_create_ticket_from_issue",
+    "latencyFromEvidenceMs": 22953,
+    "evidenceSeq": 26
+   }
+  ],
+  "callLog": [
+   {
+    "batch": 1,
+    "queueDepthAtSend": 1,
+    "ms": 3093,
+    "seqs": [
+     1,
+     1
+    ],
+    "judge": "gate: no task boundary (no completed task in this batch)",
+    "tier2Ms": 2183,
+    "recon": false,
+    "completed": 0
+   },
+   {
+    "batch": 10,
+    "queueDepthAtSend": 10,
+    "ms": 6597,
+    "seqs": [
+     2,
+     11
+    ],
+    "judge": "gate: p_create_ticket_from_issue: 1 completed instance(s), no mechanical evidence",
+    "tier2Ms": 5415,
+    "recon": false,
+    "completed": 1
+   },
+   {
+    "batch": 19,
+    "queueDepthAtSend": 19,
+    "ms": 20808,
+    "seqs": [
+     12,
+     30
+    ],
+    "judge": "suggest (score 0.36)",
+    "tier2Ms": 8823,
+    "recon": false,
+    "judgeMs": 6395,
+    "completed": 3
+   }
+  ]
+ },
+ {
+  "effort": "medium",
+  "gapMs": 300,
+  "steps": 30,
+  "traceId": "t_e10_medium_mw6ynzrw",
+  "totalMs": 31223,
+  "calls": 3,
+  "meanBatch": 10,
+  "maxQueueDepth": 19,
+  "callMs": {
+   "mean": 10308,
+   "max": 20568
+  },
+  "drainMsAfterLastArrival": 22192,
+  "suggestions": [
+   {
+    "title": "Prefill tracker tickets from your other issues?",
+    "patternId": "p_create_ticket_from_issue",
+    "latencyFromEvidenceMs": 23395,
+    "evidenceSeq": 26
+   }
+  ],
+  "callLog": [
+   {
+    "batch": 1,
+    "queueDepthAtSend": 1,
+    "ms": 3270,
+    "seqs": [
+     1,
+     1
+    ],
+    "judge": "gate: no task boundary (no completed task in this batch)",
+    "tier2Ms": 2373,
+    "recon": false,
+    "completed": 0
+   },
+   {
+    "batch": 10,
+    "queueDepthAtSend": 10,
+    "ms": 7085,
+    "seqs": [
+     2,
+     11
+    ],
+    "judge": "gate: p_create_ticket_from_issue: 1 completed instance(s), no mechanical evidence",
+    "tier2Ms": 5833,
+    "recon": false,
+    "completed": 1
+   },
+   {
+    "batch": 19,
+    "queueDepthAtSend": 19,
+    "ms": 20568,
+    "seqs": [
+     12,
+     30
+    ],
+    "judge": "suggest (score 0.346)",
+    "tier2Ms": 8871,
+    "recon": false,
+    "judgeMs": 7240,
+    "completed": 3
+   }
+  ]
+ }
+]

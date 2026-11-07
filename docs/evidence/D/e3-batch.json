@@ -1,0 +1,938 @@
+{
+ "backend": "http://127.0.0.1:8805",
+ "provider": "anthropic",
+ "at": "2026-11-07T22:14:31.315Z",
+ "traces": 0,
+ "checks": "0/0",
+ "tier1Accuracy": null,
+ "specCheckRate": null,
+ "results": [],
+ "activity": {
+  "mode": "batch",
+  "noTier1": false,
+  "effort": "low",
+  "patternAccuracy": "10/10",
+  "repeatSuggested": "7/10",
+  "expectedSuggestionsHit": "7/9",
+  "noiseTracesWithSuggestions": "0/5",
+  "noiseSuggestions": 0,
+  "meanSuggestionLatencyMs": 15098,
+  "callMs": {
+   "n": 15,
+   "mean": 10676,
+   "p50": 12069,
+   "p90": 15610,
+   "max": 16408
+  },
+  "results": [
+   {
+    "name": "act-add-to-cart-x2",
+    "kind": "repeat",
+    "traceId": "t_act_actaddtocartx2_mw6ync11",
+    "steps": 8,
+    "ms": 11143,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Add a product to cart",
+     "Add a product to cart"
+    ],
+    "patterns": [
+     {
+      "id": "p_add_product_to_cart",
+      "name": "Add a product to cart",
+      "completed": 2
+     }
+    ],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8
+      ],
+      "ms": 11143,
+      "tier1Ms": 1780,
+      "tier2Ms": 5351,
+      "judgeMs": 4005,
+      "recon": false,
+      "judge": "judge declined: Adding two different products to a cart is ordinary shopping. Each choice is a deliberate browsing decision, and there is no defined remaining list of items for a script to work through. Doing it twice isn't tedious mechanical work. A widget would also be adding to the cart on the user's behalf, which edges toward purchasing. Being conservative, I'm not suggesting it.",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern",
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity",
+       "open_task",
+       "attach_steps"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_add_product_to_cart (2)",
+    "suggested": false,
+    "expectSuggestion": null,
+    "ok": true
+   },
+   {
+    "name": "act-approve-expense-x2",
+    "kind": "repeat",
+    "traceId": "t_act_actapproveexpensex_mw6ync12",
+    "steps": 8,
+    "ms": 12069,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Approve an expense report",
+     "Approve an expense report"
+    ],
+    "patterns": [
+     {
+      "id": "p_approve_expense_report",
+      "name": "Approve an expense report",
+      "completed": 2
+     }
+    ],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8
+      ],
+      "ms": 12069,
+      "tier1Ms": 1478,
+      "tier2Ms": 5563,
+      "judgeMs": 5020,
+      "recon": false,
+      "judge": "judge declined: There are 2 completed approvals with the same structure, but the core action is approving expense reports. That is a consequential financial decision that effectively authorizes payment. A widget would have to perform it on the user's behalf, which fails the feasibility rule (no sending, publishing or paying). There is also no evidence of remaining pending reports, and each approval likely needs human judgment about the amount and submitter.",
+      "opErrors": 1,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern",
+       "attach_steps",
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_approve_expense_report (2)",
+    "suggested": false,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-archive-newsletters-x3",
+    "kind": "repeat",
+    "traceId": "t_act_actarchivenewslett_mw6ync12",
+    "steps": 6,
+    "ms": 14715,
+    "completedTasks": 3,
+    "completedGoals": [
+     "Archive an email",
+     "Archive an email",
+     "Archive an email"
+    ],
+    "patterns": [
+     {
+      "id": "p_archive_email",
+      "name": "Archive an email",
+      "completed": 3
+     }
+    ],
+    "suggestions": [
+     {
+      "atSeq": 6,
+      "latencyMs": 14715,
+      "title": "Bulk-archive newsletter emails in your inbox?",
+      "patternId": "p_archive_email",
+      "score": 0.332
+     }
+    ],
+    "calls": [
+     {
+      "seqs": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "ms": 14715,
+      "tier1Ms": 1421,
+      "tier2Ms": 5620,
+      "judgeMs": 7663,
+      "recon": false,
+      "judge": "suggest (score 0.332)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern",
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity",
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_archive_email (3)",
+    "suggested": true,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-crm-log-call-x2",
+    "kind": "repeat",
+    "traceId": "t_act_actcrmlogcallx2_mw6ync13",
+    "steps": 10,
+    "ms": 12069,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Log a contact activity",
+     "Log a contact activity"
+    ],
+    "patterns": [
+     {
+      "id": "p_log_contact_activity",
+      "name": "Log a contact activity",
+      "completed": 2
+     }
+    ],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10
+      ],
+      "ms": 12069,
+      "tier1Ms": 2326,
+      "tier2Ms": 5532,
+      "judgeMs": 4202,
+      "recon": false,
+      "judge": "judge declined: There are two completed instances, but the substance of each task is a note the user writes themselves about a different contact. A widget could only skip opening the record and the form, which saves little time. There is also no clear backlog of remaining items on the page. Being conservative, the value is too low to justify interrupting.",
+      "opErrors": 1,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern",
+       "attach_steps",
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_log_contact_activity (2)",
+    "suggested": false,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-g2-reply-noisy",
+    "kind": "repeat",
+    "traceId": "t_act_actg2replynoisy_mw6ync13",
+    "steps": 9,
+    "ms": 15391,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Reply to an email",
+     "Reply to an email"
+    ],
+    "patterns": [
+     {
+      "id": "p_reply_to_email",
+      "name": "Reply to an email",
+      "completed": 2
+     }
+    ],
+    "suggestions": [
+     {
+      "atSeq": 9,
+      "latencyMs": 15391,
+      "title": "Draft replies to your remaining emails?",
+      "patternId": "p_reply_to_email",
+      "score": 0.264
+     }
+    ],
+    "calls": [
+     {
+      "seqs": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9
+      ],
+      "ms": 15391,
+      "tier1Ms": 1456,
+      "tier2Ms": 6402,
+      "judgeMs": 7521,
+      "recon": false,
+      "judge": "suggest (score 0.264)",
+      "opErrors": 1,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern",
+       "attach_steps",
+       "open_task",
+       "attach_steps",
+       "abandon_task",
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_reply_to_email (2)",
+    "suggested": true,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-g2-reply-variant",
+    "kind": "repeat",
+    "traceId": "t_act_actg2replyvariant_mw6ynkml",
+    "steps": 8,
+    "ms": 14412,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Reply to an email",
+     "Reply to an email"
+    ],
+    "patterns": [
+     {
+      "id": "p_reply_to_email",
+      "name": "Reply to an email",
+      "completed": 2
+     }
+    ],
+    "suggestions": [
+     {
+      "atSeq": 8,
+      "latencyMs": 14412,
+      "title": "Draft replies to your other emails for review?",
+      "patternId": "p_reply_to_email",
+      "score": 0.22
+     }
+    ],
+    "calls": [
+     {
+      "seqs": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8
+      ],
+      "ms": 14412,
+      "tier1Ms": 1134,
+      "tier2Ms": 5676,
+      "judgeMs": 7598,
+      "recon": false,
+      "judge": "suggest (score 0.22)",
+      "opErrors": 1,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "attach_steps",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern",
+       "attach_steps",
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_reply_to_email (2)",
+    "suggested": true,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-g2-reply-x2",
+    "kind": "repeat",
+    "traceId": "t_act_actg2replyx2_mw6ynlcb",
+    "steps": 7,
+    "ms": 15610,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Reply to an email",
+     "Reply to an email"
+    ],
+    "patterns": [
+     {
+      "id": "p_reply_to_email",
+      "name": "Reply to an email",
+      "completed": 2
+     }
+    ],
+    "suggestions": [
+     {
+      "atSeq": 7,
+      "latencyMs": 15610,
+      "title": "Draft replies to your remaining emails for review?",
+      "patternId": "p_reply_to_email",
+      "score": 0.247
+     }
+    ],
+    "calls": [
+     {
+      "seqs": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7
+      ],
+      "ms": 15610,
+      "tier1Ms": 1388,
+      "tier2Ms": 5671,
+      "judgeMs": 8547,
+      "recon": false,
+      "judge": "suggest (score 0.247)",
+      "opErrors": 1,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern",
+       "attach_steps",
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_reply_to_email (2)",
+    "suggested": true,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-g2-reply-x3",
+    "kind": "repeat",
+    "traceId": "t_act_actg2replyx3_mw6ynlcc",
+    "steps": 11,
+    "ms": 16408,
+    "completedTasks": 3,
+    "completedGoals": [
+     "Reply to an email",
+     "Reply to an email",
+     "Reply to an email"
+    ],
+    "patterns": [
+     {
+      "id": "p_reply_to_email",
+      "name": "Reply to an email",
+      "completed": 3
+     }
+    ],
+    "suggestions": [
+     {
+      "atSeq": 11,
+      "latencyMs": 16408,
+      "title": "Draft replies to your remaining emails?",
+      "patternId": "p_reply_to_email",
+      "score": 0.264
+     }
+    ],
+    "calls": [
+     {
+      "seqs": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11
+      ],
+      "ms": 16408,
+      "tier1Ms": 1506,
+      "tier2Ms": 6633,
+      "judgeMs": 8263,
+      "recon": false,
+      "judge": "suggest (score 0.264)",
+      "opErrors": 2,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern",
+       "attach_steps",
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity",
+       "attach_steps",
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_reply_to_email (3)",
+    "suggested": true,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-issue-to-ticket-x2",
+    "kind": "repeat",
+    "traceId": "t_act_actissuetoticketx2_mw6ynndt",
+    "steps": 18,
+    "ms": 14131,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Create a tracker issue from a GitHub-style issue",
+     "Create a tracker issue from a GitHub-style issue"
+    ],
+    "patterns": [
+     {
+      "id": "p_create_tracker_issue_from_issue",
+      "name": "Create a tracker issue from an issue",
+      "completed": 2
+     }
+    ],
+    "suggestions": [
+     {
+      "atSeq": 18,
+      "latencyMs": 14131,
+      "title": "Prefill tracker issues from the issues you open here?",
+      "patternId": "p_create_tracker_issue_from_issue",
+      "score": 0.341
+     }
+    ],
+    "calls": [
+     {
+      "seqs": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11,
+       12,
+       13,
+       14,
+       15,
+       16,
+       17,
+       18
+      ],
+      "ms": 14131,
+      "tier1Ms": 1203,
+      "tier2Ms": 6767,
+      "judgeMs": 6157,
+      "recon": false,
+      "judge": "suggest (score 0.341)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern",
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_create_tracker_issue_from_issue (2)",
+    "suggested": true,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-label-bug-x2",
+    "kind": "repeat",
+    "traceId": "t_act_actlabelbugx2_mw6ynnwn",
+    "steps": 10,
+    "ms": 15022,
+    "completedTasks": 2,
+    "completedGoals": [
+     "Add a label to an issue",
+     "Add a label to an issue"
+    ],
+    "patterns": [
+     {
+      "id": "p_add_label_to_issue",
+      "name": "Add a label to an issue",
+      "completed": 2
+     }
+    ],
+    "suggestions": [
+     {
+      "atSeq": 10,
+      "latencyMs": 15022,
+      "title": "Add labels to several issues at once from the issues list?",
+      "patternId": "p_add_label_to_issue",
+      "score": 0.264
+     }
+    ],
+    "calls": [
+     {
+      "seqs": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10
+      ],
+      "ms": 15022,
+      "tier1Ms": 1428,
+      "tier2Ms": 5235,
+      "judgeMs": 8355,
+      "recon": false,
+      "judge": "suggest (score 0.264)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "create_pattern",
+       "link_pattern",
+       "open_task",
+       "attach_steps",
+       "set_slot",
+       "set_slot",
+       "complete_task",
+       "link_pattern",
+       "flag_opportunity"
+      ]
+     }
+    ],
+    "patternCorrect": true,
+    "bestPattern": "p_add_label_to_issue (2)",
+    "suggested": true,
+    "expectSuggestion": true,
+    "ok": true
+   },
+   {
+    "name": "act-noise-docs-search",
+    "kind": "noise",
+    "traceId": "t_act_actnoisedocssearch_mw6ynvqx",
+    "steps": 8,
+    "ms": 3686,
+    "completedTasks": 0,
+    "completedGoals": [],
+    "patterns": [],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8
+      ],
+      "ms": 3686,
+      "tier1Ms": 1044,
+      "tier2Ms": 2640,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps"
+      ]
+     }
+    ],
+    "ok": true
+   },
+   {
+    "name": "act-noise-g2-browse",
+    "kind": "noise",
+    "traceId": "t_act_actnoiseg2browse_mw6ynxdx",
+    "steps": 8,
+    "ms": 3183,
+    "completedTasks": 0,
+    "completedGoals": [],
+    "patterns": [],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8
+      ],
+      "ms": 3183,
+      "tier1Ms": 1282,
+      "tier2Ms": 1898,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps"
+      ]
+     }
+    ],
+    "ok": true
+   },
+   {
+    "name": "act-noise-news",
+    "kind": "noise",
+    "traceId": "t_act_actnoisenews_mw6yny04",
+    "steps": 11,
+    "ms": 4172,
+    "completedTasks": 0,
+    "completedGoals": [],
+    "patterns": [],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11
+      ],
+      "ms": 4172,
+      "tier1Ms": 1676,
+      "tier2Ms": 2492,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps"
+      ]
+     }
+    ],
+    "ok": true
+   },
+   {
+    "name": "act-noise-shop-browse",
+    "kind": "noise",
+    "traceId": "t_act_actnoiseshopbrowse_mw6ynyac",
+    "steps": 9,
+    "ms": 3598,
+    "completedTasks": 0,
+    "completedGoals": [],
+    "patterns": [],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9
+      ],
+      "ms": 3598,
+      "tier1Ms": 1163,
+      "tier2Ms": 2431,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps"
+      ]
+     }
+    ],
+    "ok": true
+   },
+   {
+    "name": "youtube-read",
+    "kind": "noise",
+    "traceId": "t_act_youtuberead_mw6ynylb",
+    "steps": 2,
+    "ms": 4532,
+    "completedTasks": 0,
+    "completedGoals": [],
+    "patterns": [],
+    "suggestions": [],
+    "calls": [
+     {
+      "seqs": [
+       1,
+       2
+      ],
+      "ms": 4532,
+      "tier1Ms": 1902,
+      "tier2Ms": 2628,
+      "recon": false,
+      "judge": "gate: no task boundary (no completed task in this batch)",
+      "opErrors": 0,
+      "ops": [
+       "open_task",
+       "attach_steps",
+       "open_task",
+       "attach_steps",
+       "set_slot"
+      ]
+     }
+    ],
+    "ok": true
+   }
+  ]
+ }
+}

@@ -1,5 +1,13 @@
 {
   "description": "YouTube fixture: click Subscribe, copy a comment's text (lineage source).",
-  "tier1": { "1": "subscribe|click|follow", "2": "copy" },
-  "spec": { "goalNot": "draft|send|reply" }
+  "tier1": {
+    "1": "subscribe|click|follow",
+    "2": "copy"
+  },
+  "spec": {
+    "goalNot": "draft|send|reply"
+  },
+  "activity": {
+    "noise": true
+  }
 }

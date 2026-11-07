@@ -1,0 +1,6 @@
+{
+ "description": "FIXTURE-DERIVED. Open email, back, open another, back, open the first again, back — no writes.",
+ "activity": {
+  "noise": true
+ }
+}

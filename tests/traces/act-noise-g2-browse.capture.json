@@ -1,0 +1,517 @@
+{
+ "kind": "wwa-trace",
+ "version": 1,
+ "name": "act-noise-g2-browse",
+ "synthetic": false,
+ "description": "FIXTURE-DERIVED. Open email, back, open another, back, open the first again, back — no writes.",
+ "steps": [
+  {
+   "id": "g2_1",
+   "origin": "http://127.0.0.1:8802",
+   "url": "http://127.0.0.1:8802/fixture-g2/index.html",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "data",
+       "selector": "tr[data-legacy-message-id=\"m1\"]",
+       "matches": 1
+      },
+      {
+       "kind": "css",
+       "selector": "tr.zA.zE:nth-of-type(1)",
+       "matches": 1
+      },
+      {
+       "kind": "role-name",
+       "selector": "[role=\"row\"]",
+       "matches": 3
+      }
+     ],
+     "tag": "tr",
+     "role": "row",
+     "accessibleName": "Nov 6 Q4 launch checklist — Hi, Can you review the Q4 launch checklist by Friday? Items",
+     "landmarkPath": "main > grid[Inbox]"
+    },
+    "accessibleName": "Nov 6 Q4 launch checklist — Hi, Can you review the Q4 launch checklist by Friday? Items",
+    "role": "row",
+    "landmarkPath": "main > grid[Inbox]"
+   },
+   "effects": {
+    "titleChange": "HardMail — Q4 launch checklist",
+    "addedRegions": [
+     {
+      "root": "div.adn.ads",
+      "skeleton": "div.adn.ads[role=main]\n  div.ajy[role=button][aria-label=\"Back to Inbox\"] \"←\"\n  h2.hP \"Q4 launch checklist\"\n  div\n    span.gD \"Priya Nair\"\n    span.go \"<priya@example.com>\"\n  div.a3s.aiL[role=presentation] \"Hi,\n\nCan you review the Q4 launch checkl\"\n  div.aoI\n  span.ams.bkH[role=link][aria-label=\"Reply\"] \"Reply\"\n"
+     }
+    ],
+    "removedRegions": [
+     "table.F[role=grid]"
+    ],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000002500,
+   "tEnd": 1700000002532,
+   "settle": {
+    "reason": "interrupted",
+    "mutations": 1,
+    "lastActivityMs": 1
+   },
+   "title": "HardMail — Q4 launch checklist",
+   "seq": 1,
+   "tabId": 1739126509,
+   "windowId": 1739126504
+  },
+  {
+   "id": "g2_2",
+   "origin": "http://127.0.0.1:8802",
+   "url": "http://127.0.0.1:8802/fixture-g2/index.html",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "aria-label",
+       "selector": "[aria-label=\"Back to Inbox\"]",
+       "matches": 1
+      },
+      {
+       "kind": "role-name",
+       "selector": "[role=\"button\"][aria-label=\"Back to Inbox\"]",
+       "matches": 1
+      },
+      {
+       "kind": "css",
+       "selector": "div.ajy",
+       "matches": 1
+      },
+      {
+       "kind": "text",
+       "selector": "[role=\"button\"] >> text=\"←\"",
+       "matches": 1
+      }
+     ],
+     "tag": "div",
+     "role": "button",
+     "accessibleName": "Back to Inbox",
+     "landmarkPath": "main > main"
+    },
+    "accessibleName": "Back to Inbox",
+    "role": "button",
+    "landmarkPath": "main > main"
+   },
+   "effects": {
+    "titleChange": "HardMail — Inbox",
+    "addedRegions": [
+     {
+      "root": "table.F",
+      "skeleton": "table.F[role=grid][aria-label=\"Inbox\"]\n  tbody\n    tr.zA[role=row]\n      td.yX.xY[role=gridcell] \"Nov 6\"\n      td.y2[role=gridcell]\n        span.bog \"Q4 launch checklist\"\n        span.y2.s \"— Hi,\n\nCan you review the Q4 launch chec\"\n      td.xY[role=gridcell]\n    tr.zA.zE[role=row]\n      td.yX.xY[role=gridcell] \"Nov 6\"\n      td.y2[role=gridcell]\n        span.bog \"Dinner Saturday?\"\n        span.y2.s \"— Hey!\n\nA few of us are doing dinner Sat\"\n      td.xY[role=gridcell]\n    tr.zA[role=row]\n      td.yX.xY[role=gridcell] \"Nov 4\"\n      td.y2[role=gridcell]\n        span.bog \"Weekly digest #482\"\n        span.y2.s \"— Your weekly digest: 3 new docs, 1 pend\"\n      td.xY[role=gridcell]\n"
+     }
+    ],
+    "removedRegions": [
+     "div.adn.ads[role=main]"
+    ],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000005000,
+   "tEnd": 1700000005401,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 1
+   },
+   "title": "HardMail — Inbox",
+   "seq": 2,
+   "tabId": 964618852,
+   "windowId": 964618847
+  },
+  {
+   "id": "g2_3",
+   "origin": "http://127.0.0.1:8802",
+   "url": "http://127.0.0.1:8802/fixture-g2/index.html",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "data",
+       "selector": "tr[data-legacy-message-id=\"m2\"]",
+       "matches": 1
+      },
+      {
+       "kind": "css",
+       "selector": "tr.zA.zE:nth-of-type(1)",
+       "matches": 1
+      },
+      {
+       "kind": "role-name",
+       "selector": "[role=\"row\"]",
+       "matches": 3
+      }
+     ],
+     "tag": "tr",
+     "role": "row",
+     "accessibleName": "Nov 6 Dinner Saturday? — Hey! A few of us are doing dinner Saturday at 7",
+     "landmarkPath": "main > grid[Inbox]"
+    },
+    "accessibleName": "Nov 6 Dinner Saturday? — Hey! A few of us are doing dinner Saturday at 7",
+    "role": "row",
+    "landmarkPath": "main > grid[Inbox]"
+   },
+   "effects": {
+    "titleChange": "HardMail — Dinner Saturday?",
+    "addedRegions": [
+     {
+      "root": "div.adn.ads",
+      "skeleton": "div.adn.ads[role=main]\n  div.ajy[role=button][aria-label=\"Back to Inbox\"] \"←\"\n  h2.hP \"Dinner Saturday?\"\n  div\n    span.gD \"Devon\"\n    span.go \"<priya@example.com>\"\n  div.a3s.aiL[role=presentation] \"Hi,\n\nCan you review the Q4 launch checkl\"\n  div.aoI\n  span.ams.bkH[role=link][aria-label=\"Reply\"] \"Reply\"\n"
+     }
+    ],
+    "removedRegions": [
+     "table.F[role=grid]"
+    ],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000007500,
+   "tEnd": 1700000007532,
+   "settle": {
+    "reason": "interrupted",
+    "mutations": 1,
+    "lastActivityMs": 1
+   },
+   "title": "HardMail — Dinner Saturday?",
+   "seq": 3,
+   "tabId": 1739126509,
+   "windowId": 1739126504
+  },
+  {
+   "id": "g2_4",
+   "origin": "http://127.0.0.1:8802",
+   "url": "http://127.0.0.1:8802/fixture-g2/index.html",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "aria-label",
+       "selector": "[aria-label=\"Back to Inbox\"]",
+       "matches": 1
+      },
+      {
+       "kind": "role-name",
+       "selector": "[role=\"button\"][aria-label=\"Back to Inbox\"]",
+       "matches": 1
+      },
+      {
+       "kind": "css",
+       "selector": "div.ajy",
+       "matches": 1
+      },
+      {
+       "kind": "text",
+       "selector": "[role=\"button\"] >> text=\"←\"",
+       "matches": 1
+      }
+     ],
+     "tag": "div",
+     "role": "button",
+     "accessibleName": "Back to Inbox",
+     "landmarkPath": "main > main"
+    },
+    "accessibleName": "Back to Inbox",
+    "role": "button",
+    "landmarkPath": "main > main"
+   },
+   "effects": {
+    "titleChange": "HardMail — Inbox",
+    "addedRegions": [
+     {
+      "root": "table.F",
+      "skeleton": "table.F[role=grid][aria-label=\"Inbox\"]\n  tbody\n    tr.zA[role=row]\n      td.yX.xY[role=gridcell] \"Nov 6\"\n      td.y2[role=gridcell]\n        span.bog \"Q4 launch checklist\"\n        span.y2.s \"— Hi,\n\nCan you review the Q4 launch chec\"\n      td.xY[role=gridcell]\n    tr.zA.zE[role=row]\n      td.yX.xY[role=gridcell] \"Nov 6\"\n      td.y2[role=gridcell]\n        span.bog \"Dinner Saturday?\"\n        span.y2.s \"— Hey!\n\nA few of us are doing dinner Sat\"\n      td.xY[role=gridcell]\n    tr.zA[role=row]\n      td.yX.xY[role=gridcell] \"Nov 4\"\n      td.y2[role=gridcell]\n        span.bog \"Weekly digest #482\"\n        span.y2.s \"— Your weekly digest: 3 new docs, 1 pend\"\n      td.xY[role=gridcell]\n"
+     }
+    ],
+    "removedRegions": [
+     "div.adn.ads[role=main]"
+    ],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000010000,
+   "tEnd": 1700000010401,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 1
+   },
+   "title": "HardMail — Inbox",
+   "seq": 4,
+   "tabId": 964618852,
+   "windowId": 964618847
+  },
+  {
+   "id": "g2_5",
+   "origin": "http://127.0.0.1:8802",
+   "url": "http://127.0.0.1:8802/fixture-g2/index.html",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "data",
+       "selector": "tr[data-legacy-message-id=\"m3\"]",
+       "matches": 1
+      },
+      {
+       "kind": "css",
+       "selector": "tr.zA.zE:nth-of-type(1)",
+       "matches": 1
+      },
+      {
+       "kind": "role-name",
+       "selector": "[role=\"row\"]",
+       "matches": 3
+      }
+     ],
+     "tag": "tr",
+     "role": "row",
+     "accessibleName": "Nov 4 Weekly digest — Your weekly digest: 3 new docs, 1 pending approval",
+     "landmarkPath": "main > grid[Inbox]"
+    },
+    "accessibleName": "Nov 4 Weekly digest — Your weekly digest: 3 new docs, 1 pending approval",
+    "role": "row",
+    "landmarkPath": "main > grid[Inbox]"
+   },
+   "effects": {
+    "titleChange": "HardMail — Weekly digest",
+    "addedRegions": [
+     {
+      "root": "div.adn.ads",
+      "skeleton": "div.adn.ads[role=main]\n  div.ajy[role=button][aria-label=\"Back to Inbox\"] \"←\"\n  h2.hP \"Weekly digest\"\n  div\n    span.gD \"Ops Bot\"\n    span.go \"<priya@example.com>\"\n  div.a3s.aiL[role=presentation] \"Hi,\n\nCan you review the Q4 launch checkl\"\n  div.aoI\n  span.ams.bkH[role=link][aria-label=\"Reply\"] \"Reply\"\n"
+     }
+    ],
+    "removedRegions": [
+     "table.F[role=grid]"
+    ],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000012500,
+   "tEnd": 1700000012532,
+   "settle": {
+    "reason": "interrupted",
+    "mutations": 1,
+    "lastActivityMs": 1
+   },
+   "title": "HardMail — Weekly digest",
+   "seq": 5,
+   "tabId": 1739126509,
+   "windowId": 1739126504
+  },
+  {
+   "id": "g2_6",
+   "origin": "http://127.0.0.1:8802",
+   "url": "http://127.0.0.1:8802/fixture-g2/index.html",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "aria-label",
+       "selector": "[aria-label=\"Back to Inbox\"]",
+       "matches": 1
+      },
+      {
+       "kind": "role-name",
+       "selector": "[role=\"button\"][aria-label=\"Back to Inbox\"]",
+       "matches": 1
+      },
+      {
+       "kind": "css",
+       "selector": "div.ajy",
+       "matches": 1
+      },
+      {
+       "kind": "text",
+       "selector": "[role=\"button\"] >> text=\"←\"",
+       "matches": 1
+      }
+     ],
+     "tag": "div",
+     "role": "button",
+     "accessibleName": "Back to Inbox",
+     "landmarkPath": "main > main"
+    },
+    "accessibleName": "Back to Inbox",
+    "role": "button",
+    "landmarkPath": "main > main"
+   },
+   "effects": {
+    "titleChange": "HardMail — Inbox",
+    "addedRegions": [
+     {
+      "root": "table.F",
+      "skeleton": "table.F[role=grid][aria-label=\"Inbox\"]\n  tbody\n    tr.zA[role=row]\n      td.yX.xY[role=gridcell] \"Nov 6\"\n      td.y2[role=gridcell]\n        span.bog \"Q4 launch checklist\"\n        span.y2.s \"— Hi,\n\nCan you review the Q4 launch chec\"\n      td.xY[role=gridcell]\n    tr.zA.zE[role=row]\n      td.yX.xY[role=gridcell] \"Nov 6\"\n      td.y2[role=gridcell]\n        span.bog \"Dinner Saturday?\"\n        span.y2.s \"— Hey!\n\nA few of us are doing dinner Sat\"\n      td.xY[role=gridcell]\n    tr.zA[role=row]\n      td.yX.xY[role=gridcell] \"Nov 4\"\n      td.y2[role=gridcell]\n        span.bog \"Weekly digest #482\"\n        span.y2.s \"— Your weekly digest: 3 new docs, 1 pend\"\n      td.xY[role=gridcell]\n"
+     }
+    ],
+    "removedRegions": [
+     "div.adn.ads[role=main]"
+    ],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000015000,
+   "tEnd": 1700000015401,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 1
+   },
+   "title": "HardMail — Inbox",
+   "seq": 6,
+   "tabId": 964618852,
+   "windowId": 964618847
+  },
+  {
+   "id": "g2_7",
+   "origin": "http://127.0.0.1:8802",
+   "url": "http://127.0.0.1:8802/fixture-g2/index.html",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "data",
+       "selector": "tr[data-legacy-message-id=\"m1\"]",
+       "matches": 1
+      },
+      {
+       "kind": "css",
+       "selector": "tr.zA.zE:nth-of-type(1)",
+       "matches": 1
+      },
+      {
+       "kind": "role-name",
+       "selector": "[role=\"row\"]",
+       "matches": 3
+      }
+     ],
+     "tag": "tr",
+     "role": "row",
+     "accessibleName": "Nov 6 Q4 launch checklist — Hi, Can you review the Q4 launch checklist by Friday? Items",
+     "landmarkPath": "main > grid[Inbox]"
+    },
+    "accessibleName": "Nov 6 Q4 launch checklist — Hi, Can you review the Q4 launch checklist by Friday? Items",
+    "role": "row",
+    "landmarkPath": "main > grid[Inbox]"
+   },
+   "effects": {
+    "titleChange": "HardMail — Q4 launch checklist",
+    "addedRegions": [
+     {
+      "root": "div.adn.ads",
+      "skeleton": "div.adn.ads[role=main]\n  div.ajy[role=button][aria-label=\"Back to Inbox\"] \"←\"\n  h2.hP \"Q4 launch checklist\"\n  div\n    span.gD \"Priya Nair\"\n    span.go \"<priya@example.com>\"\n  div.a3s.aiL[role=presentation] \"Hi,\n\nCan you review the Q4 launch checkl\"\n  div.aoI\n  span.ams.bkH[role=link][aria-label=\"Reply\"] \"Reply\"\n"
+     }
+    ],
+    "removedRegions": [
+     "table.F[role=grid]"
+    ],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000017500,
+   "tEnd": 1700000017532,
+   "settle": {
+    "reason": "interrupted",
+    "mutations": 1,
+    "lastActivityMs": 1
+   },
+   "title": "HardMail — Q4 launch checklist",
+   "seq": 7,
+   "tabId": 1739126509,
+   "windowId": 1739126504
+  },
+  {
+   "id": "g2_8",
+   "origin": "http://127.0.0.1:8802",
+   "url": "http://127.0.0.1:8802/fixture-g2/index.html",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "aria-label",
+       "selector": "[aria-label=\"Back to Inbox\"]",
+       "matches": 1
+      },
+      {
+       "kind": "role-name",
+       "selector": "[role=\"button\"][aria-label=\"Back to Inbox\"]",
+       "matches": 1
+      },
+      {
+       "kind": "css",
+       "selector": "div.ajy",
+       "matches": 1
+      },
+      {
+       "kind": "text",
+       "selector": "[role=\"button\"] >> text=\"←\"",
+       "matches": 1
+      }
+     ],
+     "tag": "div",
+     "role": "button",
+     "accessibleName": "Back to Inbox",
+     "landmarkPath": "main > main"
+    },
+    "accessibleName": "Back to Inbox",
+    "role": "button",
+    "landmarkPath": "main > main"
+   },
+   "effects": {
+    "titleChange": "HardMail — Inbox",
+    "addedRegions": [
+     {
+      "root": "table.F",
+      "skeleton": "table.F[role=grid][aria-label=\"Inbox\"]\n  tbody\n    tr.zA[role=row]\n      td.yX.xY[role=gridcell] \"Nov 6\"\n      td.y2[role=gridcell]\n        span.bog \"Q4 launch checklist\"\n        span.y2.s \"— Hi,\n\nCan you review the Q4 launch chec\"\n      td.xY[role=gridcell]\n    tr.zA.zE[role=row]\n      td.yX.xY[role=gridcell] \"Nov 6\"\n      td.y2[role=gridcell]\n        span.bog \"Dinner Saturday?\"\n        span.y2.s \"— Hey!\n\nA few of us are doing dinner Sat\"\n      td.xY[role=gridcell]\n    tr.zA[role=row]\n      td.yX.xY[role=gridcell] \"Nov 4\"\n      td.y2[role=gridcell]\n        span.bog \"Weekly digest #482\"\n        span.y2.s \"— Your weekly digest: 3 new docs, 1 pend\"\n      td.xY[role=gridcell]\n"
+     }
+    ],
+    "removedRegions": [
+     "div.adn.ads[role=main]"
+    ],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000020000,
+   "tEnd": 1700000020401,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 1
+   },
+   "title": "HardMail — Inbox",
+   "seq": 8,
+   "tabId": 964618852,
+   "windowId": 964618847
+  }
+ ]
+}

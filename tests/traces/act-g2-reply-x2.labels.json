@@ -1,0 +1,8 @@
+{
+ "description": "FIXTURE-DERIVED. Reply to 2 emails on HardMail (m1, then m3), Back to Inbox between.",
+ "activity": {
+  "pattern": "repl(y|ies)|respond|answer",
+  "minCompleted": 2,
+  "expectSuggestion": true
+ }
+}

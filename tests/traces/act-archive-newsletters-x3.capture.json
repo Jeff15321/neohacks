@@ -1,0 +1,291 @@
+{
+ "kind": "wwa-trace",
+ "version": 1,
+ "name": "act-archive-newsletters-x3",
+ "synthetic": true,
+ "description": "SYNTHETIC. Open and archive 3 newsletters (\"Conversation archived\").",
+ "steps": [
+  {
+   "id": "syn_1",
+   "seq": 1,
+   "tabId": 1,
+   "origin": "https://mail.example.test",
+   "url": "https://mail.example.test/inbox",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "tr[data-subject=\"The Weekly Byte #212\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "tr",
+     "role": "row",
+     "accessibleName": "The Weekly Byte #212"
+    },
+    "accessibleName": "The Weekly Byte #212",
+    "role": "row"
+   },
+   "effects": {
+    "titleChange": "The Weekly Byte #212 — Mail",
+    "addedRegions": [
+     {
+      "root": "div.message",
+      "skeleton": "div.message\n  h2 \"The Weekly Byte #212\"\n  div.body \"This week in…  Unsubscribe\""
+     }
+    ],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000002500,
+   "tEnd": 1700000002950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 40
+   },
+   "title": "The Weekly Byte #212 — Mail"
+  },
+  {
+   "id": "syn_2",
+   "seq": 2,
+   "tabId": 1,
+   "origin": "https://mail.example.test",
+   "url": "https://mail.example.test/inbox",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "aria-label",
+       "selector": "[aria-label=\"Archive\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "button",
+     "accessibleName": "Archive"
+    },
+    "accessibleName": "Archive"
+   },
+   "effects": {
+    "titleChange": "Inbox — Mail",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [
+     "Conversation archived"
+    ],
+    "net": [
+     {
+      "opId": "op2_0",
+      "method": "POST",
+      "routeTemplate": "/api/threads/:id/archive",
+      "status": 200
+     }
+    ],
+    "mutatingOk": true
+   },
+   "settled": true,
+   "tStart": 1700000005000,
+   "tEnd": 1700000005450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 40
+   },
+   "title": "Inbox — Mail"
+  },
+  {
+   "id": "syn_3",
+   "seq": 3,
+   "tabId": 1,
+   "origin": "https://mail.example.test",
+   "url": "https://mail.example.test/inbox",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "tr[data-subject=\"Product Digest — November\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "tr",
+     "role": "row",
+     "accessibleName": "Product Digest — November"
+    },
+    "accessibleName": "Product Digest — November",
+    "role": "row"
+   },
+   "effects": {
+    "titleChange": "Product Digest — November — Mail",
+    "addedRegions": [
+     {
+      "root": "div.message",
+      "skeleton": "div.message\n  h2 \"Product Digest — November\"\n  div.body \"This week in…  Unsubscribe\""
+     }
+    ],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000007500,
+   "tEnd": 1700000007950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 40
+   },
+   "title": "Product Digest — November — Mail"
+  },
+  {
+   "id": "syn_4",
+   "seq": 4,
+   "tabId": 1,
+   "origin": "https://mail.example.test",
+   "url": "https://mail.example.test/inbox",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "aria-label",
+       "selector": "[aria-label=\"Archive\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "button",
+     "accessibleName": "Archive"
+    },
+    "accessibleName": "Archive"
+   },
+   "effects": {
+    "titleChange": "Inbox — Mail",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [
+     "Conversation archived"
+    ],
+    "net": [
+     {
+      "opId": "op4_0",
+      "method": "POST",
+      "routeTemplate": "/api/threads/:id/archive",
+      "status": 200
+     }
+    ],
+    "mutatingOk": true
+   },
+   "settled": true,
+   "tStart": 1700000010000,
+   "tEnd": 1700000010450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 40
+   },
+   "title": "Inbox — Mail"
+  },
+  {
+   "id": "syn_5",
+   "seq": 5,
+   "tabId": 1,
+   "origin": "https://mail.example.test",
+   "url": "https://mail.example.test/inbox",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "css",
+       "selector": "tr[data-subject=\"Morning Brew\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "tr",
+     "role": "row",
+     "accessibleName": "Morning Brew"
+    },
+    "accessibleName": "Morning Brew",
+    "role": "row"
+   },
+   "effects": {
+    "titleChange": "Morning Brew — Mail",
+    "addedRegions": [
+     {
+      "root": "div.message",
+      "skeleton": "div.message\n  h2 \"Morning Brew\"\n  div.body \"This week in…  Unsubscribe\""
+     }
+    ],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1700000012500,
+   "tEnd": 1700000012950,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 40
+   },
+   "title": "Morning Brew — Mail"
+  },
+  {
+   "id": "syn_6",
+   "seq": 6,
+   "tabId": 1,
+   "origin": "https://mail.example.test",
+   "url": "https://mail.example.test/inbox",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "aria-label",
+       "selector": "[aria-label=\"Archive\"]",
+       "matches": 1
+      }
+     ],
+     "tag": "button",
+     "accessibleName": "Archive"
+    },
+    "accessibleName": "Archive"
+   },
+   "effects": {
+    "titleChange": "Inbox — Mail",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [
+     "Conversation archived"
+    ],
+    "net": [
+     {
+      "opId": "op6_0",
+      "method": "POST",
+      "routeTemplate": "/api/threads/:id/archive",
+      "status": 200
+     }
+    ],
+    "mutatingOk": true
+   },
+   "settled": true,
+   "tStart": 1700000015000,
+   "tEnd": 1700000015450,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 1,
+    "lastActivityMs": 40
+   },
+   "title": "Inbox — Mail"
+  }
+ ]
+}

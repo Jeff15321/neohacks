@@ -9,3 +9,6 @@ export * from './settle.js';
 export * from './locators.js';
 export * from './step-redact.js';
 export * from './lineage.js';
+export * from './activity.js';
+export * from './suggest.js';
+export * from './job-machine.js';

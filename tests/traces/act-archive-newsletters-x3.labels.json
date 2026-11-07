@@ -1,0 +1,8 @@
+{
+ "description": "SYNTHETIC. Open and archive 3 newsletters (\"Conversation archived\").",
+ "activity": {
+  "pattern": "archiv|newsletter|clean|triage",
+  "minCompleted": 2,
+  "expectSuggestion": true
+ }
+}
