@@ -32,7 +32,23 @@ agent when a step's postcondition fails, so every step MUST declare what success
   - Steps must be idempotent: if the postcondition is already true, do not act again (no duplicate drafts).
   - Postconditions must POSITIVELY confirm success. Never accept "nothing found" as success just because elements
     are missing (the page may still be loading); accept an empty result only when the page shows an explicit empty
-    state (e.g. an "inbox is empty" message) — otherwise fail so the platform can wait/recover.
+    state (e.g. an "inbox is empty" message) — otherwise fail so the platform can wait/recover. Detect that empty
+    state in the step itself (e.g. a [role=status]/empty-state element whose text matches /empty|no (new )?(mail|
+    messages|results|items)/i) and let the postcondition accept it, e.g.
+      check: (s) => s.items.length > 0 || (s.emptyState === true) || 'rows not loaded and no empty-state message'
+    where run() sets s.emptyState only when that explicit empty-state text is visible.
+  - Postconditions check the EFFECT of the step, never the wording of the control the step (or a branch) clicks.
+    The recovery agent heals renamed/moved controls (e.g. "Reply" shown as "Respond", "Save draft" as "Keep"), so
+    a postcondition that requires the original label can NEVER pass after a correct recovery. Good effects:
+    "the message view for this item is open" (its subject heading/body is visible and the list row is gone),
+    "an editable composer (textarea/[contenteditable]/[role=textbox]) is visible", "the drafts counter increased or
+    a 'saved' toast appeared", "the row's state/class changed", "a dialog is gone". Bad: "a Reply button is visible",
+    "a control labelled X exists". Prefer structure/role/attributes (headings, [role=dialog], [contenteditable],
+    counters, data-* ids) over visible text in BOTH postconditions and helper lookups; when you must match a
+    control by text, use a synonym regex (e.g. /reply|respond|answer/i) so the scripted path also tolerates renames.
+  - Write at least one branch per fragile click step for "a popup/dialog/interstitial ([role=dialog], [aria-modal],
+    a fixed overlay) covers the page": dismiss it with its non-committal control (Not now / No thanks / Close /
+    Dismiss / ×), then redo the step's action.
   - Give per-item steps a stable name plus index (e.g. 'open-reply-1', 'open-reply-2'): branches the agent learns for
     one item are re-used for the others.
   - Never put sending/deleting/publishing/paying into a step or branch; a runtime danger guard blocks script

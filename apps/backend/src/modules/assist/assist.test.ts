@@ -43,3 +43,13 @@ test('assist.create / escalate (mock): reviewed branch; escalate uses the genera
   assert.match(esc.input, /UNTRUSTED DATA/);
   await app.close();
 });
+
+test('assist prompts: decide never stops for overlays; create gets the state shape framed as untrusted', async () => {
+  const { DECIDE_SYSTEM } = await import('./prompts/decide.js');
+  const { CREATE_SYSTEM, createUser } = await import('./prompts/create.js');
+  assert.match(DECIDE_SYSTEM, /NEVER "stop" because of such an overlay/);
+  assert.match(CREATE_SYSTEM, /synonym/);
+  const u = createUser({ ...base, dom: '<div>', tier: 'create', stateKeys: ['items', 'cur'], stateShape: '{"cur":0,"items":[{"id":"m1"}]}' });
+  assert.match(u, /STATE SHAPE[^\n]*UNTRUSTED[\s\S]*<state_shape>\n\{"cur":0/);
+  assert.doesNotMatch(createUser({ ...base, dom: '<div>', tier: 'create' }), /STATE SHAPE/);
+});

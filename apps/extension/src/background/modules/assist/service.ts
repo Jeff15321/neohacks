@@ -3,7 +3,7 @@ import {
   type AssistCreateRequest, type AssistCreateResponse, type AssistDecideRequest, type AssistDecideResponse, type AssistNewBranch,
   type RunTimelineEvent, type StepFailureReport, type WidgetRun,
 } from '@app/contracts';
-import { beginAttempt, buildRunNarrative, learnedBranchSnippet, newRunAssistState, stepFamily, planAssist, resolveDecision, reviewBranchCode, type RunAssistState } from '@app/core/assist';
+import { beginAttempt, buildRunNarrative, learnedBranchSnippet, newRunAssistState, stepFamily, planAssist, resolveDecision, reviewBranchCode, stateShapePreview, type RunAssistState } from '@app/core/assist';
 import { checkGeneratedCode } from '@app/core/validate-code';
 import { buildBranchSource } from '@app/widget-runtime';
 import type { Bus } from '../../bus.js';
@@ -127,7 +127,8 @@ export class AssistService {
 
     s.newCount++;
     const stateKeys = state && typeof state === 'object' ? Object.keys(state as object).slice(0, 40) : [];
-    const creq: AssistCreateRequest = { ...req, tier, stateKeys, previous: s.lastNew };
+    const stateShape = state && typeof state === 'object' ? stateShapePreview(state) || undefined : undefined;
+    const creq: AssistCreateRequest = { ...req, tier, stateKeys, stateShape, previous: s.lastNew };
     let cres: AssistCreateResponse;
     try { cres = await backend.post<AssistCreateResponse>('/api/assist/create', creq, traceId); }
     catch (e) { cres = { ok: false, error: String((e as Error).message) }; }

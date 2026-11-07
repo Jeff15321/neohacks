@@ -42,6 +42,26 @@ export function beginAttempt(run: RunAssistState, step: string): StepAssistState
   return s;
 }
 
+/**
+ * Compact JSON preview of the run state for the branch writer (shape + small values): strings cut to `str` chars,
+ * arrays to 5 items, depth 4, whole preview ≤ `max` chars. Lets the agent use real ids (state.items[state.cur].id)
+ * instead of guessing from key names.
+ */
+export function stateShapePreview(state: unknown, max = 1200, str = 60): string {
+  const walk = (v: unknown, d: number): unknown => {
+    if (typeof v === 'string') return v.length > str ? `${v.slice(0, str)}…(${v.length} chars)` : v;
+    if (v === null || typeof v !== 'object') return v;
+    if (d >= 4) return Array.isArray(v) ? `[array(${v.length})]` : '{…}';
+    if (Array.isArray(v)) { const a: unknown[] = v.slice(0, 5).map(x => walk(x, d + 1)); if (v.length > 5) a.push(`…+${v.length - 5} more`); return a; }
+    const o: Record<string, unknown> = {};
+    for (const k of Object.keys(v as object).slice(0, 30)) o[k] = walk((v as Record<string, unknown>)[k], d + 1);
+    return o;
+  };
+  let out: string;
+  try { out = JSON.stringify(walk(state, 0)) ?? ''; } catch { return ''; }
+  return out.length > max ? `${out.slice(0, max)}…` : out;
+}
+
 export type ResolvedDecision = { kind: 'branch'; branchId: string } | { kind: 'new' } | { kind: 'stop'; reason: string };
 
 /** Map the decide model's free-form choice onto an action. Unknown / already-tried branch ids become "new". */
