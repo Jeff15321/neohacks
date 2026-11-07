@@ -3,6 +3,26 @@
 Repo: https://github.com/Jeff15321/neohacks · PR #1 (branch `mvp`, ~7 commits).
 Everything below is empirically verified unless marked "unverified".
 
+## Product intent (the north star)
+
+An AI-powered extension that lets ANY user extend ANY website with real,
+functional, AI-generated UI — "add a button to Gmail that drafts replies to
+my 2 recent unread emails", "group this YouTube video's comments into
+topics", "extract this Amazon product's specs into a compare panel".
+
+- The platform is an EXECUTION ENVIRONMENT for generated website logic —
+  never a registry of per-site hardcoded tools (that would defeat the core
+  hypothesis: arbitrary capability from natural language).
+- Widgets are genuine generated JS: their own UI, own DOM traversal, own
+  workflow logic — calling only GENERIC platform APIs (inference, storage,
+  log, future: network).
+- Preferred UX: modify the site's native layout (toolbar button, panel beside
+  content), not a floating dock; dock is fallback.
+- Safety contract: user reviews code before run; draft-only, never
+  send/delete/purchase; origin-scoped; keys server-side.
+- Demo target: compelling end-to-end Gmail draft workflow + proof the same
+  machinery generalizes (YouTube/Amazon), not production polish.
+
 ## What it is
 
 Chrome MV3 extension + Fastify backend. User types a natural-language request
