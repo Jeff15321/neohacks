@@ -34,6 +34,31 @@ export const tabs = {
   /** Send to the tab's content script; defaults to the top frame. */
   send: <R = unknown>(tabId: number, msg: SWToContent, frameId = 0): Promise<R> => chrome.tabs.sendMessage(tabId, msg, { frameId }) as Promise<R>,
   onRemoved: (fn: (tabId: number) => void) => chrome.tabs.onRemoved.addListener(fn),
+  /** Phase B: tab switches (recording follows them). */
+  onActivated: (fn: (tabId: number, windowId: number) => void) => chrome.tabs.onActivated.addListener(i => fn(i.tabId, i.windowId)),
+  /** Phase B: tab finished loading (re-announce recording state to the fresh content script). */
+  onUpdatedComplete: (fn: (tabId: number, tab: chrome.tabs.Tab) => void) =>
+    chrome.tabs.onUpdated.addListener((id, info, tab) => { if (info.status === 'complete') fn(id, tab); }),
+  query: (q: chrome.tabs.QueryInfo) => chrome.tabs.query(q),
+};
+
+/** Phase B: toolbar action badge ("REC"). */
+export const action = {
+  setBadge: async (text: string, color = '#b91c1c') => {
+    try { await chrome.action.setBadgeText({ text }); if (text) await chrome.action.setBadgeBackgroundColor({ color }); } catch { /* no action */ }
+  },
+  getBadge: () => chrome.action.getBadgeText({}),
+};
+
+/** Phase B: manifest `commands` (toggle-recording Alt+Shift+R). */
+export const commands = {
+  onCommand: (fn: (command: string, tab?: chrome.tabs.Tab) => void) => chrome.commands?.onCommand.addListener(fn),
+};
+
+/** Phase B: top-frame navigations (full loads + SPA history updates) for navigate Steps. */
+export const webNavigation = {
+  onCommitted: (fn: (d: { tabId: number; url: string; transitionType: string; timeStamp: number }) => void) =>
+    chrome.webNavigation?.onCommitted.addListener(d => { if (d.frameId === 0) fn(d); }),
 };
 
 export const userScripts = {

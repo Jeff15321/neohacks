@@ -1,6 +1,7 @@
 import type { GenerateWidgetRequest } from '@app/contracts';
 import { WidgetGrant } from '@app/contracts';
 import { WIDGET_PROMPT_SECTIONS } from './sections/index.js';
+import { renderSpecForPrompt } from './sections/spec.js';
 import { renderNetOpAnalysis } from './sections/network.js';
 
 /**
@@ -196,6 +197,7 @@ VISIBLE TEXT SAMPLE:
 ${pc.textSample.slice(0, 3000)}
 
 USER REQUEST: ${req.request}`;
+  if (req.spec) p += renderSpecForPrompt(req.spec, req.evidence); // Phase B: recorded workflow
   if (req.existingCollections) { // Phase A
     p += `\n\nEXISTING DATA COLLECTIONS (this user's WidgetAI.db — reuse one when it fits the request):\n${req.existingCollections.slice(0, 100).map(c => `- ${c}`).join('\n') || '(none yet)'}`;
   }

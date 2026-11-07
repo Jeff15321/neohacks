@@ -12,3 +12,6 @@ pattern; Radix only for Tabs). Neutral palette + indigo accent, dark mode via `p
 
 Stable test hooks: `#req`, `#gen-btn`, `[data-testid=tab-<id>]`, `approval-card`, `approve`, `widget-card`,
 `widget-status`, `run`, `edit-input`, `net-ops`, `net-refresh`, `bus-log`, `llm-calls`, `llm-call`.
+Phase B: `rec-toggle`, `rec-start`, `rec-stop`, `rec-status`, `record-tab`, `step-row`, `step-meaning`, `step-strike`, `step-live`,
+`review`, `spec`, `spec-goal`, `spec-slot`, `spec-consequential`, `spec-answer`, `#rec-instructions`, `rec-interpret`, `rec-generate`,
+`steps-log`, `step-log-row`, `export-bundle`, `export-trace`.

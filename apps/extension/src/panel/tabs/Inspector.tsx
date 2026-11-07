@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import type { BusLogEntry, LlmCallLog, NetInvokeResult, NetOpSummary } from '@app/contracts';
+import type { BusLogEntry, LlmCallLog, NetInvokeResult, NetOpSummary, Step } from '@app/contracts';
+import { redactStepForExport } from '@app/core/step-redact';
+import { usePanel, type LogLine } from '../app/state.js';
 import { Button } from '../components/ui/button.js';
 import { Badge, Disclosure } from '../components/ui/primitives.js';
 import { send } from '../hooks/useBus.js';
@@ -7,11 +9,13 @@ import { cn, fmtTime } from '../lib/utils.js';
 
 /**
  * Inspector: raw capture and AI interpretation shown separately (decision A).
- * Phase 0: Network ops, Bus log, LLM calls. Phase B adds Steps, run timelines, Export debug bundle.
+ * Phase 0: Network ops, Bus log, LLM calls. Phase B adds Steps, run timelines, Export debug bundle / trace.
  */
 export function InspectorTab() {
   return (
     <div className="space-y-3">
+      <ExportBar />
+      <StepsPane />
       <NetworkPane />
       <BusPane />
       <LlmPane />
@@ -157,6 +161,101 @@ function LlmPane() {
           </Disclosure>
         ))}
         {calls.length === 0 && !err && <div className="text-xs text-muted-foreground">No LLM calls yet.</div>}
+      </div>
+    </section>
+  );
+}
+
+// ------------------------------------------------------------------ Phase B: Steps + export
+
+/** Everything needed to debug a run offline → one JSON file (decision A / Debuggability). */
+export async function collectDebugBundle(widgets: ReturnType<typeof usePanel>['widgets'], logs: Record<string, LogLine[]>) {
+  const [steps, rec, llm, bus] = await Promise.all([
+    send<{ steps?: Step[] }>({ type: 'GET_STEPS', limit: 300 }),
+    send<Record<string, unknown>>({ type: 'REC_GET' }),
+    send<{ calls?: LlmCallLog[] }>({ type: 'GET_LLM_CALLS', limit: 100 }),
+    send<{ entries?: BusLogEntry[] }>({ type: 'GET_BUS_LOG', limit: 400 }),
+  ]);
+  const busEntries = bus.entries ?? [];
+  return {
+    kind: 'wwa-debug-bundle', version: 1, exportedAt: new Date().toISOString(),
+    extensionVersion: chrome.runtime.getManifest?.().version,
+    steps: (steps.steps ?? []).map(redactStepForExport),
+    recording: rec.ok ? { session: rec.session ?? null, steps: ((rec.steps as Step[] | undefined) ?? []).map(redactStepForExport), semantic: rec.semantic ?? {}, spec: rec.spec ?? null, widgetId: rec.widgetId } : null,
+    llmCalls: llm.calls ?? [],
+    busLog: busEntries,
+    widgets: widgets.map(w => ({
+      id: w.id, name: w.name, version: w.version, status: w.status, approved: w.approved, origin: w.origin,
+      matchPatterns: w.matchPatterns, grants: w.grants, traceId: w.traceId, lastError: w.lastError, code: w.code, spec: w.spec, thread: w.thread,
+    })),
+    runTimeline: widgets.map(w => ({
+      widgetId: w.id, version: w.version,
+      logs: logs[w.id] ?? [],
+      bus: busEntries.filter(e => e.type.startsWith('WIDGET_') && (!w.traceId || e.traceId === w.traceId || e.channel === 'userScript')),
+    })),
+  };
+}
+
+function download(name: string, data: unknown) {
+  const json = JSON.stringify(data, null, 2);
+  (window as unknown as { __wwaLastExport?: string }).__wwaLastExport = json; // test hook
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+
+function ExportBar() {
+  const { widgets, logs, setError } = usePanel();
+  const [busy, setBusy] = useState(false);
+  const stamp = () => new Date().toISOString().replace(/[:.]/g, '-');
+  const exportBundle = async () => {
+    setBusy(true);
+    try { download(`wwa-debug-${stamp()}.json`, await collectDebugBundle(widgets, logs)); } catch (e) { setError(String((e as Error)?.message ?? e)); }
+    setBusy(false);
+  };
+  const exportTrace = async () => {
+    const rec = await send<{ steps?: Step[]; semantic?: unknown; spec?: unknown; session?: { id: string } | null }>({ type: 'REC_GET' });
+    const steps = rec.steps?.length ? rec.steps : (await send<{ steps?: Step[] }>({ type: 'GET_STEPS', limit: 300 })).steps ?? [];
+    download(`wwa-trace-${stamp()}.json`, {
+      kind: 'wwa-trace', version: 1, name: rec.session?.id ?? 'trace', exportedAt: new Date().toISOString(),
+      steps: steps.map(redactStepForExport), semantic: rec.semantic ?? {}, spec: rec.spec ?? null,
+      labels: { note: 'add hand labels here (see tests/traces/README.md)' },
+    });
+  };
+  return (
+    <div className="flex items-center gap-1.5">
+      <Button size="sm" variant="outline" data-testid="export-bundle" disabled={busy} onClick={() => void exportBundle()}>Export debug bundle</Button>
+      <Button size="sm" variant="ghost" data-testid="export-trace" onClick={() => void exportTrace()}>Export trace</Button>
+    </div>
+  );
+}
+
+function StepsPane() {
+  const [steps, setSteps] = useState<Step[]>([]);
+  const load = useCallback(() => { void send<{ steps?: Step[] }>({ type: 'GET_STEPS', limit: 60 }).then(r => setSteps((r.steps ?? []).slice().reverse())); }, []);
+  useEffect(load, [load]);
+  return (
+    <section data-testid="steps-log">
+      <PaneHeader title="Steps (raw capture)" testId="steps-refresh" onRefresh={load} />
+      {steps.length === 0 && <div className="text-xs text-muted-foreground">No Steps yet — start a recording (or turn Observe on) and interact with the page.</div>}
+      <div className="space-y-1">
+        {steps.map(s => (
+          <Disclosure key={s.id} title={
+            <span className="flex min-w-0 items-center gap-1.5 text-[11px] text-foreground" data-testid="step-log-row">
+              <span className="font-mono text-muted-foreground">#{s.seq}</span>
+              <b>{s.action.kind}</b>
+              <span className="truncate">{s.action.accessibleName ?? s.action.target?.accessibleName ?? s.action.key ?? ''}</span>
+              {!s.settled && <Badge variant="warning">{s.settle?.reason ?? 'unsettled'}</Badge>}
+              {[...s.effects.liveRegionText, ...(s.lateEffects?.liveRegionText ?? [])].map(t => <Badge key={t} variant="success">{t}</Badge>)}
+              <span className="ml-auto shrink-0 text-muted-foreground">{s.tEnd - s.tStart}ms</span>
+            </span>
+          }>
+            <pre className="m-0 max-h-64 overflow-auto rounded bg-muted p-1.5 text-[10.5px] whitespace-pre-wrap">{JSON.stringify(s, null, 1).slice(0, 12000)}</pre>
+          </Disclosure>
+        ))}
       </div>
     </section>
   );

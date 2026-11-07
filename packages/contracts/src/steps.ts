@@ -53,6 +53,8 @@ export const Step = z.object({
     /** Redacted preview of committed input value. */
     valuePreview: z.string().optional(),
     key: z.string().optional(),
+    /** lineage hash of copied/pasted/typed value (core/lineage hashValue) — raw values never leave the page. */
+    valueHash: z.string().optional(),
   }),
   effects: z.object({
     urlChange: z.string().optional(),
@@ -68,8 +70,19 @@ export const Step = z.object({
   settled: z.boolean(),
   tStart: z.number(),
   tEnd: z.number(),
+  /** Settle diagnostics (E2): why the Step closed, significant mutation batches, ms from tStart to last activity. */
+  settle: z.object({ reason: z.enum(['quiet', 'cap', 'interrupted', 'flush']), mutations: z.number(), lastActivityMs: z.number() }).optional(),
+  /** Page title at close. */
+  title: z.string().optional(),
 });
 export type Step = z.infer<typeof Step>;
+
+/** What the content script sends: the SW assigns `seq`, `tabId`, `windowId`. */
+export const StepDraft = Step.omit({ seq: true, tabId: true, windowId: true });
+export type StepDraft = z.infer<typeof StepDraft>;
+
+export const StepLateEffects = z.object({ liveRegionText: z.array(z.string()), net: z.array(StepNetEffect) });
+export type StepLateEffects = z.infer<typeof StepLateEffects>;
 
 /** Tier-1 Step Interpreter output. */
 export const SemanticStep = z.object({

@@ -1,0 +1,52 @@
+[E9] {
+ "headless": true,
+ "composerText": "Hi,\n\nCan you review the Q4 launch checklist by Friday? Items",
+ "steps": [
+  {
+   "seq": 1,
+   "kind": "click"
+  },
+  {
+   "seq": 2,
+   "kind": "copy",
+   "preview": "Hi, Can you review the Q4 launch checklist by Frid",
+   "hash": "89a33473"
+  },
+  {
+   "seq": 3,
+   "kind": "click"
+  },
+  {
+   "seq": 4,
+   "kind": "paste",
+   "preview": "Hi, Can you review the Q4 launch checklist by Frid",
+   "hash": "89a33473"
+  },
+  {
+   "seq": 5,
+   "kind": "input-commit",
+   "preview": "Hi, Can you review the Q4 launch checklist by Frid",
+   "hash": "89a33473"
+  }
+ ],
+ "copyRead": true,
+ "pasteRead": true,
+ "lineage": [
+  {
+   "fromSeq": 2,
+   "toSeq": 4,
+   "valueHash": "89a33473"
+  },
+  {
+   "fromSeq": 2,
+   "toSeq": 5,
+   "valueHash": "89a33473"
+  }
+ ],
+ "result": "POSITIVE"
+}
+
+
+Exit code: 0
+
+`| tail -40` was parsed out (40 of 48 total lines shown).

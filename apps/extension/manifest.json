@@ -5,7 +5,7 @@
   "description": "Describe a feature; get a generated userscript widget that modifies the page.",
   "minimum_chrome_version": "135",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2rq29iqxrRunJsj+Io9rk/JpnuGWjuQznpbVIXVu5ioqhxvsPgy4c37u6bRif6GbCSBNmnMUvV6On4eZuP45JDzgdWEfVgGxx7IQ94tUMN2TttxwdFJaLngIwGkqgUxTo2hnRkabrn6P/+D/UVulQqfyVmqxWV2n/kNk+wXI8Fombnv+E+CI16BFRLCo1FtW9Fo8ex9zQAqPyZ/148GsVgkMxUCmVl3gEYJ246eGqE+9ZB/qAHe5vSZ5izkM7YAbLQI50XkLQQfKuq35enRjyaMHPBDSg26nv9fnhiTS6HlcXt9L1Ws3sihnC0le7lEv7kzie/PbSwYwaJ9RTrYMIwIDAQAB",
-  "permissions": ["userScripts", "tabs", "sidePanel", "storage", "webRequest"],
+  "permissions": ["userScripts", "tabs", "sidePanel", "storage", "webRequest", "webNavigation"],
   "host_permissions": ["<all_urls>"],
   "background": { "service_worker": "sw.js" },
   "action": { "default_title": "Widget AI" },
@@ -14,5 +14,8 @@
     { "matches": ["http://*/*", "https://*/*"], "js": ["netprobe.js"], "run_at": "document_start", "all_frames": true, "world": "MAIN" },
     { "matches": ["http://*/*", "https://*/*"], "js": ["content.js"], "run_at": "document_idle", "all_frames": true }
   ],
+  "commands": {
+    "toggle-recording": { "suggested_key": { "default": "Alt+Shift+R" }, "description": "Start/stop recording a workflow" }
+  },
   "icons": {}
 }
