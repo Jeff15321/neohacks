@@ -1,0 +1,17 @@
+{
+  "name": "@app/contracts",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Types + zod schemas for every boundary message and LLM output. No logic.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
+}

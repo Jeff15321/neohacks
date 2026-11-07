@@ -22,10 +22,10 @@ if (CLICK) {
 
 const panel = await context.newPage();
 await panel.goto(`chrome-extension://${EXT_ID}/sidepanel.html`);
-await panel.click('#net-toggle');
+await panel.click('[data-testid="tab-inspector"]'); await panel.click('[data-testid="net-refresh"]');
 await panel.waitForTimeout(1500);
 console.log('=== CAPTURED OPS ===');
-console.log((await panel.locator('.card.net').innerText()).slice(0, 5000));
+console.log((await panel.locator('[data-testid="net-ops"]').innerText()).slice(0, 5000));
 
 if (process.env.REPLAY === '1') {
   // expand the first op and hit its Replay button (verbatim re-issue)
@@ -33,6 +33,6 @@ if (process.env.REPLAY === '1') {
   await panel.locator('.netdetail button:has-text("Replay")').first().click();
   await panel.waitForTimeout(4000);
   console.log('=== AFTER REPLAY ===');
-  console.log((await panel.locator('.card.net').innerText()).slice(0, 5000));
+  console.log((await panel.locator('[data-testid="net-ops"]').innerText()).slice(0, 5000));
 }
 await context.close();

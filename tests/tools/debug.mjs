@@ -21,7 +21,7 @@ await panel.goto(`chrome-extension://${EXT_ID}/sidepanel.html`);
 await panel.waitForSelector('#req');
 await panel.fill('#req', 'Add a button that drafts replies to unread emails');
 await panel.click('#gen-btn');
-await panel.waitForSelector('.card h3', { timeout: 30000 });
+await panel.waitForSelector('[data-testid="approval-card"] h3', { timeout: 30000 });
 console.log('generated ok');
 const r = await panel.evaluate(async () => {
   const btn = [...document.querySelectorAll('button.primary')].find(b => /Approve/.test(b.textContent));

@@ -62,11 +62,11 @@ await panel.waitForSelector('#req');
 await panel.fill('#req', REQUEST);
 console.log('generating widget (real LLM)…');
 await panel.click('#gen-btn');
-await panel.waitForSelector('.card h3', { timeout: 180_000 });
-console.log('CARD:', (await panel.locator('.card').first().innerText()).split('\n').slice(0, 4).join(' | '));
+await panel.waitForSelector('[data-testid="approval-card"] h3', { timeout: 300_000 });
+console.log('CARD:', (await panel.locator('[data-testid="approval-card"]').first().innerText()).split('\n').slice(0, 4).join(' | '));
 
 console.log('approving & injecting…');
-await panel.click('button.primary:has-text("Approve & Run")');
+await panel.click('[data-testid="approve"]');
 await page.waitForSelector('div[id^="wwa-"]', { timeout: 30_000 }).catch(() => console.log('!! widget host not found in DOM'));
 
 const widgetBtns = await page.locator('div[id^="wwa-"] >> css=button').count();

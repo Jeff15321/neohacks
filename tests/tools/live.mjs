@@ -9,13 +9,13 @@ await panel.goto(`chrome-extension://${EXT_ID}/sidepanel.html`);
 await panel.waitForSelector('#req');
 await panel.fill('#req', 'Add a button that reads my two most recent unread emails and writes a friendly AI-generated reply draft for each.');
 await panel.click('#gen-btn');
-await panel.waitForSelector('.card h3', { timeout: 120000 });
-const card = await panel.locator('.card').first().innerText();
+await panel.waitForSelector('[data-testid="approval-card"] h3', { timeout: 300000 });
+const card = await panel.locator('[data-testid="approval-card"]').first().innerText();
 console.log('CARD:', card.split('\n').slice(0,4).join(' | '));
 // dump code for inspection
 const code = await sw.evaluate(async () => (await chrome.storage.local.get('wwa_widgets')).wwa_widgets?.[0]?.code);
 console.log('=== GENERATED CODE ===\n' + code + '\n=== END ===');
-await panel.click('button.primary:has-text("Approve & Run")');
+await panel.click('[data-testid="approve"]');
 await page.waitForSelector('div[id^="wwa-"]', { timeout: 20000 });
 await page.waitForTimeout(500);
 const btnCount = await page.locator('div[id^="wwa-"] >> css=button').count();

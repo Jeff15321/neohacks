@@ -9,8 +9,8 @@ await panel.goto(`chrome-extension://${EXT_ID}/sidepanel.html`);
 await panel.waitForSelector('#req');
 await panel.fill('#req', 'x');
 await panel.click('#gen-btn');
-await panel.waitForSelector('.card h3');
-await panel.click('button.primary:has-text("Approve & Run")');
+await panel.waitForSelector('[data-testid="approval-card"] h3');
+await panel.click('[data-testid="approve"]');
 await page.waitForSelector('.gj-toolbar div[id^="wwa-"]', { timeout: 15000 });
 await page.locator('.gj-toolbar div[id^="wwa-"] >> css=button').click();
 for (let i = 0; i < 30; i++) {

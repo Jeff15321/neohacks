@@ -15,3 +15,8 @@ poc/package*.json
 tests/e2e/.pw-profile/
 tests/tools/.gmail-profile/
 tests/tools/.demo-profile/
+.data/
+tests/e2e/.demo-profile/
+**/.pw-profile/
+**/.demo-profile/
+.worktrees/

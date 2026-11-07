@@ -1,0 +1,136 @@
+import type { GenerateWidgetRequest, GenerateWidgetResponse, WidgetGrant, WidgetRecord, WidgetStatus } from '@app/contracts';
+import { matchesAny, randomId } from '@app/core';
+import { buildCleanupSource, buildWidgetSource } from '@app/widget-runtime';
+import type { Bus } from '../../bus.js';
+import { backend, tabs, userScripts } from '../../platform/index.js';
+import { WidgetStore } from './store.js';
+
+const now = () => Date.now();
+
+export class WidgetService {
+  readonly store = new WidgetStore();
+  constructor(private bus: Bus) {}
+
+  setStatus(w: WidgetRecord, status: WidgetStatus, log?: string, traceId?: string) {
+    w.status = status;
+    if (status === 'failed' && log) w.lastError = log;
+    this.bus.broadcast({ type: 'WIDGET_STATUS', widgetId: w.id, status, log, traceId });
+    void this.store.persist();
+  }
+
+  /** userScripts registrations = APPROVED widgets only (re-injected on page load). */
+  async syncRegistrations() {
+    if (!userScripts.available()) return;
+    const approved = this.store.list().filter(w => w.approved);
+    try {
+      await userScripts.replaceAll(approved.map(w => ({ id: w.id, matches: w.matchPatterns, code: buildWidgetSource(w, w.traceId ?? '') })));
+      for (const w of approved) await userScripts.configureWorld(w.id);
+    } catch (e) { console.warn('[wwa] userscript re-register failed:', e); }
+  }
+
+  authorize(widgetId: string, tabUrl: string, grant?: WidgetGrant): string | undefined {
+    const w = this.store.get(widgetId);
+    if (!w) return 'unknown widget';
+    if (!w.approved) return 'widget not approved';
+    if (w.matchPatterns.length && !matchesAny(w.matchPatterns, tabUrl)) return `origin not allowed for widget (tab=${tabUrl})`;
+    if (grant && !w.grants.includes(grant)) return `grant "${grant}" not declared by widget`;
+    return undefined;
+  }
+
+  private async contextFor(tab: chrome.tabs.Tab) {
+    const pageContext = await this.bus.use('page.context')(tab);
+    try { pageContext.networkOps = await this.bus.use('net.opsForTab')(tab.id!, pageContext.origin, 12); } catch { /* net module off */ }
+    return pageContext;
+  }
+
+  async generate(request: string, traceId: string): Promise<WidgetRecord> {
+    const tab = await tabs.findTarget();
+    if (!tab?.id) throw new Error('no eligible web page tab found');
+    this.bus.broadcast({ type: 'GENERATION_PROGRESS', stage: 'context', detail: 'extracting page context', traceId });
+    const pageContext = await this.contextFor(tab);
+    this.bus.broadcast({ type: 'GENERATION_PROGRESS', stage: 'llm', detail: 'generating widget code', traceId });
+    const res = await backend.post<GenerateWidgetResponse>('/api/generate-widget', { request, pageContext } satisfies GenerateWidgetRequest, traceId);
+    if (!res.ok || !res.widget) throw new Error(res.error ?? 'generation failed');
+    const w: WidgetRecord = {
+      ...res.widget, id: randomId('w'), version: 1, createdAt: now(), origin: pageContext.origin,
+      status: 'ready', approved: false, originalRequest: request, traceId,
+      thread: [{ role: 'user', text: request, ts: now() }, { role: 'generator', text: res.widget.description, version: 1, ts: now() }],
+    };
+    await this.store.put(w);
+    this.bus.broadcast({ type: 'WIDGET_GENERATED', widget: w, traceId });
+    if (res.warnings?.length) this.bus.broadcast({ type: 'WIDGET_STATUS', widgetId: w.id, status: 'ready', log: 'warnings: ' + res.warnings.join('; '), traceId });
+    return w;
+  }
+
+  /** Repair (no instruction) or conversational edit. The new version must be approved again before it runs. */
+  async repair(widgetId: string, instruction: string | undefined, traceId: string): Promise<WidgetRecord> {
+    const w = this.mustGet(widgetId);
+    const tab = await tabs.findTarget(w.matchPatterns);
+    if (!tab?.id) throw new Error(`no tab matches ${w.matchPatterns.join(', ')}`);
+    this.bus.broadcast({ type: 'GENERATION_PROGRESS', stage: 'context', detail: 're-extracting context', widgetId, traceId });
+    const pageContext = await this.contextFor(tab);
+    this.bus.broadcast({ type: 'GENERATION_PROGRESS', stage: 'llm', detail: instruction ? 'editing widget' : 'repairing widget', widgetId, traceId });
+    const res = await backend.post<GenerateWidgetResponse>('/api/generate-widget', {
+      request: w.originalRequest ?? w.description,
+      pageContext,
+      prior: { code: w.code, error: instruction ? undefined : (w.lastError ?? 'widget failed at runtime'), feedback: instruction },
+      history: (w.thread ?? []).slice(-10).map(t => ({ role: t.role, text: t.text })),
+    } satisfies GenerateWidgetRequest, traceId);
+    if (!res.ok || !res.widget) throw new Error(res.error ?? 'repair generation failed');
+    const version = w.version + 1;
+    const nw: WidgetRecord = {
+      ...res.widget, id: w.id, version, createdAt: w.createdAt, origin: w.origin, status: 'ready', approved: false,
+      originalRequest: w.originalRequest, traceId,
+      thread: [...(w.thread ?? []),
+        { role: 'user' as const, text: instruction ?? `Auto-fix: ${w.lastError ?? 'runtime failure'}`, ts: now() },
+        { role: 'generator' as const, text: res.widget.changeSummary ?? res.widget.description, version, ts: now() }].slice(-40),
+    };
+    await this.store.put(nw);
+    void this.syncRegistrations();
+    this.bus.broadcast({ type: 'WIDGET_GENERATED', widget: nw, traceId });
+    return nw;
+  }
+
+  private broadcastList(traceId?: string) {
+    this.bus.broadcast({ type: 'WIDGET_LIST', widgets: this.store.list(), traceId });
+  }
+
+  async approve(widgetId: string, traceId: string) {
+    const w = this.mustGet(widgetId);
+    w.approved = true;
+    await this.store.put(w);
+    this.broadcastList(traceId);
+    await this.syncRegistrations();
+    return this.run(widgetId, traceId);
+  }
+
+  async run(widgetId: string, traceId: string) {
+    const w = this.mustGet(widgetId);
+    if (!w.approved) throw new Error('widget must be approved before it runs');
+    const tab = await tabs.findTarget(w.matchPatterns);
+    if (!tab?.id) throw new Error(`no tab matches ${w.matchPatterns.join(', ')}`);
+    this.setStatus(w, 'running', 'injecting widget', traceId);
+    await userScripts.configureWorld(w.id);
+    const results = await userScripts.execute(tab.id, buildWidgetSource(w, traceId), w.id);
+    const err = results?.[0]?.error;
+    if (err) { this.setStatus(w, 'failed', err, traceId); throw new Error(err); }
+    return { widgetId };
+  }
+
+  async remove(widgetId: string) {
+    const w = this.store.get(widgetId);
+    await this.store.delete(widgetId);
+    this.broadcastList();
+    await this.syncRegistrations();
+    if (w?.approved) {
+      const tab = await tabs.findTarget(w.matchPatterns);
+      if (tab?.id) { try { await userScripts.execute(tab.id, buildCleanupSource(widgetId), widgetId); } catch { /* tab gone */ } }
+    }
+  }
+
+  mustGet(id: string) {
+    const w = this.store.get(id);
+    if (!w) throw new Error('widget not found');
+    return w;
+  }
+}

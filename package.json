@@ -1,25 +1,28 @@
 {
   "name": "neohacks",
   "private": true,
-  "description": "AI Website Widget Builder — generate custom website widgets from natural language",
+  "description": "AI Website Widget Builder — generate custom website widgets from natural language (next-gen architecture)",
   "workspaces": [
+    "packages/contracts",
+    "packages/core",
+    "packages/widget-runtime",
     "apps/extension",
     "apps/backend",
-    "packages/shared",
     "tests/e2e"
   ],
   "scripts": {
-    "build": "npm run build -w packages/shared && npm run build -w apps/extension && npm run build -w apps/backend",
-    "build:extension": "npm run build -w packages/shared && npm run build -w apps/extension",
+    "build": "npm run build -w apps/extension",
+    "build:extension": "npm run build -w apps/extension",
     "dev:backend": "npm run dev -w apps/backend",
     "test": "npm run test -w tests/e2e",
-    "typecheck": "npm run typecheck -w packages/shared && npm run typecheck -w apps/extension && npm run typecheck -w apps/backend"
+    "test:unit": "npm run test:unit -w packages/core && npm run test:unit -w packages/widget-runtime && npm run test:unit -w apps/backend && npm run test:unit -w apps/extension",
+    "typecheck": "npm run typecheck -w packages/contracts && npm run typecheck -w packages/core && npm run typecheck -w packages/widget-runtime && npm run typecheck -w apps/extension && npm run typecheck -w apps/backend && npm run typecheck -w tests/e2e"
   },
   "devDependencies": {
     "typescript": "~5.6.3"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.13"
   },
   "allowScripts": {
     "esbuild@0.24.2": true,

@@ -1,0 +1,18 @@
+{
+  "name": "@app/widget-runtime",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Source of the WidgetAI prelude injected around generated widget code.",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:unit": "tsx --test \"src/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@app/contracts": "*"
+  },
+  "devDependencies": {
+    "acorn": "^8.14.0"
+  }
+}

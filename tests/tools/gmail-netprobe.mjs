@@ -39,9 +39,9 @@ await page.waitForTimeout(4000);
 
 const panel = await context.newPage();
 await panel.goto(`chrome-extension://${EXT_ID}/sidepanel.html`);
-await panel.click('#net-toggle');
+await panel.click('[data-testid="tab-inspector"]'); await panel.click('[data-testid="net-refresh"]');
 await panel.waitForTimeout(1500);
-const text = await panel.locator('.card.net').innerText();
+const text = await panel.locator('[data-testid="net-ops"]').innerText();
 console.log('=== CAPTURED OPS ===');
 console.log(text.slice(0, 4000));
 await context.close();
