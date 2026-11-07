@@ -172,11 +172,12 @@ function LlmPane() {
 
 /** Everything needed to debug a run offline → one JSON file (decision A / Debuggability). */
 export async function collectDebugBundle(widgets: ReturnType<typeof usePanel>['widgets'], logs: Record<string, LogLine[]>) {
-  const [steps, rec, llm, bus] = await Promise.all([
+  const [steps, rec, llm, bus, net] = await Promise.all([
     send<{ steps?: Step[] }>({ type: 'GET_STEPS', limit: 300 }),
     send<Record<string, unknown>>({ type: 'REC_GET' }),
     send<{ calls?: LlmCallLog[] }>({ type: 'GET_LLM_CALLS', limit: 100 }),
     send<{ entries?: BusLogEntry[] }>({ type: 'GET_BUS_LOG', limit: 400 }),
+    send<{ records?: unknown[] }>({ type: 'GET_NET_RECORDS' }),
   ]);
   const busEntries = bus.entries ?? [];
   return {
@@ -186,6 +187,7 @@ export async function collectDebugBundle(widgets: ReturnType<typeof usePanel>['w
     recording: rec.ok ? { session: rec.session ?? null, steps: ((rec.steps as Step[] | undefined) ?? []).map(redactStepForExport), semantic: rec.semantic ?? {}, spec: rec.spec ?? null, widgetId: rec.widgetId } : null,
     llmCalls: llm.calls ?? [],
     busLog: busEntries,
+    netRecords: net.records ?? [],
     widgets: widgets.map(w => ({
       id: w.id, name: w.name, version: w.version, status: w.status, approved: w.approved, origin: w.origin,
       matchPatterns: w.matchPatterns, grants: w.grants, traceId: w.traceId, lastError: w.lastError, code: w.code, spec: w.spec, thread: w.thread,

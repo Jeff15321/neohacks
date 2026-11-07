@@ -40,6 +40,12 @@ export function registerNet(bus: Bus) {
       browserOnly: svc.log.browserOnly(tab.id, origin),
     };
   });
+  bus.on('GET_NET_RECORDS', async () => {
+    const tab = await tabs.findTarget();
+    if (!tab?.id || !tab.url) throw new Error('no eligible tab');
+    await svc.hydrate(tab.id);
+    return { tabId: tab.id, records: svc.log.all(tab.id) };
+  });
   bus.on('NET_REPLAY', async (m) => {
     const tab = await tabs.findTarget();
     if (!tab?.id || !tab.url) throw new Error('no eligible tab');

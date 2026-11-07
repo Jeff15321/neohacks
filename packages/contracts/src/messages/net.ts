@@ -5,6 +5,8 @@ import { InvokeRequestSpec, NetDirectRequest, NetInvokeOverrides, NetRequestReco
 /** Owner: extension modules/net (+ content/netbridge, page/netprobe). */
 export const panel = [
   msg('GET_NET_OPS', { tabId: z.number().optional() }),
+  /** Full raw records for the target tab (debug/export — not redacted). */
+  msg('GET_NET_RECORDS', { tabId: z.number().optional() }),
   msg('NET_REPLAY', { opId: z.string(), overrides: NetInvokeOverrides.optional(), tabId: z.number().optional() }),
 ] as const;
 
