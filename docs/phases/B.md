@@ -1,8 +1,9 @@
 # Phase B — Steps + recording + Record/Inspector UI + trace harness
 
 ## HANDOFF
-Status: **DONE** (13:40 PST). Branch `phase-b` (from `nextgen`). Gate green: typecheck 0 errors; unit 57/57; E2E 6/6
-(widget, gmail2, youtube, net, record ×2); live Demo-1 **5/5** first try (Opus 5.5); E1/E2/E9 run (see report).
+Status: **DONE** (13:45 PST). Branch `phase-b` (from `nextgen`; `origin/nextgen` with phases A + E merged in at 13:40,
+conflicts resolved keep-both). Gate green on the merged tree: typecheck 0 errors; unit 93/93; E2E 7/7 (data, gmail2, net,
+record ×2, widget, youtube); live Demo-1 **5/5** first try (Opus 5.5, pre-merge) + **2/2** post-merge; E1/E2/E9 run.
 Nothing in progress. Follow-ups for the coordinator are under "Known issues".
 
 ## Decisions (made without the human)
@@ -21,6 +22,7 @@ Nothing in progress. Follow-ups for the coordinator are under "Known issues".
 - 13:17 — `REC_DISCARD` stops without interpreting (used by tools that must not spend Opus calls).
 - 13:20 — Live-run tool clicks "Generate" with the instruction "Draft only (never send). Do all unread emails. Run from a toolbar button." and does not answer open questions — the instruction is the human's normal review step; counted as first-try (one interpret + one generate, no retry, no repair).
 - 13:25 — `tests/e2e/helpers.ts` gained `PW_PROFILE` (default unchanged) so tools can run beside another browser session.
+- 13:40 — Merged `origin/nextgen` (A + E) into `phase-b` so the PR is conflict-free; all conflicts were additive (keep both: `existingCollections` + `spec/evidence`, movies mock + spec mock). Phase E added `isSecretField(name)` to `core/redact`, so ours was renamed `isSecretInput(FieldInfo)`.
 - 13:27 — Trace labels were written before seeing model output and are NOT edited to match it (the noisy-trace "Back to Inbox is noise" label disagrees with Opus; reported as-is).
 
 ## Stuck log
@@ -51,8 +53,8 @@ Nothing in progress. Follow-ups for the coordinator are under "Known issues".
 
 **Evidence the phase is correct:**
 - `npm run typecheck` → exit 0, 0 errors (all packages).
-- `npm run test:unit` → core 38/0 (14 new: settle ×9, significance filter, locators ×2, redaction, lineage), widget-runtime 2/0, backend 13/0 (4 new recordings tests), extension 4/0 → **57 passed, 0 failed**.
-- `cd tests/e2e && E2E_PORT=8802 npx playwright test --reporter=line` → **6 passed (27.2 s)**: gmail2, net, record (Demo 1), record (pill/redaction/E1), widget, youtube.
+- `npm run test:unit` → before merge: core 38/0 (14 new: settle ×9, significance filter, locators ×2, redaction, lineage), widget-runtime 2/0, backend 13/0 (4 new recordings tests), extension 4/0 = 57/0. **After merging nextgen (A+E): core 50/0, widget-runtime 5/0, backend 31/0, extension 7/0 = 93 passed, 0 failed.**
+- `cd tests/e2e && E2E_PORT=8802 npx playwright test --reporter=line` → before merge 6 passed (27.2 s); **after merge 7 passed (31.0 s)**: data, gmail2, net, record (Demo 1), record (pill/redaction/E1), widget, youtube.
 - `record.spec.ts` key assertions: REC_START via message → badge "REC" + pill attached; Steps = `click, click, input-commit` with monotonic seq, row locator `tr[data-legacy-message-id="m1"]` (1 match), Reply step's appeared region contains "Message Body", typing Step has live text "Draft saved" and a value preview; Record tab shows 3 step rows with Tier-1 meanings; REC_STOP → badge "" + pill gone; review shows spec goal /unread/, ≥1 slot, stop-before "Send"; answering the open question + Re-interpret clears it; Generate → approval card in the Record tab → approve → `WidgetRecord.spec.goal` saved → widget click → `__drafts` = {m1, m2} (= N unread at start), `__sent` = 0, status completed, 0 unread rows left; Inspector shows Steps + `recordings.interpret` / `steps.interpret` / `generate.widget` calls + bus `REC_START`; Export debug bundle downloads and `JSON.parse`s with steps ≥3, spec, llmCalls ⊇ {steps.interpret, recordings.interpret, generate.widget, inference}, bus log, widget code v1, run-timeline logs. Second test: pill click stops; a typed password (`hunter2-SuperSecret!`) is `[REDACTED]` in the Step and absent from the exported bundle text.
 - **Live Demo 1 (Opus 5.5, fixture-gmail2): 5/5 first try** (`tests/tools/record-live.mjs`, backend `LLM_PROVIDER=anthropic` on :8802). Every run: 3 Steps → spec → one generation (no validator retry, no repair) → drafts {m1, m2}, 0 sent, status completed.
 
@@ -63,6 +65,8 @@ Nothing in progress. Follow-ups for the coordinator are under "Known issues".
   | 3 | `t_b2sru6l83cct` (13.0, 1443) | `t_n6kpkrvw8121` (128.0, 15196) | AI Draft Replies for Unread |
   | 4 | `t_e8itid348mag` (12.5, 1263) | `t_tbsiduy0cfe7` (135.3, 16098) | Unread Reply Drafter |
   | 5 | `t_nj9bdf6eotvv` (12.4, 1259) | `t_1muq31gbkp3c` (135.5, 16198) | Unread Reply Drafter |
+
+  **Post-merge (tree with phases A + E merged): 2/2 first try** — run 6 interpret `t_p7f6ynxhgz18` (12.4 s) / generate `t_aqhdqo55a14p` (153.7 s, 18 417 out); run 7 interpret `t_8h8u7ckwa0p3` (12.4 s) / generate `t_5wsvi84cwchp` (159.3 s, 19 166 out); both drafts {m1, m2}, 0 sent, completed (`live-run-{6,7}.json`, `live-llm-calls-postmerge.txt`). Overall 7/7.
 
   All parseOk; Tier-1 (Haiku 5.5): 94 calls in the session, mean 1.3 s, max 3.1 s, 94/94 parseOk. (Phase 0 baseline for generation without a recording: ~1 in 3–4.)
 - **Trace eval (live, `trace-eval.mjs`)**: 4 traces, **42/43 checks**, Tier-1 accuracy 1.0 (17/17 labelled Steps + navOnly), spec checks 22/23. The one miss: on `gmail2-reply-noisy` Opus cites the detour "Back to Inbox" (seq 2) in an essential "return to inbox" intent — label says noise. Spec latency 12–21 s per recording. Mock smoke run: 41/43 (the mock is intentionally naive) — harness discriminates.
