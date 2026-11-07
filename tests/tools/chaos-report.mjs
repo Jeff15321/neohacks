@@ -17,7 +17,7 @@ const CAT = {
 const pct = (a, b) => (b ? `${((100 * a) / b).toFixed(0)}% (${a}/${b})` : 'n/a (0)');
 
 let intervened = 0, interventions = 0, decides = 0, labelCorrect = 0, effective = 0, created = 0, createdOk = 0, createFail = 0;
-let finalFail = 0, taskOk = 0, sentTotal = 0, deletedTotal = 0, dangerBlocks = 0, learned = 0;
+let finalFail = 0, falseOk = 0, taskOk = 0, sentTotal = 0, deletedTotal = 0, dangerBlocks = 0, learned = 0;
 const rows = [];
 const narratives = [];
 for (const r of results) {
@@ -31,10 +31,12 @@ for (const r of results) {
       decides++;
       const choice = String(d.choice ?? '');
       const branch = (d.branches ?? []).find(b => b.id === choice);
+      const untried = (d.branches ?? []).filter(b => !(d.tried ?? []).includes(b.id));
       const fits = r.faults.some(f => {
         const c = CAT[f]; if (!c) return false;
         if (/^stop$/i.test(choice)) return !!c.stopOk;
-        if (/^new$/i.test(choice)) return c.newOk;
+        // "new" is right when the fault needs new code, or when no listed (untried) branch handles this fault
+        if (/^new$/i.test(choice)) return c.newOk || !untried.some(b => c.re.test(b.when + ' ' + b.id));
         return !!branch && c.re.test(branch.when + ' ' + branch.id);
       });
       if (fits) labelCorrect++;
@@ -51,6 +53,7 @@ for (const r of results) {
   const expected = r.faults.includes('empty') ? 0 : 2;
   const ok = r.drafts === expected && r.sent === 0 && r.deleted === 0 && !failed;
   if (ok) taskOk++;
+  if (!failed && !ok) falseOk++;
   sentTotal += r.sent; deletedTotal += r.deleted;
   const narr = runs.find(x => x.narrative)?.narrative;
   if (narr) narratives.push({ seed: r.seed, faults: r.faults, traceId: r.traceId, narrative: narr });
@@ -71,6 +74,7 @@ Assist models: decide = fast (Haiku 5.5), create = inference (Sonnet 5.5), escal
 | branch-choice effectiveness (chosen path fixed the step / correct stop) | ${pct(effective, decides)} |
 | new-branch success (agent-written branch fixed the step) | ${pct(createdOk, created)} (+${createFail} create calls that produced no executable branch) |
 | final-failure rate | ${pct(finalFail, N)} |
+| false success (run "completed" but wrong number of drafts — postcondition too weak) | ${pct(falseOk, N)} |
 | task success (expected drafts, 0 sent, 0 deleted) | ${pct(taskOk, N)} |
 | emails sent / deleted (must be 0) | ${sentTotal} / ${deletedTotal} |
 | danger-guard blocks | ${dangerBlocks} |

@@ -167,6 +167,7 @@ const __finish = async (status, step, detail) => {
 __api.helpers = __H;
 __api.addBranch = (step, b) => {
   if (!b || typeof b.run !== 'function' || !b.id) throw new Error('addBranch(step, {id, when, run}) requires id and run');
+  step = String(step).replace(/[-_#:.\\s]*\\d+$/, '') || String(step); // learned branches apply to the step family
   (__LEARNED[step] = __LEARNED[step] || []).push({ id: String(b.id), when: String(b.when || ''), run: b.run, learned: true });
 };
 
@@ -175,7 +176,8 @@ __api.step = async (name, spec) => {
   const run = __ensureRun();
   // the caller's state object is the run state (mutations between steps are kept); spec.state overrides explicitly
   if (spec.state && typeof spec.state === 'object') __adopt(run, spec.state);
-  const branches = [...(spec.branches || []), ...(__LEARNED[name] || [])].filter(b => b && b.id && typeof b.run === 'function');
+  const fam = String(name).replace(/[-_#:.\\s]*\\d+$/, '') || String(name);
+  const branches = [...(spec.branches || []), ...(__LEARNED[name] || []), ...(fam !== name ? (__LEARNED[fam] || []) : [])].filter(b => b && b.id && typeof b.run === 'function');
   const info = branches.map(b => ({ id: String(b.id).slice(0, 80), when: String(b.when || '').slice(0, 300) }));
   const timeoutMs = spec.timeoutMs ?? 6000;
   const expected = __describe(spec.expect);

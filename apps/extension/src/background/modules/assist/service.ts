@@ -3,7 +3,7 @@ import {
   type AssistCreateRequest, type AssistCreateResponse, type AssistDecideRequest, type AssistDecideResponse, type AssistNewBranch,
   type RunTimelineEvent, type StepFailureReport, type WidgetRun,
 } from '@app/contracts';
-import { beginAttempt, buildRunNarrative, learnedBranchSnippet, newRunAssistState, planAssist, resolveDecision, reviewBranchCode, type RunAssistState } from '@app/core/assist';
+import { beginAttempt, buildRunNarrative, learnedBranchSnippet, newRunAssistState, stepFamily, planAssist, resolveDecision, reviewBranchCode, type RunAssistState } from '@app/core/assist';
 import { checkGeneratedCode } from '@app/core/validate-code';
 import { buildBranchSource } from '@app/widget-runtime';
 import type { Bus } from '../../bus.js';
@@ -101,7 +101,7 @@ export class AssistService {
     const { runId: _r, state, ...rest } = report;
 
     // an agent-written branch that already fixed this step earlier in the run is re-used first (no LLM call)
-    const reuse = plan.kind === 'decide' ? r.learned.find(l => l.step === report.step && !s.tried.includes(l.id)) : undefined;
+    const reuse = plan.kind === 'decide' ? r.learned.find(l => stepFamily(l.step) === stepFamily(report.step) && !s.tried.includes(l.id)) : undefined;
     if (reuse) {
       s.tried.push(reuse.id);
       this.agentEvent(r, 'branch-run', report.step, { branchId: reuse.id, source: 'learned' }, 're-using the branch the agent wrote earlier in this run');

@@ -30,6 +30,11 @@ agent when a step's postcondition fails, so every step MUST declare what success
     or covered: popups/interstitials, collapsed composers/sections, "show more" toggles, lazy lists, alternative
     labels). Accuracy first: bloat is acceptable. Each branch must make the SAME postcondition true.
   - Steps must be idempotent: if the postcondition is already true, do not act again (no duplicate drafts).
+  - Postconditions must POSITIVELY confirm success. Never accept "nothing found" as success just because elements
+    are missing (the page may still be loading); accept an empty result only when the page shows an explicit empty
+    state (e.g. an "inbox is empty" message) — otherwise fail so the platform can wait/recover.
+  - Give per-item steps a stable name plus index (e.g. 'open-reply-1', 'open-reply-2'): branches the agent learns for
+    one item are re-used for the others.
   - Never put sending/deleting/publishing/paying into a step or branch; a runtime danger guard blocks script
     clicks on such controls and asks the user to Allow/Block.
   - Non-DOM work (WidgetAI.inference calls, building UI) happens between steps, not inside expect checks.`;

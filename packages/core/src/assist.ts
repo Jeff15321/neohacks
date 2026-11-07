@@ -9,6 +9,9 @@ import { DANGER_TEXT_RE } from './danger.js';
 export interface StepAssistState { attempts: number; tried: string[]; newCount: number; lastNew?: { code: string; error: string } }
 export interface RunAssistState { interventions: number; startedAt: number; steps: Record<string, StepAssistState> }
 
+/** Step family: "open-reply-2" / "open-reply#2" → "open-reply" (per-item step names share learned branches). */
+export const stepFamily = (step: string) => step.replace(/[-_#:.\s]*\d+$/, '') || step;
+
 export const newRunAssistState = (now: number): RunAssistState => ({ interventions: 0, startedAt: now, steps: {} });
 
 export type AssistPlan =
