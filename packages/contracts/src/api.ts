@@ -23,6 +23,8 @@ export const GenerateWidgetRequest = z.object({
   }).optional(),
   /** Last N conversation turns for this widget (edit thread). */
   history: z.array(z.object({ role: z.enum(['user', 'generator']), text: z.string() })).max(20).optional(),
+  /** The user's existing WidgetAI.db collection names, so the generator reuses them (Phase A). */
+  existingCollections: z.array(z.string().max(64)).max(100).optional(),
 });
 export type GenerateWidgetRequest = z.infer<typeof GenerateWidgetRequest>;
 
