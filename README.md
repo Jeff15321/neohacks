@@ -72,4 +72,7 @@ See `.env.example`: `LLM_PROVIDER`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`,
 - `docs/implementation-plan.md` — milestones, contracts, debugging guide
 - `docs/devin-task.md` — autonomous-agent task definition
 - `docs/manual-test.md` — real Gmail walkthrough
+- `docs/gmail-selectors.md` — Gmail DOM field guide
+- `docs/demo.webm` — recorded run: request → generated widget → 2 drafts
+- `tests/tools/gmail-live.mjs` — near-push-button real-Gmail driver (persistent profile)
 - `poc/` — the standalone feasibility spike that de-risked the architecture

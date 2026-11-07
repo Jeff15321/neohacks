@@ -19,3 +19,8 @@
 - Playwright `page.evaluate` callbacks must be strings in helpers (esbuild `__name` wrapper breaks function literals).
 - Only standard CSS selectors in generated code (`:has-text` etc. are rejected server-side).
 - Branded Chrome won't `--load-extension`; tests use Playwright bundled `chromium` channel.
+
+## Testing tools (tests/tools/)
+- `live.mjs` — live-LLM run against a fixture: `TARGET_URL=<fixture> npx tsx live.mjs`
+- `gmail-live.mjs` — real-Gmail driver, persistent profile in .gmail-profile
+- `record-demo.mjs` — headed recording of the g2 workflow (needs mock backend)

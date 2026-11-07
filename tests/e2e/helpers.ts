@@ -10,10 +10,15 @@ export const EXT_ID = 'jbdmmaojlbiclmjbafphlchlnppplpen'; // from manifest key
 const PROFILE = path.join(DIR, '.pw-profile');
 const HEADED = process.env.HEADED === '1';
 
+interface LaunchOpts { recordVideoDir?: string; headed?: boolean; }
+let extraOpts: LaunchOpts = {};
+
 async function launch(): Promise<BrowserContext> {
   return chromium.launchPersistentContext(PROFILE, {
     channel: 'chromium',
-    headless: !HEADED,
+    headless: !(extraOpts.headed ?? HEADED),
+    ...(extraOpts.recordVideoDir ? { recordVideo: { dir: extraOpts.recordVideoDir, size: { width: 1400, height: 900 } } } : {}),
+    viewport: extraOpts.recordVideoDir ? { width: 1400, height: 900 } : undefined,
     args: [`--disable-extensions-except=${EXT_PATH}`, `--load-extension=${EXT_PATH}`],
   });
 }
@@ -61,7 +66,8 @@ async function enableToggles(context: BrowserContext) {
  * Launch a browser with the extension loaded and chrome.userScripts enabled.
  * Verified empirically on Chromium 158 (see docs/feasibility.md).
  */
-export async function launchWithExtension(): Promise<{ context: BrowserContext; sw: Worker }> {
+export async function launchWithExtension(opts: LaunchOpts = {}): Promise<{ context: BrowserContext; sw: Worker }> {
+  extraOpts = opts;
   fs.rmSync(PROFILE, { recursive: true, force: true });
   let context = await launch();
   let sw = await getSW(context);
