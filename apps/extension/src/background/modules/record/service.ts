@@ -256,7 +256,9 @@ export class RecordService {
     const instr = st.session.instructions?.trim();
     const request = `Build a widget that automates this recorded workflow: ${spec.goal}${instr ? `\nUser instructions: ${instr}` : ''}`.slice(0, 4000);
     const lastTab = st.session.tabs[st.session.tabs.length - 1];
-    const w = await this.bus.use('widgets.generate')(request, traceId, { spec, evidence: this.evidence(spec), tabId: lastTab });
+    // Phase F: a cross-tab recording (GitHub → Jira) builds a bundle whose HOME is where the user started
+    const homeTab = st.session.tabs.length > 1 ? st.session.startTab : lastTab;
+    const w = await this.bus.use('widgets.generate')(request, traceId, { spec, evidence: this.evidence(spec), tabId: homeTab });
     st.widgetId = w.id;
     this.persist(true);
     this.bus.broadcast({ type: 'REC_WIDGET', widget: w, traceId });

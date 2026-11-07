@@ -41,6 +41,6 @@ export function registerWidgets(bus: Bus) {
     const w = svc.mustGet(m.widgetId);
     bus.broadcast({ type: 'WIDGET_STATUS', widgetId: w.id, status: w.status, log: `[${m.level}] ${m.message}`, traceId: ctx.traceId });
   });
-  bus.onUserScript('WIDGET_STATUS', (m, ctx) => { svc.setStatus(svc.mustGet(m.widgetId), m.status, m.detail, ctx.traceId); });
+  bus.onUserScript('WIDGET_STATUS', (m, ctx) => { if (m.widgetId.includes('#')) return; /* Phase F: a sink part never sets the widget's status */ svc.setStatus(svc.mustGet(m.widgetId), m.status, m.detail, ctx.traceId); });
   return svc;
 }

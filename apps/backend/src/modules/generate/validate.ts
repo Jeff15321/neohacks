@@ -1,6 +1,6 @@
 import type { GeneratedWidget, WidgetGrant } from '@app/contracts';
 import { DATA_LIMITS, WidgetGrant as GrantSchema } from '@app/contracts';
-import { checkGeneratedCode, isValidMatchPattern } from '@app/core';
+import { checkBundle, checkGeneratedCode, isValidMatchPattern } from '@app/core';
 
 const GRANTS = new Set<string>(GrantSchema.options);
 
@@ -34,6 +34,9 @@ export function parseGeneratedWidget(raw: string): ParseResult {
   const data = checkDataUse(obj.collections, grants, code);
   if (data.error) return { error: data.error, warnings };
   warnings.push(...data.warnings);
+  const bundle = checkBundle({ code, matchPatterns, grants, parts: obj.parts }); // Phase F: bundle parts (doc §5)
+  if (!bundle.ok) return { error: bundle.error, warnings };
+  warnings.push(...bundle.warnings);
 
   return {
     warnings,
@@ -48,6 +51,7 @@ export function parseGeneratedWidget(raw: string): ParseResult {
       changeSummary: typeof obj.changeSummary === 'string' && obj.changeSummary ? obj.changeSummary.slice(0, 400) : undefined,
       consequentialActions: strs(obj.consequentialActions, 10, 200),
       ...(data.collections.length ? { collections: data.collections } : {}),
+      ...(bundle.parts.length ? { parts: bundle.parts } : {}),
     },
   };
 }

@@ -1,0 +1,15 @@
+{
+ "expectedMs": 2000,
+ "background": {
+  "hidden": false,
+  "raf": 1,
+  "timersMs": 1991,
+  "vis": "visible"
+ },
+ "foreground": {
+  "hidden": false,
+  "raf": 1,
+  "timersMs": 1989,
+  "vis": "visible"
+ }
+}

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ticket · Tracker</title>
+<link rel="stylesheet" href="tracker.css">
+</head>
+<body>
+<header class="top" role="banner"><b>Tracker</b> · Project TRK · <a href="index.html">Board</a></header>
+<main role="main">
+  <article class="ticket" aria-label="Issue details" data-testid="ticket">
+    <div class="crumbs">TRK / <span data-testid="ticket-key" id="key"></span></div>
+    <h1 data-testid="ticket-summary" id="summary"></h1>
+    <div class="labels" id="labels" data-testid="ticket-labels"></div>
+    <h3>Description</h3>
+    <div class="desc" data-testid="ticket-description" id="description"></div>
+  </article>
+</main>
+<script>
+  const key = new URLSearchParams(location.search).get('key') || '';
+  // simulate an SPA-ish tracker that renders the issue after a fetch
+  fetch('/fixture-tracker-api/rest/api/2/issue/' + encodeURIComponent(key)).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(t => {
+    document.title = t.key + ': ' + t.fields.summary + ' · Tracker';
+    document.getElementById('key').textContent = t.key;
+    document.getElementById('summary').textContent = t.fields.summary;
+    document.getElementById('description').textContent = t.fields.description;
+    document.getElementById('labels').textContent = t.fields.labels.join(', ');
+  }, (status) => { document.getElementById('summary').textContent = 'Issue not found (' + status + ')'; });
+</script>
+</body>
+</html>

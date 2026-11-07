@@ -134,7 +134,7 @@ export const widgetSystemPrompt = () => [BASE, ...WIDGET_PROMPT_SECTIONS].join('
 export const WIDGET_JSON_SCHEMA: Record<string, unknown> = {
   type: 'object',
   additionalProperties: false,
-  required: ['name', 'description', 'matchPatterns', 'grants', 'insertionHint', 'code', 'warnings', 'plan', 'changeSummary', 'consequentialActions', 'collections'],
+  required: ['name', 'description', 'matchPatterns', 'grants', 'insertionHint', 'code', 'warnings', 'plan', 'changeSummary', 'consequentialActions', 'collections', 'parts'],
   properties: {
     name: { type: 'string' },
     description: { type: 'string' },
@@ -148,6 +148,9 @@ export const WIDGET_JSON_SCHEMA: Record<string, unknown> = {
     consequentialActions: { type: 'array', items: { type: 'string' } },
     /** Phase A: WidgetAI.db collections the widget reads/writes ([] when unused). */
     collections: { type: 'array', items: { type: 'string' } },
+    /** Phase F: bundle parts on other sites ([] for single-site widgets). */
+    parts: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['role', 'matchPatterns', 'code', 'entryUrl', 'handlers'],
+      properties: { role: { type: 'string' }, matchPatterns: { type: 'array', items: { type: 'string' } }, code: { type: 'string' }, entryUrl: { type: 'string' }, handlers: { type: 'array', items: { type: 'string' } } } } },
   },
 };
 

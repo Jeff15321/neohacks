@@ -3,6 +3,7 @@ import { MOCK_WIDGET_CODE, MOCK_WIDGET_CODE_G2, MOCK_WIDGET_CODE_NET, MOCK_WIDGE
 import { MOCK_WIDGET_CODE_G2_DELETE, MOCK_WIDGET_CODE_G2_STEPS } from './widget.mockdata.steps.js';
 import { MOCK_WIDGET_CODE_SPEC_G2 } from './widget.spec.mockdata.js';
 import { moviesMockWidget } from './widget.mock.movies.js';
+import { flowMockWidget } from './widget.mockdata.flow.js';
 
 const LOCAL = ['*://127.0.0.1/*', '*://localhost/*'];
 
@@ -15,6 +16,8 @@ export const widgetMock: MockFn = (req) => {
   const changeSummary = /PRIOR WIDGET CODE/.test(user) ? 'mock: regenerated with the requested change' : '';
   const out = (w: { name: string; description: string; matchPatterns: string[]; grants: string[]; insertionHint: string; code: string; plan: string[]; collections?: string[] }) =>
     JSON.stringify({ collections: [], ...w, warnings: ['mock provider: deterministic fixture widget'], changeSummary, consequentialActions: [] });
+  const flow = flowMockWidget(user); // Phase F: fixture-issues → fixture-tracker bundle (WidgetAI.flow)
+  if (flow) return JSON.stringify({ collections: [], warnings: ['mock provider: deterministic fixture bundle'], changeSummary, ...flow });
   const movies = moviesMockWidget(user); // Phase A: fixture-movies (WidgetAI.db)
   if (movies) return out(movies);
   // Phase B: spec-conditioned generation from a recording (record.spec.ts)

@@ -40,6 +40,20 @@ export const tabs = {
   onUpdatedComplete: (fn: (tabId: number, tab: chrome.tabs.Tab) => void) =>
     chrome.tabs.onUpdated.addListener((id, info, tab) => { if (info.status === 'complete') fn(id, tab); }),
   query: (q: chrome.tabs.QueryInfo) => chrome.tabs.query(q),
+  /** Phase F (flow coordinator): open / focus target tabs. */
+  create: (url: string, active: boolean) => chrome.tabs.create({ url, active }),
+  activate: async (tabId: number) => {
+    try { const t = await chrome.tabs.update(tabId, { active: true }); if (t?.windowId !== undefined) await chrome.windows.update(t.windowId, { focused: true }).catch(() => {}); return true; }
+    catch { return false; }
+  },
+};
+
+/** Phase F: chrome.alarms (flow-run timeouts survive SW suspension; setTimeout dies with the SW). */
+export const alarms = {
+  create: (name: string, when: number) => chrome.alarms.create(name, { when }),
+  clear: (name: string) => chrome.alarms.clear(name).catch(() => false),
+  getAll: () => chrome.alarms.getAll(),
+  onAlarm: (fn: (name: string) => void) => chrome.alarms?.onAlarm.addListener(a => fn(a.name)),
 };
 
 /** Phase B: toolbar action badge ("REC"). */
