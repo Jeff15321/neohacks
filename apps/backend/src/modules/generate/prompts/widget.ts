@@ -1,6 +1,7 @@
 import type { GenerateWidgetRequest } from '@app/contracts';
 import { WidgetGrant } from '@app/contracts';
 import { WIDGET_PROMPT_SECTIONS } from './sections/index.js';
+import { renderSpecForPrompt } from './sections/spec.js';
 
 /**
  * Widget generator prompt. Every DOM/waiting/safety rule below was learned from a real Gmail failure
@@ -191,6 +192,7 @@ VISIBLE TEXT SAMPLE:
 ${pc.textSample.slice(0, 3000)}
 
 USER REQUEST: ${req.request}`;
+  if (req.spec) p += renderSpecForPrompt(req.spec, req.evidence); // Phase B: recorded workflow
   if (req.history?.length) {
     p += `\n\nCONVERSATION SO FAR (oldest first):\n${req.history.map(h => `${h.role}: ${h.text.slice(0, 600)}`).join('\n')}`;
   }

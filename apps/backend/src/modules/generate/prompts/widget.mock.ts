@@ -1,5 +1,6 @@
 import type { MockFn } from '../../../llm/types.js';
 import { MOCK_WIDGET_CODE, MOCK_WIDGET_CODE_G2, MOCK_WIDGET_CODE_NET, MOCK_WIDGET_CODE_YT } from './widget.mockdata.js';
+import { MOCK_WIDGET_CODE_SPEC_G2 } from './widget.spec.mockdata.js';
 
 const LOCAL = ['*://127.0.0.1/*', '*://localhost/*'];
 
@@ -12,6 +13,14 @@ export const widgetMock: MockFn = (req) => {
   const changeSummary = /PRIOR WIDGET CODE/.test(user) ? 'mock: regenerated with the requested change' : '';
   const out = (w: { name: string; description: string; matchPatterns: string[]; grants: string[]; insertionHint: string; code: string; plan: string[] }) =>
     JSON.stringify({ ...w, warnings: ['mock provider: deterministic fixture widget'], changeSummary, consequentialActions: [] });
+  // Phase B: spec-conditioned generation from a recording (record.spec.ts)
+  if (/RECORDED WORKFLOW SPEC/.test(user) && /fixture-g2|hardmail/i.test(user)) {
+    return out({
+      name: 'Recorded: Draft Replies to Unread', description: 'Toolbar button that drafts an AI reply to every unread email, as recorded (never sends).',
+      matchPatterns: [...LOCAL, '*://mail.google.com/*'], grants: ['inference', 'log'], insertionHint: 'Button in the main toolbar (spec trigger).', code: MOCK_WIDGET_CODE_SPEC_G2,
+      plan: ['Add a "Draft replies to unread" button to the toolbar', 'For each unread email: open it, write a reply with AI, let it auto-save as a draft', 'Never press Send'],
+    });
+  }
   if (/fixture-net|netmail/i.test(user)) {
     return out({
       name: 'API Draft Creator', description: 'Button that creates an email draft by replaying the captured save-draft network call.',

@@ -1,6 +1,7 @@
 import {
   PanelToSW, PageToSW, UserScriptMsg, SWToPanel, LIMITS, boundaryError,
   type BusLogEntry, type BusReply, type MsgOf, type NetOpSummary, type PageContext, type Settings, type WidgetGrant, type WidgetRecord, type z,
+  type EvidenceStep, type Step, type StepDraft, type WorkflowSpec,
 } from '@app/contracts';
 import { Ring, newTraceId } from '@app/core';
 
@@ -30,6 +31,13 @@ export interface Services {
   'widgets.authorize': (widgetId: string, tabUrl: string, grant?: WidgetGrant) => string | undefined;
   /** Module on/off flags (settings flag per module, Rules §5). */
   'settings.get': () => Settings;
+  /** Phase B (modules/observe): assign the global seq + store a Step (content drafts and SW-made tab/nav Steps). */
+  'steps.ingest': (draft: StepDraft, tabId: number, windowId?: number) => Promise<Step>;
+  /** Phase B: subscribe to new/updated Steps (record module, Phase D observe client). Returns unsubscribe. */
+  'steps.subscribe': (fn: (s: Step, update: boolean) => void) => () => void;
+  'steps.recent': (limit?: number) => Step[];
+  /** Phase B: generate a widget conditioned on a recorded WorkflowSpec + Step evidence. */
+  'widgets.generate': (request: string, traceId: string, opts?: { spec?: WorkflowSpec; evidence?: EvidenceStep[]; tabId?: number }) => Promise<WidgetRecord>;
 }
 
 const SCHEMAS: Record<Channel, z.ZodTypeAny> = { panel: PanelToSW, content: PageToSW, userScript: UserScriptMsg };
