@@ -1,7 +1,10 @@
 # Phase D — Activity model + proactive suggestions + background jobs
 
 ## HANDOFF
-Status: **gate running** (see Phase report for final numbers). Branch `phase-d` (from `nextgen` @ 0436c10 = 0+A+B+E).
+Status: **DONE** (14:40 PST). Branch `phase-d` (from `nextgen` @ 0436c10 = 0+A+B+E; `origin/nextgen` merged in at 14:36 —
+only PROGRESS.md changed upstream). Gate green on the merged tree: typecheck 0 errors; unit 110/110; E2E 9/9 (data, gmail2,
+net, record ×2, widget, youtube, suggest ×2); live trace eval 10/10 patterns, 0/5 noise traces with suggestions; live
+Demo 2 2/3 PASS (run 1 failed only the tool's success criterion — see report). Nothing in progress.
 
 ## Decisions (made without the human)
 - 13:50 — **Backend service registry** (`apps/backend/src/modules/types.ts`: `ServiceRegistry` + `BackendServices`, `deps.services`). generate provides `generate.widget`, recordings provides `steps.interpret` (one line each in their `routes.ts`); jobs/observe `use` them lazily. Rules §2 (no module-internal imports). Rejected: importing `createGenerateService` from jobs.
@@ -24,4 +27,123 @@ Status: **gate running** (see Phase report for final numbers). Branch `phase-d` 
 (none)
 
 ## Phase report
-(filled in at the end — see below)
+
+### Phase D — Activity model + proactive suggestions + background jobs — DONE
+**Implemented** (mapped to `docs/next-gen-architecture.md`):
+- §1.4 WorkingMemory + patch ops → `packages/contracts/src/activity.ts` (TaskInstance/TaskPattern/WorkingMemory/PatchOp/Suggestion
+  widened: `endedAt`, attach_steps `confidence/expectedNext/goal`, Suggestion `request/spec/details/origin/tabId/jobId/widgetId/
+  snoozed/acceptPending`; `SuggestionCandidate`, `ObserveStepsRequest/Response`, feedback schemas). Reducer
+  `packages/core/src/activity.ts` (`reduceActivity` pure, `replayActivity`, `completedInstances`, `dismissPattern/restorePattern`)
+  enforcing ≤3 active / ≤2 goal readings / recentCompleted ≤20 / completed-only instances.
+- §1.4 tiers → backend `modules/observe` (`service.ts`, `routes.ts`, README): Tier 1 = recordings' `steps.interpret` via the new
+  backend service registry (Haiku, per Step, parallel, 5-label window); Tier 2 `observe.activity` (Sonnet = `cfg.models.inference`,
+  effort low, structured output, frozen cached system prompt + WorkingMemory JSON + last 12 Steps + NEW Steps + deterministic
+  evidence features); reconsolidation `observe.reconsolidate` (on completion and every 25 Steps; inline only when a completed task
+  is unlinked, else right after the response, serialized per user); Tier 3 `observe.judge` (Opus = `cfg.models.generation`, effort
+  low, conservative rubric, sees dismissals with names) behind the deterministic gate (`packages/core/src/suggest.ts`: task boundary,
+  Tier-2 flag, ≥2 completed instances or ≥3 lineage edges, not dismissed, 30-min per-pattern cooldown; score =
+  value×confidence×feasibility ≥ 0.2). Per-user `activity_snapshots` (memory, last 60 Steps/labels, op log, suggested patterns,
+  lineage copies, seen step ids → duplicate delivery is a no-op). Routes: `POST /api/observe/steps`, `GET /api/observe/state`,
+  `POST /api/observe/dismiss|restore`, `DELETE /api/observe/state`. Prompts one file each + deterministic mocks:
+  `prompts/{activity,reconsolidate,judge}{,.mock}.ts`, shared `ops-schema.ts`, `compact.ts`.
+- §2 jobs → backend `modules/jobs` (`POST /api/jobs {kind, request, spec?, pageContext, …, dedupeKey?}`, `GET /api/jobs/:id?wait=25&since=`
+  long-poll, `DELETE` cancel; persisted in `jobs`; runner = generate service via `deps.services.use('generate.widget')`; pure state
+  machine `packages/core/src/job-machine.ts`; per-user ownership; stale running jobs failed at startup). Extension `modules/jobs`
+  JobClient (services `jobs.start/cancel/get`, 25 s long-poll slices with backoff, resumes after SW restart, `JOB_UPDATED`, `JOBS_LIST`/`JOB_CANCEL`).
+- §2 ObserveClient → extension `modules/observe/activity-client.ts` (NEW file; B's code untouched except one `registerActivity(bus)` line):
+  single in-flight POST, queue coalescing in `storage.session`, ≤40/batch, only when `Settings.observe`, sensitive-origin denylist, E10 stats.
+- §7 suggestion pipeline → `modules/observe/suggestions.ts`: admit (core `admitSuggestion`: dismissed / one live per pattern / ≤1 visible,
+  higher score replaces) → speculative job (dedupe `patternId:specHash`) → card states generating → ready → failed; Accept (also while
+  generating → "Preparing…" → auto-adopt when ready) → `widgets.adopt` → UNAPPROVED widget → approval card (Create tab; panel switches
+  via `SuggestionRouter`; `sidePanel.open` attempted); Not now; Never for this (cancel job + backend dismiss); Retry; Restore.
+  Gated by `Settings.suggestions`; persisted in `storage.local`.
+- §7 in-page card → `apps/extension/src/content/overlay/suggestion-card.ts` (Shadow DOM, bottom-right, non-modal, title / why / Details /
+  Accept · Not now · Never for this, progress ring; re-surfaces on matching origin via `WWA_SUGGESTION_QUERY`).
+- §7 Activity tab → `panel/tabs/Activity.tsx` (active tasks with goal + confidence + cited Steps + slots + expectedNext, suggestions
+  history with Accept / Never / Restore and the justifying task instances, patterns with completed-instance counts, recently completed,
+  pause/start observation, suggestions on/off, clear, pipeline diagnostics incl. last gate/Judge verdict).
+- Decision A Inspector → `panel/tabs/ActivityInspector.tsx` `HypothesesPane` (hypotheses with alternative readings, step roles, patterns,
+  Tier-1 labels, WorkingMemory JSON) + one line in `Inspector.tsx`.
+- §8 trace harness → `tests/tools/trace-synth.mjs` (14 new traces + labels), `tests/tools/trace-eval.mjs` `STAGES=activity`
+  (pattern accuracy, noise suggestions, latency; `ACT_MODE`, `ACT_NO_TIER1`, `ACT_EFFORT` knobs), `tests/tools/e10-burst.mjs`,
+  `tests/tools/suggest-live.mjs` (live Demo 2).
+
+**Not implemented / descoped:**
+- §9 E3 "full transcript" (chat) configuration — not built; E3 compares 3 cheaper configurations (below).
+- Per-site denylist is a fixed regex, not user-editable in the Activity tab.
+- Toggling Observe does not push capture to already-open tabs (B's record module owns `WWA_REC_STATE`; tabs pick it up on next load).
+  The E2E sets settings before loading the page.
+- Job cancel does not abort the in-flight Opus call (no AbortSignal in `callModel`); the late result is discarded.
+- Suggestion "judge TTL" re-surfacing (§7) is approximated: a visible suggestion re-surfaces on any tab of the same origin; no TTL expiry.
+- Late effects arriving after a Step was sent (`STEP_UPDATED`) are not re-sent to the activity model.
+- IndexedDB EventStore — still B's 300-Step `storage.session` ring.
+
+**Evidence the phase is correct:**
+- `npm run typecheck` → exit 0, 0 errors (all packages).
+- `npm run test:unit` → core 62/0 (12 new: reducer ×7 incl. purity/replay/caps/uncertain, gate ×3, dedupe, job machine), widget-runtime 5/0,
+  backend 36/0 (5 new: observe ×3 — 1st reply no suggestion / 2nd suggestion with spec / cooldown / op-log replay / dismiss+restore+clear /
+  user isolation / noise; jobs ×2 — long-poll → succeeded, dedupe, ownership, cancel mid-flight → late result discarded), extension 7/0
+  = **110 passed, 0 failed**.
+- `cd tests/e2e && E2E_PORT=8805 npx playwright test --reporter=line` → **9 passed** (~55 s) on the merged tree: data, gmail2, net,
+  record ×2, widget, youtube, **suggest ×2**.
+- `suggest.spec.ts` key assertions: observe+suggestions on → reply m1 → pattern 1 completed instance, **no card** (also after an 800 ms grace),
+  0 suggestions, gate reason "1 completed instance / not flagged" → reply m3 → card attached, title /unread/, why "2 emails", state →
+  `ready` (job succeeded, `JOBS_LIST`), 0 widgets installed before Accept, Details lists 2 instances → Accept → card gone → approval card
+  in the panel, widget `approved:false`, `spec.goal` /unread/ → Approve → `approved:true` → click widget → `__drafts` = {m1, m3 (user), m2
+  (widget)}, `__sent` = 0, status completed; suggestion `accepted` with `widgetId`; bus log has `jobs.start`, `widgets.adopt`,
+  `WWA_SUGGESTION_ACTION`; Activity tab "2 completed", 2 completed tasks; Inspector shows pattern `p_reply_to_email` and
+  `observe.judge` / `observe.activity` LLM calls. Test 2: card → "Never for this" → card gone, suggestion `dismissed`, backend
+  `dismissed` ∋ pattern → 3rd reply (m2) → 3 completed instances, **no card, still 1 suggestion**, gate reason "dismissed", 0 widgets →
+  Activity Restore → suggestion back to ready/generating, dismissals empty.
+- **Trace eval (live, `trace-eval.mjs STAGES=activity`, 15 traces: 10 repeat + 5 noise; 4 fixture-derived + 10 synthetic + B's youtube-read)**,
+  final code (`docs/evidence/D/trace-eval-live.json`): **pattern accuracy 10/10**; repeat traces with a suggestion 7/10 (7/9 where a
+  suggestion was labelled expected; add-to-cart labelled "either"); **noise: 0/5 traces with suggestions, 0 suggestions, 0 Judge calls**
+  (the gate stopped all); Judge declined (reasons in the JSON) add-to-cart ("ordinary shopping"), approve-expense ("financial
+  authorization needs human judgment"), crm-log-call ("the work is the note itself"). Mean suggestion latency (backend time of the request
+  carrying the completing Step) **11.1 s** (9.9–12.3 s; target < 10 s — missed); per-call mean 3.7 s, p50 3.1 s, p90 4.4 s, max 12.3 s;
+  0 op-validation errors over 133 calls. Trace ids per trace in the JSON (e.g. act-g2-reply-x2 → `t_act_actg2replyx2_*`).
+  Progression: v1 (inline reconsolidation) 10/10 · 6/10 suggested · 0/5 noise · 13.2 s; v2 (deferred recon) 10/10 · 7/10 · 0/5 · 10.9 s;
+  v3 = final (+Judge "prefer bulk trigger" guidance) 10/10 · 7/10 · 0/5 · 11.1 s. Mock smoke of the harness: 4/10 patterns (the mock only
+  knows the HardMail reply) — the harness discriminates.
+- **E3** (cheapest honest version, same 15 traces, v2 code): (a) per-Step delta state + Tier 1: 10/10 · 7/10 · 0/5 · suggestion latency
+  10.9 s · call mean 3.9 s; (b) **no Tier 1**: 10/10 · 7/10 · 0/5 · 10.3 s · call mean 2.7 s; (c) **whole trace in one request** (batch):
+  10/10 · 7/10 · 0/5 · 15.1 s per call (7 reducer op errors). Conclusion (honest): on these traces Tier 1 adds ~1.2 s/call and no measurable
+  accuracy — but the synthetic Steps carry clean accessible names, so they are easy; real-site traces are needed before dropping Tier 1.
+  Full-transcript configuration not tested.
+- **E4** (noise false-suggestion rate): 0 suggestions on 5 noise traces (news, shopping browse with tab switches, docs search + copy,
+  HardMail open/back ×4, YouTube subscribe + copy) in every run (v1, v2, v3, E3 a/b/c) = 0/30 trace-runs; no noise trace ever reached
+  the Judge, and no noise trace produced a completed task.
+- **E10** (`e10-burst.mjs`, 30 Steps at 300 ms, faithful ObserveClient policy, live): effort low → 3 calls (batches 1/10/19, max queue
+  depth 19), call mean 10.2 s / max 20.8 s (19-Step batch: Tier 2 8.8 s + Judge 6.4 s), queue drained 21.7 s after the last Step,
+  suggestion (`p_create_ticket_from_issue`) 23.0 s after the evidence Step arrived; effort medium → same batching, call mean 10.3 s /
+  max 20.6 s, suggestion 23.4 s. Coalescing works (30 Steps → 3 calls); latency under a burst is dominated by the big batch.
+- **Live Demo 2** (`suggest-live.mjs`, fixture-gmail2, real typing, live Haiku/Sonnet/Opus): card after the 1st reply = 0 in 3/3; card
+  after the 2nd reply in 3/3 (13–17 s after the "Draft saved" toast; includes the 1.5 s typing-idle commit + settle); job succeeded 3/3
+  (Opus generation 79 s / 256 s / 226 s); Accept → unapproved approval card 3/3; **end-to-end drafts {m1, m3, m2}, 0 sent: 2/3**.
+  Run 1 (before the Judge "bulk" guidance) produced a valid per-email "Draft reply" button widget; the tool clicked it on the inbox and
+  waited for an m2 draft → counted FAIL. Runs 2–3 (final prompt): bulk "Draft replies to your remaining unread emails?" → PASS.
+  Trace ids: run 1 `t_obs_mw6yqep3` (job `job_hd8kqld1dh`), run 2 `t_obs_mw6yxgix` (`job_tblxhw3lwn`), run 3 `t_obs_mw6z72x3`.
+  All live LLM calls this session: `docs/evidence/D/live-llm-calls.txt` (0 parse failures over 1 379 calls; reconsolidation almost
+  always returned `{"ops":[]}` — 11 output tokens on average).
+- Artifacts (`docs/evidence/D/`, ~270 KB): `trace-eval-live{,-v2,-v1-inline-recon}.json`, `e3-no-tier1.json`, `e3-batch.json`,
+  `e10-burst.json`, `live-suggest-{1,2,3}.json`, `live-llm-calls.txt`, `suggestion-card.png`, `suggest-approval.png`, `activity-tab.png`.
+
+**How to verify it yourself (≤5 min):**
+`npm run typecheck && npm run test:unit` → 0 errors, 110 passes. `cd tests/e2e && E2E_PORT=8805 npx playwright test suggest.spec.ts --reporter=line`
+→ 2 passed (~30 s). Offline harness smoke: start a mock backend on a free port and `cd tests/tools && E2E_PORT=<port> STAGES=activity node trace-eval.mjs`
+(4/10 with the mock). Live (~4 min): `BACKEND_PORT=8805 LLM_PROVIDER=anthropic DATA_DB_PATH=/tmp/x.db npm run start -w apps/backend`, then
+`cd tests/tools && E2E_PORT=8805 STAGES=activity CONCURRENCY=5 node trace-eval.mjs`.
+
+**Known issues:**
+- Shared files edited (expect small conflicts): `packages/contracts/src/{activity,jobs}.ts`, `messages/{observe,jobs}.ts` (ours);
+  `packages/core/src/index.ts` (+3 exports); backend `modules/types.ts` (ServiceRegistry + `services` in ModuleDeps), `server.ts`
+  (2 lines), `modules/generate/routes.ts` + `modules/recordings/routes.ts` (one `provide` line each); extension `background/bus.ts`
+  (Services: `widgets.adopt`, `jobs.*`), `platform/index.ts` (`sidePanel` wrapper), `modules/widgets/{service,index}.ts` (`adopt`),
+  `modules/observe/index.ts` (+1 line) and its README (Phase D section appended), `content/main.ts` (+1 line), `panel/app/App.tsx`
+  (`SuggestionRouter`), `panel/tabs/Inspector.tsx` (+1 line); `tests/traces/youtube-read.labels.json` (+`activity`), `tests/tools/trace-eval.mjs` (activity stage).
+- Mean suggestion latency 11.1 s misses the < 10 s target (Tier 1 ≈1.2 s + Tier 2 ≈2–3 s + Opus Judge ≈6.6 s). Options: drop Tier 1 from
+  the hot path (E3 b), or Sonnet as Judge for the first pass.
+- MIN_JUDGE_SCORE 0.2 and Judge effort low were set after one live demo trace (Decisions 14:07). The multiplicative score clusters at 0.25–0.38.
+- The eval traces are fixture-derived/synthetic and short; real-site behaviour (constant background mutation, long sessions, 25-Step
+  reconsolidation under drift) is unmeasured. Reconsolidation almost never changes anything on these traces.
+- Running the full E2E makes the A/E specs rewrite their screenshots under docs/evidence/A|E — restore them before committing (`git checkout -- docs/evidence/A docs/evidence/E`).
