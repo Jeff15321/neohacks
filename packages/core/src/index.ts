@@ -4,3 +4,7 @@ export * from './net/netlog.js';
 export * from './redact.js';
 export * from './util.js';
 export * from './validate-code.js';
+export * from './settle.js';
+export * from './locators.js';
+export * from './step-redact.js';
+export * from './lineage.js';

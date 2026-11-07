@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { PageContext } from './page.js';
 import { GeneratedWidget } from './widget.js';
+import { EvidenceStep, WorkflowSpec } from './workflow.js';
 
 /** Uniform backend error shape (plugins/errors). */
 export const ApiError = z.object({
@@ -23,6 +24,9 @@ export const GenerateWidgetRequest = z.object({
   }).optional(),
   /** Last N conversation turns for this widget (edit thread). */
   history: z.array(z.object({ role: z.enum(['user', 'generator']), text: z.string() })).max(20).optional(),
+  /** Phase B: recorded workflow spec + Step evidence (generation conditioned on a recording). */
+  spec: WorkflowSpec.optional(),
+  evidence: z.array(EvidenceStep).max(40).optional(),
 });
 export type GenerateWidgetRequest = z.infer<typeof GenerateWidgetRequest>;
 

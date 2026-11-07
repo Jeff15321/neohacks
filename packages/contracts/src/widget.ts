@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { WorkflowSpec } from './workflow.js';
 
 /** Capabilities a generated widget may request via `grants`. Later phases extend this enum (data, flow). */
 export const WidgetGrant = z.enum([
@@ -51,6 +52,8 @@ export const WidgetRecord = GeneratedWidget.extend({
   originalRequest: z.string().optional(),
   /** traceId of the generation that produced this version. */
   traceId: z.string().optional(),
+  /** Phase B: the recorded WorkflowSpec this widget was generated from (reused for edits and repair). */
+  spec: WorkflowSpec.optional(),
   /** Conversation turns for this widget (user + generator), newest last. */
   thread: z.array(z.object({
     role: z.enum(['user', 'generator']),
