@@ -6,12 +6,11 @@ import { PanelProvider, usePanel } from './state.js';
 import { CreateTab } from '../tabs/Create.js';
 import { WidgetsTab } from '../tabs/Widgets.js';
 import { InspectorTab } from '../tabs/Inspector.js';
-import { ActivityTab, DataTab, RecordTab } from '../tabs/Placeholders.js';
+import { RecordTab } from '../tabs/Record.js';
+import { ActivityTab } from '../tabs/Activity.js';
+import { DataTab } from '../tabs/Data.js';
 
-/**
- * Panel tab shell. Each tab's body lives in tabs/<Name>.tsx (one owner per tab).
- * Phases replace a placeholder by importing their own tab component here (one-line change).
- */
+/** Panel tab shell. Each tab's body lives in tabs/<Name>.tsx (one owner per tab: Record → B, Activity → D, Data → A). */
 const TABS: Array<{ id: string; label: string; Body: React.ComponentType }> = [
   { id: 'create', label: 'Create', Body: CreateTab },
   { id: 'widgets', label: 'Widgets', Body: WidgetsTab },

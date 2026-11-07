@@ -26,6 +26,8 @@ let replayDepth = 0;
 const target = location.origin === 'null' ? '*' : location.origin;
 const post = (data: object) => { try { window.postMessage({ source: 'wwa-net', ...data }, target); } catch { /* detached */ } };
 const emit = (record: NetRequestRecord) => post({ kind: 'record', record });
+/** In-flight signal for the Step settle machine (content/netbridge tracks start → record pairs; not sent to the SW). */
+const started = (r: NetRequestRecord) => post({ kind: 'start', id: r.id, method: r.method, url: r.url, ts: r.startTs });
 
 async function bodyToString(body: unknown): Promise<{ text?: string; kind: NetBodyKind }> {
   try {
@@ -81,6 +83,7 @@ try {
       const src = init && 'body' in init ? init.body : (req ? req.clone().text() : undefined);
       bodyP = Promise.resolve(src).then(bodyToString).then(b => { rec.bodyKind = b.kind; rec.requestBody = b.text; });
     } catch { /* still record the call */ }
+    started(rec);
     let result: Promise<Response>;
     try {
       result = of(input, init);
@@ -140,6 +143,7 @@ try {
       m.requestHeaders = m.headers;
       m.contentType = pickHeader(m.headers, 'content-type');
       void bodyToString(body).then(b => { m.bodyKind = b.kind; m.requestBody = b.text; });
+      started(m);
       this.addEventListener('loadend', () => {
         try {
           m.status = this.status; m.statusText = this.statusText; m.ok = this.status >= 200 && this.status < 400;

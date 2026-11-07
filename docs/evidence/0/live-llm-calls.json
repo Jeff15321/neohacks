@@ -1,0 +1,50 @@
+[
+ {
+  "id": "llm_c3pbuu0hlp4h",
+  "traceId": "t_dixg4or9w9i6",
+  "stage": "inference",
+  "model": "claude-sonnet-5-5",
+  "effort": "low",
+  "latencyMs": 1487,
+  "inputTokens": 344,
+  "outputTokens": 87,
+  "parseOk": true,
+  "error": null
+ },
+ {
+  "id": "llm_8vscvdmb4ikp",
+  "traceId": "t_dixg4or9w9i6",
+  "stage": "inference",
+  "model": "claude-sonnet-5-5",
+  "effort": "low",
+  "latencyMs": 2102,
+  "inputTokens": 360,
+  "outputTokens": 140,
+  "parseOk": true,
+  "error": null
+ },
+ {
+  "id": "llm_6fwrs3mdcynw",
+  "traceId": "t_c5uq4ywgr6d2",
+  "stage": "generate.widget",
+  "model": "claude-opus-5-5",
+  "effort": "high",
+  "latencyMs": 152790,
+  "inputTokens": 1325,
+  "outputTokens": 17918,
+  "parseOk": true,
+  "error": null
+ },
+ {
+  "id": "llm_62zdpnnmn9zb",
+  "traceId": "t_8hmrnl50fom4",
+  "stage": "generate.widget",
+  "model": "claude-opus-5-5",
+  "effort": "high",
+  "latencyMs": 154119,
+  "inputTokens": 1325,
+  "outputTokens": 18430,
+  "parseOk": true,
+  "error": null
+ }
+]

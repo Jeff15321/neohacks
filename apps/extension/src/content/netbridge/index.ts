@@ -36,6 +36,23 @@ const pendingInvokes = new Map<string, (r: unknown) => void>();
 let probeSeen = false;
 const pageOrigin = location.origin === 'null' ? '*' : location.origin;
 
+/**
+ * In-flight request tracking for this frame (probe `start` → `record` pairs), consumed by the Step settle machine
+ * (Phase B: content/steps). Requests that never complete are dropped after 30 s.
+ */
+type NetActivity = { kind: 'start' | 'end'; id: string; method: string; url: string; ts: number; status?: number };
+const inflight = new Map<string, number>();
+const listeners = new Set<(e: NetActivity) => void>();
+export const netActivity = {
+  inflight(): number {
+    const now = Date.now();
+    for (const [id, ts] of inflight) if (now - ts > 30_000) inflight.delete(id);
+    return inflight.size;
+  },
+  subscribe(fn: (e: NetActivity) => void): () => void { listeners.add(fn); return () => listeners.delete(fn); },
+};
+const notify = (e: NetActivity) => { for (const fn of listeners) { try { fn(e); } catch { /* listener bug */ } } };
+
 export function startNetBridge() {
   document.addEventListener('click', e => reportGesture('click', e), true);
   document.addEventListener('submit', e => reportGesture('submit', e), true);
@@ -46,7 +63,15 @@ export function startNetBridge() {
     const d = ev.data as { source?: string; kind?: string; record?: unknown; frameUrl?: string; patched?: boolean; invokeId?: string; result?: unknown } | null;
     if (!d || typeof d !== 'object' || d.source !== 'wwa-net') return;
     probeSeen = true;
-    if (d.kind === 'record') send({ type: 'WWA_NET_RECORD', record: d.record });
+    if (d.kind === 'start') {
+      const s = d as unknown as NetActivity;
+      inflight.set(String(s.id), Date.now());
+      notify({ kind: 'start', id: String(s.id), method: String(s.method), url: String(s.url), ts: Number(s.ts) });
+    } else if (d.kind === 'record') {
+      const r = d.record as { id?: string; method?: string; url?: string; startTs?: number; status?: number; replay?: boolean } | undefined;
+      if (r?.id) { inflight.delete(r.id); notify({ kind: 'end', id: r.id, method: String(r.method), url: String(r.url), ts: Date.now(), status: r.status }); }
+      send({ type: 'WWA_NET_RECORD', record: d.record });
+    }
     else if (d.kind === 'hello' || d.kind === 'pong') send({ type: 'WWA_NET_HELLO', frameUrl: String(d.frameUrl ?? location.href), patched: d.patched });
     else if (d.kind === 'result' && isTop && d.invokeId) {
       const resolve = pendingInvokes.get(d.invokeId);

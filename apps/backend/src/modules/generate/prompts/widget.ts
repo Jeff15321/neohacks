@@ -1,13 +1,13 @@
 import type { GenerateWidgetRequest } from '@app/contracts';
+import { WidgetGrant } from '@app/contracts';
+import { WIDGET_PROMPT_SECTIONS } from './sections/index.js';
 
 /**
  * Widget generator prompt. Every DOM/waiting/safety rule below was learned from a real Gmail failure
  * (docs/handoff.md) — ported verbatim from the MVP `generation/prompt.ts`. Frozen (no timestamps) so it caches.
- * Phase owners append their own sections via `WIDGET_PROMPT_SECTIONS` (C: steps/branches, A: db, E: net strategy, F: flow).
+ * Phase owners add their own sections in `sections/<name>.ts` (C: steps, A: db, E: network, B: spec, F: flow).
  */
-export const GRANTS_DOC = '["inference","log","storage","network"]';
-
-export const WIDGET_PROMPT_SECTIONS: string[] = [];
+export const GRANTS_DOC = JSON.stringify(WidgetGrant.options);
 
 const BASE = `You are WIDGET-GEN, a code generator for a browser-extension platform that injects AI-generated "widgets" into existing websites.
 
@@ -137,7 +137,7 @@ export const WIDGET_JSON_SCHEMA: Record<string, unknown> = {
     name: { type: 'string' },
     description: { type: 'string' },
     matchPatterns: { type: 'array', items: { type: 'string' } },
-    grants: { type: 'array', items: { type: 'string', enum: ['inference', 'log', 'storage', 'network'] } },
+    grants: { type: 'array', items: { type: 'string', enum: [...WidgetGrant.options] } },
     insertionHint: { type: 'string' },
     code: { type: 'string' },
     warnings: { type: 'array', items: { type: 'string' } },

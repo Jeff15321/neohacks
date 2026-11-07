@@ -9,9 +9,17 @@ import type { ModuleDeps, RegisterModule } from './modules/types.js';
 import { registerGenerate } from './modules/generate/routes.js';
 import { registerInference } from './modules/inference/routes.js';
 import { registerDebug } from './modules/debug/routes.js';
+import { registerAssist } from './modules/assist/routes.js';
+import { registerObserve } from './modules/observe/routes.js';
+import { registerRecordings } from './modules/recordings/routes.js';
+import { registerJobs } from './modules/jobs/routes.js';
+import { registerData } from './modules/data/routes.js';
 
-/** Backend modules. Phases append theirs (assist, observe, recordings, jobs, data). */
-const MODULES: RegisterModule[] = [registerGenerate, registerInference, registerDebug];
+/** Backend modules (each owns its routes; stubs register nothing until implemented). */
+const MODULES: RegisterModule[] = [
+  registerGenerate, registerInference, registerDebug,
+  registerAssist, registerObserve, registerRecordings, registerJobs, registerData,
+];
 
 export async function buildApp(cfg: Config = loadConfig(), opts: { logger?: boolean } = {}): Promise<{ app: FastifyInstance; deps: ModuleDeps }> {
   const db = openDb(cfg.dataDbPath);

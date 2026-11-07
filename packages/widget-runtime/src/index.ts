@@ -1,6 +1,9 @@
 import { bridgeSection } from './sections/bridge.js';
 import { coreSection } from './sections/core.js';
 import { netSection } from './sections/net.js';
+import { stepSection } from './sections/step.js';
+import { dbSection } from './sections/db.js';
+import { flowSection } from './sections/flow.js';
 
 export interface WidgetSourceInput {
   id: string;
@@ -12,11 +15,14 @@ export interface WidgetSourceInput {
 
 /**
  * Prelude sections, in order. Each section adds members to `__api` (never reassigns it).
- * Phases add their own section file here: C → step/assist/danger guard, A → db, F → flow.
+ * One file per owner: step.ts (C: step/assist/danger guard), db.ts (A), flow.ts (F) — edit only your file.
  */
 const SECTIONS: Array<(w: WidgetSourceInput) => string> = [
   () => coreSection(),
   () => netSection(),
+  () => stepSection(),
+  () => dbSection(),
+  () => flowSection(),
 ];
 
 /** The prelude alone (bridge + all sections + frozen WidgetAI). */
