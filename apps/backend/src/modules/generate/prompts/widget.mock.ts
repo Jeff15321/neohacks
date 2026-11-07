@@ -1,6 +1,8 @@
 import type { MockFn } from '../../../llm/types.js';
 import { MOCK_WIDGET_CODE, MOCK_WIDGET_CODE_G2, MOCK_WIDGET_CODE_NET, MOCK_WIDGET_CODE_YT } from './widget.mockdata.js';
 import { MOCK_WIDGET_CODE_G2_DELETE, MOCK_WIDGET_CODE_G2_STEPS } from './widget.mockdata.steps.js';
+import { MOCK_WIDGET_CODE_SPEC_G2 } from './widget.spec.mockdata.js';
+import { moviesMockWidget } from './widget.mock.movies.js';
 
 const LOCAL = ['*://127.0.0.1/*', '*://localhost/*'];
 
@@ -11,13 +13,25 @@ const LOCAL = ['*://127.0.0.1/*', '*://localhost/*'];
 export const widgetMock: MockFn = (req) => {
   const user = req.messages[0]?.content ?? '';
   const changeSummary = /PRIOR WIDGET CODE/.test(user) ? 'mock: regenerated with the requested change' : '';
-  const out = (w: { name: string; description: string; matchPatterns: string[]; grants: string[]; insertionHint: string; code: string; plan: string[] }) =>
-    JSON.stringify({ ...w, warnings: ['mock provider: deterministic fixture widget'], changeSummary, consequentialActions: [] });
+  const out = (w: { name: string; description: string; matchPatterns: string[]; grants: string[]; insertionHint: string; code: string; plan: string[]; collections?: string[] }) =>
+    JSON.stringify({ collections: [], ...w, warnings: ['mock provider: deterministic fixture widget'], changeSummary, consequentialActions: [] });
+  const movies = moviesMockWidget(user); // Phase A: fixture-movies (WidgetAI.db)
+  if (movies) return out(movies);
+  // Phase B: spec-conditioned generation from a recording (record.spec.ts)
+  if (/RECORDED WORKFLOW SPEC/.test(user) && /fixture-g2|hardmail/i.test(user)) {
+    return out({
+      name: 'Recorded: Draft Replies to Unread', description: 'Toolbar button that drafts an AI reply to every unread email, as recorded (never sends).',
+      matchPatterns: [...LOCAL, '*://mail.google.com/*'], grants: ['inference', 'log'], insertionHint: 'Button in the main toolbar (spec trigger).', code: MOCK_WIDGET_CODE_SPEC_G2,
+      plan: ['Add a "Draft replies to unread" button to the toolbar', 'For each unread email: open it, write a reply with AI, let it auto-save as a draft', 'Never press Send'],
+    });
+  }
   if (/fixture-net|netmail/i.test(user)) {
     return out({
       name: 'API Draft Creator', description: 'Button that creates an email draft by replaying the captured save-draft network call.',
       matchPatterns: LOCAL, grants: ['network', 'log'], insertionHint: 'Inserts a button into the main toolbar.', code: MOCK_WIDGET_CODE_NET,
-      plan: ['Add a button to the toolbar', 'Replay the captured "save draft" request with new values', 'Read the drafts list back to confirm'],
+      plan: ['Add a button to the toolbar', 'Strategy: network (confirmed op, JSON body, CSRF dependency resolvable) with a DOM fallback',
+        'Re-fetch the CSRF token the save-draft request depends on', 'Replay the captured "save draft" request with new values and the fresh token',
+        'Read the drafts list back to confirm, then mark the operation verified'],
     });
   }
   // Phase C: danger-guard + step-based chaos widgets (more specific than the plain g2 widget below)

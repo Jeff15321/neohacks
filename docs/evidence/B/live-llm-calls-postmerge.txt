@@ -1,0 +1,11 @@
+stage|trace_id|model|effort|latency_ms|input_tokens|output_tokens|parse_ok
+steps.interpret|t_qtuiv0wmk5zm|claude-haiku-5-5|low|1459|563|137|1
+steps.interpret|t_qtuiv0wmk5zm|claude-haiku-5-5|low|1486|467|125|1
+steps.interpret|t_qtuiv0wmk5zm|claude-haiku-5-5|low|1006|400|139|1
+recordings.interpret|t_p7f6ynxhgz18|claude-opus-5-5|high|12386|2016|1280|1
+generate.widget|t_aqhdqo55a14p|claude-opus-5-5|high|153744|3906|18417|1
+steps.interpret|t_qr2c5gkt77rs|claude-haiku-5-5|low|1297|563|137|1
+steps.interpret|t_qr2c5gkt77rs|claude-haiku-5-5|low|1089|467|125|1
+steps.interpret|t_qr2c5gkt77rs|claude-haiku-5-5|low|1210|400|141|1
+recordings.interpret|t_8h8u7ckwa0p3|claude-opus-5-5|high|12388|2016|1335|1
+generate.widget|t_5wsvi84cwchp|claude-opus-5-5|high|159301|3971|19166|1

@@ -12,6 +12,7 @@ const GRANT_TEXT: Record<string, string> = {
   log: 'Show progress messages in this panel',
   storage: 'Remember its own settings in this browser',
   network: "Re-send this site's own requests (same site only, with your login)",
+  data: 'Read and save your personal data (only the collections listed below)',
 };
 
 const STATUS_VARIANT: Record<string, 'default' | 'accent' | 'success' | 'warning' | 'destructive'> = {
@@ -54,6 +55,9 @@ export function ApprovalCard({ w }: { w: WidgetRecord }) {
         {w.grants.length > 0 && (
           <ul className="m-0 list-disc space-y-0.5 pl-4 text-xs text-muted-foreground">{w.grants.map(g => <li key={g}>{GRANT_TEXT[g] ?? g}</li>)}</ul>
         )}
+        {!!w.collections?.length && ( /* Phase A */
+          <div data-testid="stores-data" className="text-xs"><span className="text-muted-foreground">Stores data in: </span><span className="font-mono">{w.collections.join(', ')}</span></div>
+        )}
         {!!w.consequentialActions?.length && (
           <div className="rounded-md border border-destructive/40 bg-destructive/10 p-2 text-xs text-destructive">
             Needs your confirmation at runtime: {w.consequentialActions.join('; ')}
@@ -85,7 +89,7 @@ export function WidgetCard({ w }: { w: WidgetRecord }) {
       <CardHeader>
         <CardTitle>{w.name}<StatusBadge status={w.status} /><Badge variant="outline">v{w.version}</Badge></CardTitle>
         <CardDescription>{w.description}</CardDescription>
-        <CardDescription className="font-mono text-[10.5px]">{sites(w)} · {w.grants.join(', ') || 'no grants'}</CardDescription>
+        <CardDescription className="font-mono text-[10.5px]">{sites(w)} · {w.grants.join(', ') || 'no grants'}{w.collections?.length ? ` · data: ${w.collections.join(', ')}` : ''}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
         {w.status === 'failed' && w.lastError && <div className="rounded-md bg-destructive/10 p-2 text-xs text-destructive">{w.lastError}</div>}

@@ -1,6 +1,7 @@
 import {
   PanelToSW, PageToSW, UserScriptMsg, SWToPanel, LIMITS, boundaryError,
   type BusLogEntry, type BusReply, type MsgOf, type NetOpSummary, type PageContext, type Settings, type WidgetGrant, type WidgetRecord, type z,
+  type EvidenceStep, type Step, type StepDraft, type WorkflowSpec,
 } from '@app/contracts';
 import { Ring, newTraceId } from '@app/core';
 
@@ -26,12 +27,23 @@ export interface Services {
   'page.context': (tab: chrome.tabs.Tab) => Promise<PageContext>;
   'net.opsForTab': (tabId: number, origin: string, limit?: number) => Promise<NetOpSummary[]>;
   'widgets.list': () => WidgetRecord[];
+  /** One widget record (Phase A: modules/data checks its declared `collections`). */
+  'widgets.get': (widgetId: string) => WidgetRecord | undefined;
+  /** The user's existing WidgetAI.db collection names (Phase A; sent with GENERATE_WIDGET). */
+  'data.collections': () => Promise<string[]>;
   /** Returns an error string when the user script may not perform this call. */
   'widgets.authorize': (widgetId: string, tabUrl: string, grant?: WidgetGrant) => string | undefined;
   /** Phase C: new unapproved widget version with `code` (learned branch). Needs approval like every version. */
   'widgets.newVersion': (widgetId: string, code: string, changeSummary: string, traceId: string) => Promise<WidgetRecord>;
   /** Module on/off flags (settings flag per module, Rules §5). */
   'settings.get': () => Settings;
+  /** Phase B (modules/observe): assign the global seq + store a Step (content drafts and SW-made tab/nav Steps). */
+  'steps.ingest': (draft: StepDraft, tabId: number, windowId?: number) => Promise<Step>;
+  /** Phase B: subscribe to new/updated Steps (record module, Phase D observe client). Returns unsubscribe. */
+  'steps.subscribe': (fn: (s: Step, update: boolean) => void) => () => void;
+  'steps.recent': (limit?: number) => Step[];
+  /** Phase B: generate a widget conditioned on a recorded WorkflowSpec + Step evidence. */
+  'widgets.generate': (request: string, traceId: string, opts?: { spec?: WorkflowSpec; evidence?: EvidenceStep[]; tabId?: number }) => Promise<WidgetRecord>;
 }
 
 const SCHEMAS: Record<Channel, z.ZodTypeAny> = { panel: PanelToSW, content: PageToSW, userScript: UserScriptMsg };

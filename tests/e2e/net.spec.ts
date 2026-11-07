@@ -1,9 +1,20 @@
-import { test, expect, request } from '@playwright/test';
-import { launchWithExtension, openPanel, generate, approveFirst, waitForWidgetStatus, NET_URL, BASE } from './helpers.js';
+import { test, expect, request, type Page } from '@playwright/test';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { launchWithExtension, openPanel, generate, approveFirst, waitForWidgetStatus, busLog, NET_URL, BASE } from './helpers.js';
+
+const EVIDENCE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../docs/evidence/E');
+const netOps = async (panel: Page) => {
+  const r = await panel.evaluate(() => (globalThis as any).chrome.runtime.sendMessage({ type: 'GET_NET_OPS' }));
+  expect(r.ok).toBe(true);
+  return r.ops as any[];
+};
+const draftOp = (ops: any[]) => ops.find(o => o.method === 'POST' && o.path === '/fixture-api/drafts' && !o.replay);
 
 test.describe('Network observation + reproduction (NetMail fixture, real API)', () => {
   test('user action → captured POST (webRequest-confirmed) → widget replays with new params → verified server-side', async () => {
-    const { context } = await launchWithExtension();
+    const { context, sw } = await launchWithExtension();
     try {
       const api = await request.newContext({ baseURL: BASE });
       await api.post('/fixture-api/__reset');
@@ -47,6 +58,34 @@ test.describe('Network observation + reproduction (NetMail fixture, real API)', 
       expect(forgedReplay.error).toMatch(/unconfirmed/);
       console.log('[e2e-net] real op confirmed + correlated; forged op unconfirmed and replay refused');
 
+      // 2b. op analysis (doc §4 item 3): route template, token field, dependency on the rotating CSRF GET
+      let ops = await netOps(panel);
+      const op = draftOp(ops);
+      expect(op?.confirmed).toBe(true);
+      expect(op.analysis.templateKey).toBe('POST /fixture-api/drafts');
+      expect(op.analysis.tokenFields).toContain('body.csrf');
+      expect(op.analysis.paramFields).toEqual([]);
+      const dep = op.analysis.dependsOn.find((d: any) => d.field === 'body.csrf');
+      expect(dep).toMatchObject({ fromTemplate: 'GET /fixture-api/csrf', path: 'token' });
+      expect(ops.find(o => o.id === dep.opId)?.path).toBe('/fixture-api/csrf');
+      expect(op.analysis.idempotencyHint).toMatch(/not idempotent/);
+      expect(op.attribution).toBe('window'); // no Step recorder yet → 6 s gesture window fallback
+      expect(op.requestBodyTemplate).toContain('"csrf":"[REDACTED]"'); // token stays redacted for panel/LLM/widgets
+      expect(op.tier).toBe('observed');
+      console.log('[e2e-net] analysis:', JSON.stringify({ template: op.analysis.templateKey, tokens: op.analysis.tokenFields, dependsOn: op.analysis.dependsOn.map((d: any) => `${d.field}←${d.fromTemplate}.${d.path}`) }));
+
+      // 2c. a verbatim replay carries the STALE single-use token → 403 surfaced honestly, tier not promoted
+      const stale = await panel.evaluate((id) => (globalThis as any).chrome.runtime.sendMessage({ type: 'NET_REPLAY', opId: id }), op.id);
+      expect(stale.ok).toBe(true);
+      expect(stale.result.status).toBe(403);
+      expect(stale.result.ok).toBe(false);
+      expect(stale.result.bodyText).toMatch(/stale csrf/);
+      expect((await (await api.get('/fixture-api/__csrf-stats')).json()).rejected).toBe(1);
+      ops = await netOps(panel);
+      expect(draftOp(ops).tier).toBe('observed');
+      expect((await (await api.get('/fixture-api/drafts')).json()).drafts).toHaveLength(1);
+      console.log('[e2e-net] stale-token replay → 403, tier stays observed');
+
       // 3. generate + approve a widget that replays the captured op with new params
       const title = await generate(panel, 'Add a button that creates an email draft using the captured save-draft API call.');
       console.log('[e2e-net] widget:', title);
@@ -67,6 +106,28 @@ test.describe('Network observation + reproduction (NetMail fixture, real API)', 
       const sent = (await (await api.get('/fixture-api/sent')).json()).sent;
       expect(sent).toHaveLength(0);
       console.log('[e2e-net] 2 drafts server-side (1 manual + 1 replayed), 0 sent');
+
+      expect((await (await api.get('/fixture-api/__csrf-stats')).json()).rejected).toBe(1); // widget used a FRESH token
+
+      // 5b. verification tiers (doc §4 item 4): the widget's replay → replayed, its read-back → reportVerified → verified
+      ops = await netOps(panel);
+      expect(draftOp(ops).tier).toBe('verified');
+      expect(draftOp(ops).tierEvidence).toContain('API-authored draft');
+      expect(ops.find(o => o.path === '/fixture-api/csrf')?.tier).toBe('replayed'); // GET re-fetched, never "verified" by itself
+      const bus = await busLog(sw);
+      const rv = bus.filter(e => e.type === 'WIDGET_NET_REPORT_VERIFIED');
+      expect(rv.length).toBe(1);
+      expect(rv[0]!.ok).toBe(true);
+      expect(bus.filter(e => e.type === 'WIDGET_NET_INVOKE').length).toBe(2); // csrf re-fetch + draft replay
+      await panel.click('[data-testid="tab-inspector"]');
+      await panel.click('[data-testid="net-refresh"]');
+      const verifiedRow = net.locator('button', { hasText: '/fixture-api/drafts' }).filter({ hasText: 'verified' }).first();
+      await expect(verifiedRow).toBeVisible();
+      await verifiedRow.click();
+      await expect(net.locator('[data-testid="net-analysis"]').first()).toContainText('depends: body.csrf ← GET /fixture-api/csrf .token');
+      fs.mkdirSync(EVIDENCE, { recursive: true });
+      await panel.screenshot({ path: path.join(EVIDENCE, 'inspector-tiers.png'), fullPage: true });
+      console.log('[e2e-net] draft op template tier = verified (Inspector + GET_NET_OPS)');
 
       // 6. the fixture's own Drafts view (driven by GET /fixture-api/drafts) shows both
       await page.click('#drafts-btn');

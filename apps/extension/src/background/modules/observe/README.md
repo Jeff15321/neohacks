@@ -1,8 +1,11 @@
 # modules/observe
 
-**STUB — owner: Phase D.** Settings flag: see `Settings` in `@app/contracts` (system messages).
+**Phase B part (implemented): Step ingest.** Phase D adds the ObserveClient (activity model) on top.
 
-Step ingest (seq, EventStore), ObserveClient (single in-flight POST /api/observe/steps, coalescing), suggestions.
-
-Layout: `index.ts` (registers its bus handlers / services) · `service.ts` (logic, uses `@app/core`) · `store.ts` (its own storage keys) · this README (purpose, messages handled/emitted, data owned, how to test).
-Messages go in `packages/contracts/src/messages/observe.ts`. Wire `registerObserve(bus)` into `background/main.ts`.
+- `steps.ts` — `StepStore`: assigns the global monotonic `seq` (serialised, persisted in `storage.session`
+  `wwa_step_seq`), keeps the last 300 Steps in `storage.session` `wwa_steps`, re-redacts typed values
+  (`redactStepForExport`), merges `lateEffects`, notifies subscribers.
+- Messages handled: `WWA_STEP`, `WWA_STEP_LATE` (content → SW), `GET_STEPS` (panel). Emits `STEP_UPDATED`.
+- Services provided: `steps.ingest`, `steps.subscribe`, `steps.recent`.
+- Capture is enabled by modules/record (`WWA_REC_STATE.capture` = recording || settings.observe).
+- Test: `tests/e2e/record.spec.ts` (Steps for open row → reply → type), `packages/core/src/__tests__/steps.test.ts`.

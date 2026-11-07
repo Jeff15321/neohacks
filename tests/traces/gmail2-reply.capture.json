@@ -1,0 +1,203 @@
+{
+ "kind": "wwa-trace",
+ "version": 1,
+ "name": "gmail2-reply",
+ "exportedAt": "2026-11-07T21:23:54.377Z",
+ "steps": [
+  {
+   "id": "st_mw6wuvlw_1",
+   "origin": "http://127.0.0.1:8802",
+   "url": "http://127.0.0.1:8802/fixture-g2/index.html",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "data",
+       "selector": "tr[data-legacy-message-id=\"m1\"]",
+       "matches": 1
+      },
+      {
+       "kind": "css",
+       "selector": "tr.zA.zE:nth-of-type(1)",
+       "matches": 1
+      },
+      {
+       "kind": "role-name",
+       "selector": "[role=\"row\"]",
+       "matches": 3
+      }
+     ],
+     "tag": "tr",
+     "role": "row",
+     "accessibleName": "Nov 6 Q4 launch checklist — Hi, Can you review the Q4 launch checklist by Friday? Items",
+     "landmarkPath": "main > grid[Inbox]"
+    },
+    "accessibleName": "Nov 6 Q4 launch checklist — Hi, Can you review the Q4 launch checklist by Friday? Items",
+    "role": "row",
+    "landmarkPath": "main > grid[Inbox]"
+   },
+   "effects": {
+    "titleChange": "HardMail — Q4 launch checklist",
+    "addedRegions": [
+     {
+      "root": "div.adn.ads",
+      "skeleton": "div.adn.ads[role=main]\n  div.ajy[role=button][aria-label=\"Back to Inbox\"] \"←\"\n  h2.hP \"Q4 launch checklist\"\n  div\n    span.gD \"Priya Nair\"\n    span.go \"<priya@example.com>\"\n  div.a3s.aiL[role=presentation] \"Hi,\n\nCan you review the Q4 launch checkl\"\n  div.aoI\n  span.ams.bkH[role=link][aria-label=\"Reply\"] \"Reply\"\n"
+     }
+    ],
+    "removedRegions": [
+     "table.F[role=grid]"
+    ],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1794086630276,
+   "tEnd": 1794086630308,
+   "settle": {
+    "reason": "interrupted",
+    "mutations": 1,
+    "lastActivityMs": 1
+   },
+   "title": "HardMail — Q4 launch checklist",
+   "seq": 1,
+   "tabId": 1739126509,
+   "windowId": 1739126504
+  },
+  {
+   "id": "st_mw6wuvms_2",
+   "origin": "http://127.0.0.1:8802",
+   "url": "http://127.0.0.1:8802/fixture-g2/index.html",
+   "action": {
+    "kind": "click",
+    "target": {
+     "candidates": [
+      {
+       "kind": "aria-label",
+       "selector": "[aria-label=\"Reply\"]",
+       "matches": 1
+      },
+      {
+       "kind": "role-name",
+       "selector": "[role=\"link\"][aria-label=\"Reply\"]",
+       "matches": 1
+      },
+      {
+       "kind": "css",
+       "selector": "span.ams.bkH",
+       "matches": 1
+      },
+      {
+       "kind": "text",
+       "selector": "[role=\"link\"] >> text=\"Reply\"",
+       "matches": 1
+      }
+     ],
+     "tag": "span",
+     "role": "link",
+     "accessibleName": "Reply",
+     "landmarkPath": "main > main"
+    },
+    "accessibleName": "Reply",
+    "role": "link",
+    "landmarkPath": "main > main"
+   },
+   "effects": {
+    "titleChange": "HardMail — Q4 launch checklist",
+    "addedRegions": [
+     {
+      "root": "div.Am.aiL",
+      "skeleton": "div.Am.aiL.aO9[role=textbox][aria-label=\"Message Body\"][contenteditable]\n"
+     },
+     {
+      "root": "div.aoI > div.J-J5-Ji",
+      "skeleton": "div.J-J5-Ji\n  div.T-I.J-J5-Ji.T-I-KE[role=button][aria-label=\"Send\"] \"Send\"\n"
+     }
+    ],
+    "removedRegions": [],
+    "liveRegionText": [],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1794086630308,
+   "tEnd": 1794086630313,
+   "settle": {
+    "reason": "interrupted",
+    "mutations": 1,
+    "lastActivityMs": 0
+   },
+   "title": "HardMail — Q4 launch checklist",
+   "seq": 2,
+   "tabId": 1739126509,
+   "windowId": 1739126504
+  },
+  {
+   "id": "st_mw6wuvmx_3",
+   "origin": "http://127.0.0.1:8802",
+   "url": "http://127.0.0.1:8802/fixture-g2/index.html",
+   "action": {
+    "kind": "input-commit",
+    "target": {
+     "candidates": [
+      {
+       "kind": "aria-label",
+       "selector": "[aria-label=\"Message Body\"]",
+       "matches": 1
+      },
+      {
+       "kind": "role-name",
+       "selector": "[role=\"textbox\"][aria-label=\"Message Body\"]",
+       "matches": 1
+      },
+      {
+       "kind": "css",
+       "selector": "div.Am.aiL",
+       "matches": 1
+      },
+      {
+       "kind": "text",
+       "selector": "[role=\"textbox\"] >> text=\"T\"",
+       "matches": 1
+      }
+     ],
+     "tag": "div",
+     "role": "textbox",
+     "accessibleName": "Message Body",
+     "landmarkPath": "main > main"
+    },
+    "accessibleName": "Message Body",
+    "role": "textbox",
+    "landmarkPath": "main > main",
+    "valuePreview": "Thanks Priya, I will review the checklist by Friday.",
+    "valueHash": "c07be235"
+   },
+   "effects": {
+    "titleChange": "HardMail — Q4 launch checklist",
+    "addedRegions": [],
+    "removedRegions": [],
+    "liveRegionText": [
+     "Draft saved"
+    ],
+    "net": [],
+    "mutatingOk": false
+   },
+   "settled": true,
+   "tStart": 1794086630313,
+   "tEnd": 1794086632557,
+   "settle": {
+    "reason": "quiet",
+    "mutations": 45,
+    "lastActivityMs": 1844
+   },
+   "title": "HardMail — Q4 launch checklist",
+   "seq": 3,
+   "tabId": 1739126509,
+   "windowId": 1739126504
+  }
+ ],
+ "labels": {
+  "note": "add hand labels here (see tests/traces/README.md)"
+ }
+}

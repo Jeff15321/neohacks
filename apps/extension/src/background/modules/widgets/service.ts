@@ -1,4 +1,4 @@
-import type { GenerateWidgetRequest, GenerateWidgetResponse, WidgetGrant, WidgetRecord, WidgetStatus } from '@app/contracts';
+import type { EvidenceStep, GenerateWidgetRequest, GenerateWidgetResponse, WidgetGrant, WidgetRecord, WidgetStatus, WorkflowSpec } from '@app/contracts';
 import { matchesAny, randomId } from '@app/core';
 import { buildCleanupSource, buildWidgetSource } from '@app/widget-runtime';
 import type { Bus } from '../../bus.js';
@@ -43,17 +43,25 @@ export class WidgetService {
     return pageContext;
   }
 
-  async generate(request: string, traceId: string): Promise<WidgetRecord> {
-    const tab = await tabs.findTarget();
+  /** Phase A: the user's WidgetAI.db collection names so the generator reuses them (absent if the data module/backend fails). */
+  private async existingCollections(): Promise<string[] | undefined> {
+    try { return await this.bus.use('data.collections')(); } catch { return undefined; }
+  }
+
+  /** `opts` (Phase B): generation conditioned on a recorded WorkflowSpec + Step evidence, on the recording's tab. */
+  async generate(request: string, traceId: string, opts: { spec?: WorkflowSpec; evidence?: EvidenceStep[]; tabId?: number } = {}): Promise<WidgetRecord> {
+    const tab = opts.tabId !== undefined ? await tabs.get(opts.tabId).catch(() => tabs.findTarget()) : await tabs.findTarget();
     if (!tab?.id) throw new Error('no eligible web page tab found');
     this.bus.broadcast({ type: 'GENERATION_PROGRESS', stage: 'context', detail: 'extracting page context', traceId });
     const pageContext = await this.contextFor(tab);
     this.bus.broadcast({ type: 'GENERATION_PROGRESS', stage: 'llm', detail: 'generating widget code', traceId });
-    const res = await backend.post<GenerateWidgetResponse>('/api/generate-widget', { request, pageContext } satisfies GenerateWidgetRequest, traceId);
+    const res = await backend.post<GenerateWidgetResponse>('/api/generate-widget', {
+      request, pageContext, existingCollections: await this.existingCollections(), spec: opts.spec, evidence: opts.evidence,
+    } satisfies GenerateWidgetRequest, traceId);
     if (!res.ok || !res.widget) throw new Error(res.error ?? 'generation failed');
     const w: WidgetRecord = {
       ...res.widget, id: randomId('w'), version: 1, createdAt: now(), origin: pageContext.origin,
-      status: 'ready', approved: false, originalRequest: request, traceId,
+      status: 'ready', approved: false, originalRequest: request, traceId, ...(opts.spec ? { spec: opts.spec } : {}),
       thread: [{ role: 'user', text: request, ts: now() }, { role: 'generator', text: res.widget.description, version: 1, ts: now() }],
     };
     await this.store.put(w);
@@ -75,12 +83,14 @@ export class WidgetService {
       pageContext,
       prior: { code: w.code, error: instruction ? undefined : (w.lastError ?? 'widget failed at runtime'), feedback: instruction },
       history: (w.thread ?? []).slice(-10).map(t => ({ role: t.role, text: t.text })),
+      existingCollections: await this.existingCollections(),
+      spec: w.spec,
     } satisfies GenerateWidgetRequest, traceId);
     if (!res.ok || !res.widget) throw new Error(res.error ?? 'repair generation failed');
     const version = w.version + 1;
     const nw: WidgetRecord = {
       ...res.widget, id: w.id, version, createdAt: w.createdAt, origin: w.origin, status: 'ready', approved: false,
-      originalRequest: w.originalRequest, traceId,
+      originalRequest: w.originalRequest, traceId, ...(w.spec ? { spec: w.spec } : {}),
       thread: [...(w.thread ?? []),
         { role: 'user' as const, text: instruction ?? `Auto-fix: ${w.lastError ?? 'runtime failure'}`, ts: now() },
         { role: 'generator' as const, text: res.widget.changeSummary ?? res.widget.description, version, ts: now() }].slice(-40),

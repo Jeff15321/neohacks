@@ -12,6 +12,7 @@ export const STATIC: Array<{ dir: string; prefix: string }> = [
   { dir: 'youtube', prefix: '/fixture-yt/' },
   { dir: 'gmail2', prefix: '/fixture-g2/' },
   { dir: 'net', prefix: '/fixture-net/' },
+  { dir: 'movies', prefix: '/fixture-movies/' }, // Phase A (WidgetAI.db)
 ];
 
 export async function registerFixtures(app: FastifyInstance, repoRoot: string) {

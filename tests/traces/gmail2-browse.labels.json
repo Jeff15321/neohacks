@@ -1,0 +1,6 @@
+{
+  "description": "Browsing only: open an email, go back, open it again, go back. No data written.",
+  "tier1": { "1": "open|read|view", "2": "back|return|navigate|go|close", "3": "open|read|view", "4": "back|return|navigate|go|close" },
+  "navigationOnly": [2, 4],
+  "spec": { "goalNot": "draft|send|reply" }
+}

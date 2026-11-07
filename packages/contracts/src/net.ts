@@ -54,8 +54,56 @@ export const NetRequestRecord = z.object({
   confirmed: z.boolean().optional(),
   /** Frame id (from the content-script sender). 0 = top frame. */
   frameId: z.number().optional(),
+  /** Step open when the request started (stamped by content/netbridge from the Step recorder; primary attribution). */
+  stepId: z.string().max(80).optional(),
 });
 export type NetRequestRecord = z.infer<typeof NetRequestRecord>;
+
+/** Verification tier per op template (doc §4 item 4). Ordered: observed < replayed < verified. */
+export const NetTier = z.enum(['observed', 'replayed', 'verified']);
+export type NetTier = z.infer<typeof NetTier>;
+
+/** Evidence a widget run passes to `WidgetAI.net.reportVerified` (its read-back success criterion). */
+export const NetVerifyEvidence = z.object({
+  /** What was read back, e.g. `GET /api/drafts contains "API-authored draft"`. */
+  readBack: z.string().max(400),
+  /** Optional: what the widget checked, in its own words. */
+  detail: z.string().max(400).optional(),
+});
+export type NetVerifyEvidence = z.infer<typeof NetVerifyEvidence>;
+
+/** A request field whose value came from an earlier response (doc §4 item 3: dependency inference). */
+export const NetDependency = z.object({
+  /** Request field in this op: `body.csrf`, `header.x-csrf-token`, `query.page_token`. */
+  field: z.string(),
+  /** Earlier op whose response carried the value. */
+  opId: z.string(),
+  /** That op's template key, e.g. `GET /api/csrf`. */
+  fromTemplate: z.string(),
+  /** Path inside that op's response: `token`, `data.csrf`, `items[0].id`, `header:x-csrf-token`. */
+  path: z.string(),
+});
+export type NetDependency = z.infer<typeof NetDependency>;
+
+/** Deterministic op analysis (packages/core/op-analysis). Contains field NAMES/paths only — never raw values. */
+export const NetOpAnalysis = z.object({
+  /** Route template: `/repos/:owner/:repo/issues/:n`. */
+  template: z.string(),
+  /** `${METHOD} ${template}` — tiers and grouping are keyed by this. */
+  templateKey: z.string(),
+  /** Number of captures of this template on the tab. */
+  captures: z.number(),
+  mutating: z.boolean(),
+  /** Dynamic/token fields: secret-named, high-entropy, or opaque values that differ across captures. Keep / re-fetch, never invent. */
+  tokenFields: z.array(z.string()),
+  /** Human-valued fields that differed across captures (likely user parameters). */
+  paramFields: z.array(z.string()),
+  dependsOn: z.array(NetDependency),
+  /** Client-generated id fields on a mutating op (duplicate/idempotency hint). */
+  clientIdFields: z.array(z.string()),
+  idempotencyHint: z.string().optional(),
+});
+export type NetOpAnalysis = z.infer<typeof NetOpAnalysis>;
 
 /** Compact, REDACTED view of a captured operation: fed to the LLM prompt, the panel, and widgets. */
 export const NetOpSummary = z.object({
@@ -76,6 +124,16 @@ export const NetOpSummary = z.object({
   replay: z.boolean().optional(),
   confirmed: z.boolean().optional(),
   ts: z.number(),
+  /** Step this request is attributed to (record stepId, else the correlated gesture's stepId). */
+  stepId: z.string().optional(),
+  /** How the trigger was attributed: the Step recorder (primary) or the 6 s gesture time window (fallback). */
+  attribution: z.enum(['step', 'window']).optional(),
+  /** Template-level verification tier (doc §4 item 4). */
+  tier: NetTier.optional(),
+  tierEvidence: z.string().optional(),
+  analysis: NetOpAnalysis.optional(),
+  /** Seen by chrome.webRequest only (e.g. worker requests): no bodies, not replayable. */
+  browserOnly: z.boolean().optional(),
 });
 export type NetOpSummary = z.infer<typeof NetOpSummary>;
 
@@ -123,4 +181,4 @@ export const InvokeRequestSpec = z.object({
 export type InvokeRequestSpec = z.infer<typeof InvokeRequestSpec>;
 
 /** Minimal chrome.webRequest completion kept for the integrity cross-check. */
-export interface WebRequestSeen { url: string; method: string; ts: number; statusCode?: number; }
+export interface WebRequestSeen { url: string; method: string; ts: number; statusCode?: number; type?: string; }

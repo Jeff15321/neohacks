@@ -1,0 +1,282 @@
+{
+ "backend": "http://127.0.0.1:8802",
+ "provider": "mock",
+ "at": "2026-11-07T21:34:04.264Z",
+ "traces": 4,
+ "checks": "41/43",
+ "tier1Accuracy": 1,
+ "specCheckRate": 0.913,
+ "results": [
+  {
+   "name": "gmail2-browse",
+   "steps": 4,
+   "checks": [
+    {
+     "id": "tier1#1",
+     "ok": true,
+     "detail": "want /open|read|view/ got \"open email \"Nov 6 Q4 launch checklist — Hi\"\""
+    },
+    {
+     "id": "tier1#2",
+     "ok": true,
+     "detail": "want /back|return|navigate|go|close/ got \"click Back to Inbox\""
+    },
+    {
+     "id": "tier1#3",
+     "ok": true,
+     "detail": "want /open|read|view/ got \"open email \"Nov 6 Q4 launch checklist — Hi\"\""
+    },
+    {
+     "id": "tier1#4",
+     "ok": true,
+     "detail": "want /back|return|navigate|go|close/ got \"click Back to Inbox\""
+    },
+    {
+     "id": "tier1#2:navOnly",
+     "ok": true,
+     "detail": "isNavigationOnly=true"
+    },
+    {
+     "id": "tier1#4:navOnly",
+     "ok": true,
+     "detail": "isNavigationOnly=true"
+    },
+    {
+     "id": "spec:ok",
+     "ok": true,
+     "detail": 200
+    },
+    {
+     "id": "spec:goalNot",
+     "ok": false,
+     "detail": "Draft an AI-written reply to each unread email in the inbox (save as draft, never send)"
+    }
+   ],
+   "ms": {
+    "tier1": 12,
+    "spec": 4
+   },
+   "traceId": "t_eval_gmail2browse_mw6x81ca",
+   "goal": "Draft an AI-written reply to each unread email in the inbox (save as draft, never send)",
+   "passed": 7,
+   "total": 8
+  },
+  {
+   "name": "gmail2-reply-noisy",
+   "steps": 7,
+   "checks": [
+    {
+     "id": "tier1#1",
+     "ok": true,
+     "detail": "want /open|view|navigate|go|click|check|switch/ got \"click Drafts (0)\""
+    },
+    {
+     "id": "tier1#2",
+     "ok": true,
+     "detail": "want /back|return|navigate|go|close/ got \"click Back to Inbox\""
+    },
+    {
+     "id": "tier1#3",
+     "ok": true,
+     "detail": "want /open|read|view/ got \"open email \"Nov 4 Weekly digest #482 — You\"\""
+    },
+    {
+     "id": "tier1#4",
+     "ok": true,
+     "detail": "want /back|return|navigate|go|close/ got \"click Back to Inbox\""
+    },
+    {
+     "id": "tier1#5",
+     "ok": true,
+     "detail": "want /open|read|view/ got \"open email \"Nov 6 Q4 launch checklist — Hi\"\""
+    },
+    {
+     "id": "tier1#6",
+     "ok": true,
+     "detail": "want /reply|compose/ got \"reply reply composer\""
+    },
+    {
+     "id": "tier1#7",
+     "ok": true,
+     "detail": "want /type|write|enter|draft|compose|reply/ got \"type reply text\""
+    },
+    {
+     "id": "tier1#2:navOnly",
+     "ok": true,
+     "detail": "isNavigationOnly=true"
+    },
+    {
+     "id": "tier1#4:navOnly",
+     "ok": true,
+     "detail": "isNavigationOnly=true"
+    },
+    {
+     "id": "spec:ok",
+     "ok": true,
+     "detail": 200
+    },
+    {
+     "id": "spec:goal",
+     "ok": true,
+     "detail": "Draft an AI-written reply to each unread email in the inbox (save as draft, never send)"
+    },
+    {
+     "id": "spec:slots",
+     "ok": true,
+     "detail": "email thread"
+    },
+    {
+     "id": "spec:consequential",
+     "ok": true,
+     "detail": "Send email (never pressed — drafts only)"
+    },
+    {
+     "id": "spec:cites#6",
+     "ok": true,
+     "detail": "3,5,6,7"
+    },
+    {
+     "id": "spec:cites#7",
+     "ok": true,
+     "detail": "3,5,6,7"
+    },
+    {
+     "id": "spec:noise#1",
+     "ok": true,
+     "detail": "essential cites 3,5,6,7"
+    },
+    {
+     "id": "spec:noise#2",
+     "ok": true,
+     "detail": "essential cites 3,5,6,7"
+    },
+    {
+     "id": "spec:noise#3",
+     "ok": false,
+     "detail": "essential cites 3,5,6,7"
+    },
+    {
+     "id": "spec:questions",
+     "ok": true,
+     "detail": "1 questions"
+    }
+   ],
+   "ms": {
+    "tier1": 7,
+    "spec": 1
+   },
+   "traceId": "t_eval_gmail2replynoisy_mw6x81cq",
+   "goal": "Draft an AI-written reply to each unread email in the inbox (save as draft, never send)",
+   "passed": 18,
+   "total": 19
+  },
+  {
+   "name": "gmail2-reply",
+   "steps": 3,
+   "checks": [
+    {
+     "id": "tier1#1",
+     "ok": true,
+     "detail": "want /open|read|view|select/ got \"open email \"Nov 6 Q4 launch checklist — Hi\"\""
+    },
+    {
+     "id": "tier1#2",
+     "ok": true,
+     "detail": "want /reply|compose/ got \"reply reply composer\""
+    },
+    {
+     "id": "tier1#3",
+     "ok": true,
+     "detail": "want /type|write|enter|draft|compose|reply/ got \"type reply text\""
+    },
+    {
+     "id": "spec:ok",
+     "ok": true,
+     "detail": 200
+    },
+    {
+     "id": "spec:goal",
+     "ok": true,
+     "detail": "Draft an AI-written reply to each unread email in the inbox (save as draft, never send)"
+    },
+    {
+     "id": "spec:slots",
+     "ok": true,
+     "detail": "email thread"
+    },
+    {
+     "id": "spec:slotName",
+     "ok": true,
+     "detail": "email thread"
+    },
+    {
+     "id": "spec:consequential",
+     "ok": true,
+     "detail": "Send email (never pressed — drafts only)"
+    },
+    {
+     "id": "spec:cites#1",
+     "ok": true,
+     "detail": "1,2,3"
+    },
+    {
+     "id": "spec:cites#2",
+     "ok": true,
+     "detail": "1,2,3"
+    },
+    {
+     "id": "spec:cites#3",
+     "ok": true,
+     "detail": "1,2,3"
+    },
+    {
+     "id": "spec:questions",
+     "ok": true,
+     "detail": "1 questions"
+    }
+   ],
+   "ms": {
+    "tier1": 1,
+    "spec": 0
+   },
+   "traceId": "t_eval_gmail2reply_mw6x81cz",
+   "goal": "Draft an AI-written reply to each unread email in the inbox (save as draft, never send)",
+   "passed": 12,
+   "total": 12
+  },
+  {
+   "name": "youtube-read",
+   "steps": 2,
+   "checks": [
+    {
+     "id": "tier1#1",
+     "ok": true,
+     "detail": "want /subscribe|click|follow/ got \"click Subscribe\""
+    },
+    {
+     "id": "tier1#2",
+     "ok": true,
+     "detail": "want /copy/ got \"copy div\""
+    },
+    {
+     "id": "spec:ok",
+     "ok": true,
+     "detail": 200
+    },
+    {
+     "id": "spec:goalNot",
+     "ok": true,
+     "detail": "Repeat the recorded 2-step workflow on http://127.0.0.1:8802"
+    }
+   ],
+   "ms": {
+    "tier1": 1,
+    "spec": 0
+   },
+   "traceId": "t_eval_youtuberead_mw6x81d2",
+   "goal": "Repeat the recorded 2-step workflow on http://127.0.0.1:8802",
+   "passed": 4,
+   "total": 4
+  }
+ ]
+}

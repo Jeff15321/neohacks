@@ -21,6 +21,19 @@ function describeTarget(el: Element | null): { target: string; text?: string } {
 
 const send = (msg: unknown) => { try { void chrome.runtime.sendMessage(msg).catch(() => {}); } catch { /* extension reloaded */ } };
 
+/**
+ * Step attribution hook (doc §4 item 2). The Step recorder (Phase B: content/steps) registers a provider returning
+ * the id of the currently open Step; gestures and requests started while it is open carry that stepId (primary
+ * attribution — the SW falls back to the 6 s gesture window when absent).
+ */
+let stepProvider: (() => string | undefined) | null = null;
+const currentStep = (): string | undefined => { try { const s = stepProvider?.(); return s ? String(s).slice(0, 80) : undefined; } catch { return undefined; } };
+/** request id → stepId at `start` time (records arrive after the response, possibly in a later step). */
+const startSteps = new Map<string, string>();
+export const netAttribution = {
+  setStepProvider(fn: (() => string | undefined) | null) { stepProvider = fn; },
+};
+
 let lastGesture = { kind: '', target: '', ts: 0 };
 function reportGesture(kind: 'click' | 'submit' | 'keydown', ev: Event) {
   const now = Date.now();
@@ -29,7 +42,11 @@ function reportGesture(kind: 'click' | 'submit' | 'keydown', ev: Event) {
   // Dedupe repeated events on the same element; different targets are never throttled (fast UIs fire back-to-back).
   if (kind === lastGesture.kind && target === lastGesture.target && now - lastGesture.ts < 400) return;
   lastGesture = { kind, target, ts: now };
-  send({ type: 'WWA_GESTURE', gesture: { kind, target, text, ts: now } });
+  // resolve the step after the event's other capture listeners (the Step recorder may open a step for this gesture)
+  setTimeout(() => {
+    const stepId = currentStep();
+    send({ type: 'WWA_GESTURE', gesture: { kind, target, text, ts: now, ...(stepId ? { stepId } : {}) } });
+  }, 0);
 }
 
 const pendingInvokes = new Map<string, (r: unknown) => void>();
@@ -66,11 +83,19 @@ export function startNetBridge() {
     if (d.kind === 'start') {
       const s = d as unknown as NetActivity;
       inflight.set(String(s.id), Date.now());
+      const step = currentStep();
+      if (step) { startSteps.set(String(s.id), step); if (startSteps.size > 200) startSteps.delete(startSteps.keys().next().value!); }
       notify({ kind: 'start', id: String(s.id), method: String(s.method), url: String(s.url), ts: Number(s.ts) });
     } else if (d.kind === 'record') {
       const r = d.record as { id?: string; method?: string; url?: string; startTs?: number; status?: number; replay?: boolean } | undefined;
       if (r?.id) { inflight.delete(r.id); notify({ kind: 'end', id: r.id, method: String(r.method), url: String(r.url), ts: Date.now(), status: r.status }); }
-      send({ type: 'WWA_NET_RECORD', record: d.record });
+      // stepId is stamped here (isolated world), never taken from the page-posted payload
+      const rec = { ...(d.record as Record<string, unknown>) };
+      delete rec.stepId;
+      const step = r?.id ? (startSteps.get(r.id) ?? undefined) : undefined;
+      if (r?.id) startSteps.delete(r.id);
+      if (step) rec.stepId = step;
+      send({ type: 'WWA_NET_RECORD', record: rec });
     }
     else if (d.kind === 'hello' || d.kind === 'pong') send({ type: 'WWA_NET_HELLO', frameUrl: String(d.frameUrl ?? location.href), patched: d.patched });
     else if (d.kind === 'result' && isTop && d.invokeId) {

@@ -1,0 +1,235 @@
+[e2e] enabled toggles: devMode,userScripts
+NET OPS: Network | Refresh | ▸ | POST | /fixture-api/drafts | 201 | observed | ← click "Save draft" | ▸ | GET | /fixture-api/drafts | 200 | observed | ← click "Save draft" | ▸ | GET | /fixture-api/csrf | 200 | observed | ← click "Save draft" | ▸ | GET | /fixture-api/messages | 200 | observed | ▸ | GET | /fixture-api/drafts | 200 | observed
+GENERATED: Live API Test Draft
+v1 (91 s)
+=== GENERATED CODE ===
+const ROOT_ID = 'wwa-live-api-draft';
+const TO = 'live-test@example.com';
+const SUBJECT = 'Live API test';
+const BODY = 'Draft created by the Live API Test widget.';
+const DRAFTS_PATH = '/fixture-api/drafts';
+const CSRF_PATH = '/fixture-api/csrf';
+
+// ---------- helpers ----------
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+const waitForEl = async (fn, timeout = 8000, label = 'element') => {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    try { const v = fn(); if (v) return v; } catch (_) {}
+    await sleep(100);
+  }
+  throw new Error(label + ' not found within ' + timeout + 'ms');
+};
+const transition = async (fn, timeout = 4000) => {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    try { const v = fn(); if (v) return v; } catch (_) {}
+    await sleep(100);
+  }
+  WidgetAI.log('transition not detected, continuing', 'warn');
+  return null;
+};
+const dumpView = () => {
+  const root = document.querySelector('[role="main"]') || document.body;
+  const desc = (el, depth) => {
+    if (!el || depth > 3) return '';
+    let s = el.tagName.toLowerCase() + (el.id ? '#' + el.id : '');
+    if (typeof el.className === 'string' && el.className.trim()) s += '.' + el.className.trim().split(/\s+/).join('.');
+    const kids = Array.from(el.children).slice(0, 8).map(c => desc(c, depth + 1)).filter(Boolean);
+    return kids.length ? s + '[' + kids.join(',') + ']' : s;
+  };
+  WidgetAI.log('View evidence: ' + desc(root, 0).slice(0, 500), 'warn');
+};
+const parseJSON = (t) => { try { return JSON.parse(t); } catch (_) { return null; } };
+const getByPath = (obj, path) => String(path || '').replace(/^\./, '').split('.').filter(Boolean).reduce((o, k) => (o == null ? undefined : o[k]), obj);
+const opMatches = (op, method, path) => op && String(op.method).toUpperCase() === method &&
+  ((op.analysis && op.analysis.template === path) || op.path === path || String(op.url || '').split('?')[0].endsWith(path));
+const pickOp = (ops, method, path) => ops
+  .filter(o => o.confirmed && !o.browserOnly && opMatches(o, method, path))
+  .sort((a, b) => (b.ts || 0) - (a.ts || 0))[0] || null;
+
+const readDrafts = async () => {
+  const r = await WidgetAI.net.request({ url: DRAFTS_PATH, method: 'GET' });
+  if (!r.ok) throw new Error('GET ' + DRAFTS_PATH + ' returned ' + r.status);
+  const j = parseJSON(r.bodyText);
+  return Array.isArray(j && j.drafts) ? j.drafts : [];
+};
+const isTarget = (d) => d && d.to === TO && d.subject === SUBJECT;
+const findNew = (drafts, baseline, wantId) => drafts.find(d => isTarget(d) && !baseline.has(String(d.id)) && (wantId == null || String(d.id) === String(wantId))) || null;
+
+// ---------- network path ----------
+const fetchCsrf = async (ops, saveOp) => {
+  const deps = (saveOp.analysis && saveOp.analysis.dependsOn) || [];
+  const dep = deps.find(d => d.field === 'body.csrf');
+  let csrfOp = null;
+  if (dep) csrfOp = ops.find(o => o.id === dep.opId && o.confirmed && !o.browserOnly) || pickOp(ops, 'GET', dep.fromTemplate || CSRF_PATH);
+  if (!csrfOp) csrfOp = pickOp(ops, 'GET', CSRF_PATH);
+  const path = (dep && dep.path) || '.token';
+  let r;
+  if (csrfOp && String(csrfOp.method).toUpperCase() === 'GET') {
+    WidgetAI.log('Re-fetching CSRF token via captured GET ' + (csrfOp.path || CSRF_PATH));
+    r = await WidgetAI.net.invoke(csrfOp.id);
+  } else {
+    WidgetAI.log('No captured CSRF op; requesting GET ' + CSRF_PATH + ' directly');
+    r = await WidgetAI.net.request({ url: CSRF_PATH, method: 'GET' });
+  }
+  if (!r.ok) throw new Error('CSRF re-fetch returned ' + r.status);
+  const token = getByPath(parseJSON(r.bodyText), path);
+  if (!token) throw new Error('CSRF token missing in response');
+  return token;
+};
+
+const viaNetwork = async (baseline) => {
+  const ops = await WidgetAI.net.operations();
+  const saveOp = pickOp(ops, 'POST', DRAFTS_PATH);
+  if (!saveOp) throw new Error('No confirmed POST ' + DRAFTS_PATH + ' operation captured');
+  const csrf = await fetchCsrf(ops, saveOp);
+  WidgetAI.log('Replaying save-draft request with new recipient and subject');
+  const res = await WidgetAI.net.invoke(saveOp.id, { mergeBody: { to: TO, subject: SUBJECT, body: BODY, csrf } });
+  if (!res.ok) throw new Error('POST ' + DRAFTS_PATH + ' returned ' + res.status + ' ' + (res.statusText || '') + ': ' + String(res.bodyText || '').slice(0, 200));
+  const j = parseJSON(res.bodyText);
+  if (j && j.ok === false) throw new Error('Server reported ok:false: ' + String(res.bodyText).slice(0, 200));
+  const newId = j && j.draft && j.draft.id != null ? j.draft.id : null;
+  WidgetAI.log('POST returned ' + res.status + (newId != null ? ' (draft id ' + newId + ')' : '') + '; reading back drafts');
+  let found = null;
+  for (let i = 0; i < 3 && !found; i++) {
+    if (i) await sleep(500);
+    found = findNew(await readDrafts(), baseline, newId);
+  }
+  if (!found) return { ok: false, reason: 'POST succeeded but the new draft was not found in GET ' + DRAFTS_PATH };
+  const rv = await WidgetAI.net.reportVerified(saveOp.id, { readBack: 'GET ' + DRAFTS_PATH + ' contains draft id ' + found.id + ' to ' + TO + " subject '" + SUBJECT + "'" });
+  if (rv && rv.verified) WidgetAI.log('Operation marked verified (tier ' + rv.tier + ')');
+  else WidgetAI.log('reportVerified not accepted: ' + ((rv && rv.error) || 'no reason given'), 'warn');
+  return { ok: true, draft: found, via: 'network' };
+};
+
+// ---------- DOM fallback ----------
+const setVal = (el, v) => {
+  const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+  const setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+  el.focus();
+  setter.call(el, v);
+  el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: v }));
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+};
+
+const viaDom = async (baseline) => {
+  const toSel = '#cm-to, input[aria-label="To"]';
+  if (!document.querySelector(toSel)) {
+    const compose = document.querySelector('#compose-btn, button[aria-label="Compose"]');
+    if (compose) { WidgetAI.log('Opening composer'); compose.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
+  }
+  const toEl = await waitForEl(() => document.querySelector(toSel), 8000, 'To field');
+  const subjEl = await waitForEl(() => document.querySelector('#cm-subject, input[aria-label="Subject"]'), 8000, 'Subject field');
+  const bodyEl = await waitForEl(() => document.querySelector('#cm-body, textarea[aria-label="Message Body"]'), 8000, 'Message body');
+  setVal(toEl, TO);
+  setVal(subjEl, SUBJECT);
+  setVal(bodyEl, BODY);
+  const saveBtn = await waitForEl(() => {
+    const b = document.querySelector('#cm-save, button[aria-label="Save draft"]');
+    const label = b ? (b.getAttribute('aria-label') || '') + ' ' + b.textContent : '';
+    return b && /save draft/i.test(label) && !/send/i.test(label) ? b : null;
+  }, 8000, 'Save draft button');
+  const countBefore = (document.querySelector('#dcount') || {}).textContent;
+  WidgetAI.log('Clicking Save draft (never Send)');
+  saveBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  await transition(() => {
+    const t = document.querySelector('#toast');
+    const c = (document.querySelector('#dcount') || {}).textContent;
+    return (t && !t.classList.contains('vh')) || c !== countBefore;
+  });
+  let found = null;
+  for (let i = 0; i < 4 && !found; i++) {
+    if (i) await sleep(500);
+    found = findNew(await readDrafts(), baseline, null);
+  }
+  if (!found) { dumpView(); throw new Error('Draft not found in GET ' + DRAFTS_PATH + ' after DOM save'); }
+  return { ok: true, draft: found, via: 'DOM' };
+};
+
+// ---------- UI ----------
+try {
+  const existing = document.getElementById(ROOT_ID);
+  if (existing) existing.remove();
+  const host = document.createElement('div');
+  host.id = ROOT_ID;
+  const toolbar = await waitForEl(() => document.querySelector('#nm-toolbar, [role="toolbar"][aria-label="Main"]'), 8000, 'toolbar').catch(() => null);
+  if (toolbar) {
+    host.style.display = 'inline-block';
+    host.style.marginLeft = '8px';
+    toolbar.appendChild(host);
+  } else {
+    Object.assign(host.style, { position: 'fixed', right: '16px', bottom: '16px', zIndex: '2147483647' });
+    document.body.appendChild(host);
+  }
+  const shadow = host.attachShadow({ mode: 'open' });
+  const style = document.createElement('style');
+  style.textContent = `
+    .wrap { display:inline-flex; align-items:center; gap:8px; font:13px system-ui, sans-serif; background:#fff; border:1px solid #c7d2fe; border-radius:8px; padding:4px 8px; }
+    button { background:#4f46e5; color:#fff; border:0; border-radius:6px; padding:5px 10px; cursor:pointer; font:inherit; }
+    button:disabled { opacity:.6; cursor:wait; }
+    .msg { color:#374151; max-width:340px; }
+    .msg.err { color:#b91c1c; }
+    .msg.ok { color:#047857; }
+  `;
+  const wrap = document.createElement('div');
+  wrap.className = 'wrap';
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = 'Create live test draft';
+  const msg = document.createElement('span');
+  msg.className = 'msg';
+  msg.textContent = 'Ready';
+  wrap.append(btn, msg);
+  shadow.append(style, wrap);
+  const setMsg = (t, kind) => { msg.textContent = t; msg.className = 'msg' + (kind ? ' ' + kind : ''); };
+
+  let busy = false;
+  btn.addEventListener('click', async () => {
+    if (busy) return;
+    busy = true; btn.disabled = true; setMsg('Working…');
+    try {
+      let baseline = new Set();
+      try { baseline = new Set((await readDrafts()).map(d => String(d.id))); }
+      catch (e) { WidgetAI.log('Could not read baseline drafts: ' + e.message, 'warn'); }
+      let result = null;
+      try {
+        result = await viaNetwork(baseline);
+        if (!result.ok) WidgetAI.log(result.reason, 'warn');
+      } catch (e) {
+        WidgetAI.log('Network path failed: ' + e.message + ' — falling back to the form', 'warn');
+      }
+      if (!result || !result.ok) {
+        let already = null;
+        try { already = findNew(await readDrafts(), baseline, null); } catch (_) {}
+        if (already) {
+          WidgetAI.log('Draft already present after network attempt; skipping form fallback to avoid a duplicate');
+          result = { ok: true, draft: already, via: 'network (late read-back)' };
+        } else {
+          result = await viaDom(baseline);
+        }
+      }
+      const d = result.draft;
+      const text = 'Verified draft #' + d.id + ' to ' + d.to + ' ("' + d.subject + '") via ' + result.via;
+      setMsg(text, 'ok');
+      WidgetAI.log(text);
+      WidgetAI.status('completed', text);
+    } catch (err) {
+      dumpView();
+      setMsg('Failed: ' + err.message, 'err');
+      WidgetAI.log('Failed: ' + err.message, 'error');
+      WidgetAI.status('failed', err.message);
+    } finally {
+      busy = false; btn.disabled = false;
+    }
+  });
+  WidgetAI.log('Live API test draft button ready');
+} catch (err) {
+  WidgetAI.log('Widget setup failed: ' + err.message, 'error');
+  WidgetAI.status('failed', err.message);
+}
+=== END ===
+DRAFTS: [{"to":"user@example.com","subject":"Manual draft"},{"to":"live-test@example.com","subject":"Live API test"}]
+CSRF REJECTED: {"rejected":0}
+TIERS: ["POST /fixture-api/drafts verified","GET /fixture-api/drafts observed","GET /fixture-api/csrf replayed","GET /fixture-api/messages observed","GET /fixture-api/drafts observed"]
+PANEL: Widget AI | backend ok · anthropic | Observe off | ● Record | Create | Widgets | Record | Inspector | Activity | Data | Live API Test Draft | completed | v1 |  | Adds a toolbar button that creates a draft to live-test@example.com with subject "Live API test" by replaying the captured save-draft request, then checks the drafts list to confirm it exists. |  | http://127.0.0.1:8804/fixture-net · network, log |  | Run | Remove | Edit | 01:17:43 PM warnings: attempt 1: Each click creates one new draft. Clicking it repeatedly creates duplicate drafts with the same subject.; attempt 1: The CSRF token is fetched again before every save. If the server rejects the replayed request, the widget fills in the compose form and clicks "Save draft" instead. It never clicks Send.; attempt 1: The draft body text is not specified in the request, so the widget uses the placeholder "Draft created by the Live API Test widget."; attempt 1: The form fallback overwrites whatever is currently typed in the To, Subject and Body fields. | 01:17:43 PM injecting widget | 01:17:43 PM [info] Live API test draft button ready | 01:17:44 PM [info] Re-fetching CSRF token via captured GET /fixture-api/csrf | 01:17:44 PM [info] Replaying save-draft request with new recipient and subject | 01:17:44 PM [info] POST returned 201 (draft id 2); reading back drafts | 01:17:44 PM [info] Operation marked verified (tier verified) | 01:17:44 PM [info] Verified draft #2 to live-test@example.com ("Live API test") via network | 
