@@ -1,5 +1,13 @@
 # Handoff — AI Website Widget Builder (state as of 2026-11-07)
 
+> Update: **network observation + reproduction landed.** A MAIN-world probe
+> (content script, `world:"MAIN"`, `document_start`) wraps fetch/XHR/beacon;
+> captured ops are correlated to user gestures, fed into the generation
+> prompt, exposed to widgets as grant-gated `WidgetAI.net`, inspectable in the
+> panel, and replayable in page context. Verified E2E on the NetMail fixture
+> (real `/fixture-api/*` backend) and live on reqres.in. Full details, limits,
+> and the Gmail assessment: `docs/network-observation.md`.
+
 Repo: https://github.com/Jeff15321/neohacks · PR #1 (branch `mvp`, ~7 commits).
 Everything below is empirically verified unless marked "unverified".
 

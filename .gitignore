@@ -13,3 +13,5 @@ poc/node_modules/
 poc/package*.json
 *.tsbuildinfo
 tests/e2e/.pw-profile/
+tests/tools/.gmail-profile/
+tests/tools/.demo-profile/

@@ -45,7 +45,12 @@ service worker, content script, side-panel React app). Permissions:
   - `chrome.runtime.onUserScriptMessage`: the *only* channel generated code can
     use to reach the extension. Handles `WIDGET_INFERENCE` (forwards to
     `/api/inference` after grant + origin checks), `WIDGET_LOG`,
-    `WIDGET_STATUS`, `WIDGET_STORAGE`.
+    `WIDGET_STATUS`, `WIDGET_STORAGE`, and the `WIDGET_NET_*` network surface
+    (ops list, invoke replay, direct request — all grant-gated and restricted
+    to the page's origin).
+  - `netlog.ts`: per-tab ring buffer of captured requests + gestures; correlates
+    each request to the most recent gesture within 6 s; summarizes ops for the
+    prompt (`pageContext.networkOps`), the panel, and `WidgetAI.net.operations()`.
   - `matchPattern.ts`: match-pattern → RegExp used to scope widgets to origins
     (note: Chrome patterns ignore ports — the regex allows `(:port)?`).
 - **Content script (`src/content/context.ts`)** — injected on all http(s) pages
@@ -53,15 +58,22 @@ service worker, content script, side-panel React app). Permissions:
   landmarks (roles/aria-labels/ids/classes), insertion candidates,
   interactive elements, a `domSkeleton` (indented `tag#id.class` tree of the
   main region), and a visible-text sample. This is the model's "eyes".
+  Also: captures user gestures (click/submit/Enter, capture-phase) and relays
+  MAIN-world netprobe traffic + invoke requests via `window.postMessage`.
+- **Netprobe (`src/net/probe.ts`)** — second content script, `world:"MAIN"`,
+  `document_start`, `all_frames`. Wraps `fetch`/`XMLHttpRequest`/
+  `sendBeacon` to record requests **and** response bodies, and executes
+  page-context replays via the saved original `fetch` (real cookies,
+  page CORS). See `docs/network-observation.md`.
 - **Side panel (`src/sidepanel/main.tsx`)** — React chat UI. Shows generated
   widgets with name/description/grants/matchPatterns, a **code review +
   "Approve & Run" gate** (required by the security model), per-widget status
   pills and a live log stream fed by `WidgetAI.log/status`.
 - **Runtime prelude (`src/runtime/widgetSource.ts`)** — wraps generated code
   in an async IIFE and defines `WidgetAI`:
-  `inference()` / `log()` / `status()` / `storage` — all implemented on top of
-  `chrome.runtime.sendMessage`. Grant strings from widget metadata gate each
-  API. Unhandled rejections auto-report `failed`.
+  `inference()` / `log()` / `status()` / `storage` / `net` — all implemented
+  on top of `chrome.runtime.sendMessage`. Grant strings from widget metadata
+  gate each API. Unhandled rejections auto-report `failed`.
 
 ### 2. Backend (`apps/backend`)
 
@@ -125,6 +137,8 @@ youtube.spec.ts`).
 | Structured `GeneratedWidget` JSON | Grants, matchPatterns, insertionHint are machine-checkable | Model must obey a contract — enforced by validator + retry |
 | No DB / no per-widget backend | MVP scope: one generic inference endpoint suffices | No cross-device sync, no widget sharing |
 | Mock LLM provider | Deterministic CI; the whole E2E runs in ~6s | Doesn't prove codegen — covered by manual/live runs |
+| MAIN-world netprobe over CDP/webRequest | Only approach that sees response bodies *and* can replay with page auth, without a debugger banner | Blind to WebSockets, workers, form/nav requests; the page could in principle detect the wrapper |
+| Replay via page-context fetch, same-origin only | Ambient cookies make cross-origin replay dangerous; page origin is the meaningful boundary anyway | Calls targeting other origins (e.g. api.* hosts) can't be replayed |
 
 ## What was deferred (P2)
 

@@ -8,6 +8,12 @@ back through a shared, key-protected AI inference API.
 > friendly AI-generated reply draft for each." → a real toolbar button that
 > does exactly that.
 
+Also watches the page's own API calls: a MAIN-world probe captures
+fetch/XHR traffic (with bodies), correlates it to your clicks, feeds it into
+generation, and lets widgets replay captured operations via a grant-gated
+`WidgetAI.net` API — draft/save actions without clicking through the UI.
+Details: `docs/network-observation.md`.
+
 Built for a hackathon. Architecture and browser-feasibility evidence:
 `docs/`. Inspired by Tweeks (tweeks.io), adapted to `chrome.userScripts`.
 
