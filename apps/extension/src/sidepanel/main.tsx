@@ -14,6 +14,7 @@ function App() {
   const [progress, setProgress] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [showCode, setShowCode] = useState<Record<string, boolean>>({});
+  const [health, setHealth] = useState<{ userScripts: boolean; backend: string; backendUrl: string } | null>(null);
   const busyRef = useRef(false);
 
   const pushLog = (widgetId: string, text: string) =>
@@ -21,6 +22,7 @@ function App() {
 
   useEffect(() => {
     send({ type: 'PANEL_READY' }).then(r => { if (r?.widgets) setWidgets(r.widgets); });
+    send({ type: 'GET_HEALTH' }).then(r => { if (r?.health) setHealth(r.health); });
     const listener = (msg: SWToPanel) => {
       switch (msg.type) {
         case 'GENERATION_PROGRESS': setProgress(`${msg.stage}: ${msg.detail ?? ''}`); break;
@@ -50,9 +52,11 @@ function App() {
 
   const run = (id: string) => send({ type: 'RUN_WIDGET', widgetId: id }).then(r => { if (!r?.ok) setError(r?.error ?? 'run failed'); });
   const remove = (id: string) => send({ type: 'REMOVE_WIDGET', widgetId: id }).then(() => setWidgets(prev => prev.filter(w => w.id !== id)));
+  const repair = (id: string) => { setError(''); setBusy(true); busyRef.current = true; setProgress('repair:regenerating'); send({ type: 'REPAIR_WIDGET', widgetId: id }).then(r => { if (!r?.ok) { setError(r?.error ?? 'repair failed'); setBusy(false); busyRef.current = false; setProgress(''); } }); };
 
   return <>
-    <header>Widget AI <span className="be">generated widgets run as userscripts</span></header>
+    <header>Widget AI <span className="be">{health ? `backend:${health.backend} · userScripts:${health.userScripts ? 'on' : 'OFF — enable "Allow User Scripts" in extension details'}` : '…'}</span></header>
+    {health && !health.userScripts && <div className="card err">chrome.userScripts is unavailable. Go to chrome://extensions → this extension's Details → enable <b>Allow User Scripts</b>, then reload.</div>}
     <div id="widgets">
       {error && <div className="card err">{error}</div>}
       {progress && <div className="card"><em>Generating… {progress}</em></div>}
@@ -64,6 +68,7 @@ function App() {
           <div className="row">
             <button className="primary" disabled={w.status === 'running'} onClick={() => run(w.id)}>{w.status === 'running' ? 'Running…' : 'Approve & Run'}</button>
             <button onClick={() => setShowCode(p => ({ ...p, [w.id]: !p[w.id] }))}>{showCode[w.id] ? 'Hide code' : 'Review code'}</button>
+            {w.status === 'failed' && <button onClick={() => repair(w.id)}>Auto-fix</button>}
             <button onClick={() => remove(w.id)}>Remove</button>
           </div>
           {showCode[w.id] && <pre>{w.code}</pre>}

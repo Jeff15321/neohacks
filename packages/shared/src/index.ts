@@ -49,6 +49,10 @@ export interface WidgetRecord extends GeneratedWidget {
   /** Origin the widget was generated for (display + enforcement). */
   origin: string;
   status: WidgetStatus;
+  /** Last reported failure detail (used by the repair flow). */
+  lastError?: string;
+  /** The natural-language request that produced this widget. */
+  originalRequest?: string;
 }
 
 export type WidgetStatus =
@@ -130,9 +134,18 @@ export type PanelToSW =
   | { type: 'PANEL_READY' }
   | { type: 'GENERATE_WIDGET'; request: string; tabId?: number }
   | { type: 'RUN_WIDGET'; widgetId: string; tabId?: number }
+  | { type: 'REPAIR_WIDGET'; widgetId: string }
   | { type: 'REMOVE_WIDGET'; widgetId: string }
   | { type: 'LIST_WIDGETS' }
-  | { type: 'GET_PAGE_CONTEXT'; tabId?: number };
+  | { type: 'GET_PAGE_CONTEXT'; tabId?: number }
+  | { type: 'GET_HEALTH' };
+
+export interface HealthInfo {
+  userScripts: boolean;
+  backend: 'ok' | 'down' | 'unauthorized';
+  backendUrl: string;
+  widgets: number;
+}
 
 export type SWToPanel =
   | { type: 'GENERATION_PROGRESS'; stage: string; detail?: string }

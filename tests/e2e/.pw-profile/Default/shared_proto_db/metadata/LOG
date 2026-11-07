@@ -1,3 +1,3 @@
-2026/11/07-03:08:59.529 bf9939 Reusing MANIFEST /Users/jefflu/Developer/neohacks/tests/e2e/.pw-profile/Default/shared_proto_db/metadata/MANIFEST-000001
-2026/11/07-03:08:59.529 bf9939 Recovering log #3
-2026/11/07-03:08:59.529 bf9939 Reusing old log /Users/jefflu/Developer/neohacks/tests/e2e/.pw-profile/Default/shared_proto_db/metadata/000003.log 
+2026/11/07-03:09:32.575 bfa637 Reusing MANIFEST /Users/jefflu/Developer/neohacks/tests/e2e/.pw-profile/Default/shared_proto_db/metadata/MANIFEST-000001
+2026/11/07-03:09:32.575 bfa637 Recovering log #3
+2026/11/07-03:09:32.575 bfa637 Reusing old log /Users/jefflu/Developer/neohacks/tests/e2e/.pw-profile/Default/shared_proto_db/metadata/000003.log 

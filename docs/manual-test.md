@@ -19,6 +19,11 @@ is prompt-constrained never to send — but review the generated code anyway.
 
 ## Gmail demo
 
+> Shortcut: `cd tests/tools && npx tsx gmail-live.mjs` launches a persistent
+> browser with the extension, waits for you to log in once, then drives
+> generate → approve → run and watches the result. The steps below are the
+> manual equivalent.
+
 8. Sign into a Gmail test account; send yourself **two unread emails**
    (e.g. subjects "Q4 launch checklist" and "Dinner Saturday?"). Leave them
    unread in the inbox.
@@ -50,7 +55,7 @@ is prompt-constrained never to send — but review the generated code anyway.
 | "chrome.userScripts unavailable" / API errors | Allow User Scripts toggle off (step 6); reload the extension after enabling |
 | Generation fails / 422 | Check backend log — validator errors are explicit; retry usually fixes transient contract slips |
 | Button appears in wrong place / fixed dock | Insertion heuristic missed; acceptable fallback — note it for prompt tuning |
-| "Could not find Reply" or composer | Gmail DOM drift — the model guessed selectors; regenerate, or improve PageContext (docs/devin-task.md) |
+| "Could not find Reply" or composer | Gmail DOM drift — see `docs/gmail-selectors.md` field guide; regenerate, or improve PageContext |
 | Only 1 draft | Check panel log — likely a stale row ref after SPA re-render; the prompt tells the model to re-query per iteration |
 | Drafts not saving | Gmail needs InputEvent after edit — verify generated code dispatches it to the contenteditable |
 | Backend 401 | `EXTENSION_AUTH_TOKEN` mismatch between `.env` and extension build env |

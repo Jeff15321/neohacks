@@ -32,6 +32,7 @@ const loadReady = loadWidgets();
 
 function setStatus(w: WidgetRecord, status: WidgetStatus, log?: string) {
   w.status = status;
+  if (status === 'failed' && log) w.lastError = log;
   broadcast({ type: 'WIDGET_STATUS', widgetId: w.id, status, log });
   void persistWidgets();
 }
@@ -113,6 +114,7 @@ chrome.runtime.onMessage.addListener((raw: PanelToSW | SWToPanel, sender, sendRe
             id: `w_${Math.random().toString(36).slice(2, 10)}`,
             version: 1, createdAt: Date.now(),
             origin: pageContext.origin, status: 'ready',
+            originalRequest: msg.request,
           };
           widgets.set(w.id, w);
           await persistWidgets();
@@ -140,6 +142,31 @@ chrome.runtime.onMessage.addListener((raw: PanelToSW | SWToPanel, sender, sendRe
           else sendResponse({ ok: true });
           break;
         }
+        case 'REPAIR_WIDGET': {
+          const w = widgets.get(msg.widgetId);
+          if (!w) throw new Error('widget not found');
+          const tab = await findTargetTab(w.matchPatterns);
+          if (!tab?.id) throw new Error(`no tab matches ${w.matchPatterns.join(', ')}`);
+          broadcast({ type: 'GENERATION_PROGRESS', stage: 'context', detail: 're-extracting context' });
+          const pageContext = await getPageContext(tab.id, tab);
+          broadcast({ type: 'GENERATION_PROGRESS', stage: 'llm', detail: 'repairing widget code' });
+          const res = await backendFetch<GenerateWidgetResponse>('/api/generate-widget', {
+            request: w.originalRequest ?? w.description,
+            pageContext,
+            prior: { code: w.code, error: w.lastError ?? 'widget failed at runtime' },
+          } satisfies GenerateWidgetRequest);
+          if (!res.ok || !res.widget) throw new Error(res.error ?? 'repair generation failed');
+          const nw: WidgetRecord = {
+            ...res.widget, id: w.id, version: w.version + 1,
+            createdAt: w.createdAt, origin: w.origin, status: 'ready',
+            originalRequest: w.originalRequest,
+          };
+          widgets.set(nw.id, nw);
+          await persistWidgets();
+          broadcast({ type: 'WIDGET_GENERATED', widget: nw });
+          sendResponse({ ok: true, widget: nw });
+          break;
+        }
         case 'REMOVE_WIDGET': {
           const w = widgets.get(msg.widgetId);
           widgets.delete(msg.widgetId);
@@ -163,6 +190,16 @@ chrome.runtime.onMessage.addListener((raw: PanelToSW | SWToPanel, sender, sendRe
           const tab = await findTargetTab();
           if (!tab?.id) throw new Error('no eligible tab');
           sendResponse({ ok: true, context: await getPageContext(tab.id, tab) });
+          break;
+        }
+        case 'GET_HEALTH': {
+          const info = {
+            userScripts: typeof chrome.userScripts !== 'undefined',
+            backend: await fetch(`${BACKEND}/health`).then(r => r.ok ? 'ok' : 'unauthorized').catch(() => 'down'),
+            backendUrl: BACKEND,
+            widgets: widgets.size,
+          };
+          sendResponse({ ok: true, health: info });
           break;
         }
         case 'PANEL_READY':
