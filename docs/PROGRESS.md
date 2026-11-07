@@ -1,19 +1,19 @@
 # Next-gen build progress
-_Last updated: 2026-11-07 13:55 PST by coordinator (local Devin CLI session)_
+_Last updated: 2026-11-07 14:50 PST by coordinator (local Devin CLI session)_
 
 ## Status board
 | Phase | Status (not started / in progress / gate running / DONE / DONE-DEGRADED / blocked) | Branch/PR | Gate result | Updated |
 |---|---|---|---|---|
 | 0 Foundation | DONE | `nextgen` (coordinator, direct) | PASS — typecheck 0 errors; unit 39/39; E2E 4/4; live gmail2 1/1 | 13:10 |
-| C Self-healing runtime | in progress | `phase-c` (subagent) | — | 13:10 |
+| C Self-healing runtime | DONE | `phase-c` / PR #7 (merged) | PASS on `nextgen` after merge — runtime.spec ×4 green; unit 123/123; E2E 14/14; 2× 20-run live chaos sweep recorded (task success 25% / 35%) | 14:42 |
 | B Steps + recording + Inspector | DONE | `phase-b` / PR #5 (merged) | PASS on `nextgen` after merge — record.spec ×2 green; unit 93/93; E2E 7/7; live Demo-1 5/5 (+2/2 post-merge) | 13:50 |
 | A User data store | DONE | `phase-a` / PR #4 (merged) | PASS on `nextgen` after merge — data.spec green; unit 75/75; E2E 5/5 | 13:30 |
 | E Network upgrades | DONE | `phase-e` / PR #3 (merged) | PASS on `nextgen` after merge — extended net.spec (rotating CSRF → verified) green; op-analysis unit tests; E2E 5/5 | 13:30 |
-| D Activity + suggestions + jobs | in progress | `phase-d` (subagent, port 8805) | — | 13:55 |
-| F Cross-site flows | not started (needs B, C) | — | — | — |
+| D Activity + suggestions + jobs | DONE | `phase-d` / PR #6 (merged) | PASS on `nextgen` after merge — suggest.spec ×2 green; trace-eval 10/10 pattern, 0/5 noise; E2E 9/9 → 14/14 with C | 14:38 |
+| F Cross-site flows | in progress | `phase-f` (subagent, port 8806) | — | 14:45 |
 
 ## Now working on
-- coordinator: A, E, B merged and gated; D started 13:55 (needs B ✓); waiting on C (8801); F starts when C passes.
+- coordinator: 0, A, E, B, D, C merged and gated (E2E 14/14 on `nextgen`); F started 14:45 (needs B ✓ C ✓), PR due 16:50.
 
 ## Up next
 - C: WidgetAI.step/expect/branches, assist (Haiku→Sonnet→Opus), caps, danger guard, failure narrative, learned branches, gmail2 chaos mode, runtime.spec, 20-run live chaos sweep.
@@ -69,6 +69,32 @@ Full report: `docs/phases/B.md`. Summary:
 - **Not implemented:** IndexedDB event store (300-entry session ring instead), `replay-bundle.mjs`, download Steps, screenshot thumbnails. Reply flow yields 3 Steps on the fixture (doc expected 4: autosave, no Save click).
 - **Known issues:** observe flag reaches already-open tabs only after reload.
 
+### Phase C — Self-healing branching runtime — DONE (live recovery numbers are poor, reported as measured)
+Full report: `docs/phases/C.md`. Summary:
+- **Implemented:** spike (same-worldId re-execution + JSON state, `tests/e2e/spike-world.spec.ts`), `WidgetAI.run/step` with `expect` postconditions + pre-generated branches, `WidgetAI.assist` ladder (Haiku 5.5 `assist.decide` → Sonnet 5.5 `assist.create` branch executed in the same worldId → one Opus 5.5 `assist.escalate` → stop) with caps enforced in the SW (≤2 attempts per step invocation, ≤5 interventions per run, 300 s per run), deterministic static safety review of agent branches (backend + SW), runtime danger guard (capture-phase, `!isTrusted` send/delete/… → in-page Allow/Block rendered by the prelude; Allow accepts only real user clicks), run timeline + final-failure narrative (widget, panel `RunTimeline`, bus), learned branches → new widget version (diff, needs approval), generator steps section, gmail2 chaos mode (`?chaos=seed`: collapsed composer, popup, renamed Reply, slow load, empty state).
+- **Evidence (on `nextgen` after merging C, 14:42):** typecheck 0 errors; unit 123 passed / 0 failed (core 68, widget-runtime 10, backend 38, extension 7); E2E **14 passed (1.5 min)**: data, gmail2, net, record ×2, runtime ×4, spike-world, suggest ×2, widget, youtube. runtime.spec: branch pick (popup → `dismiss-popup`, 1 intervention); new branch (renamed Reply → agent branch in same worldId, reused for email 2, accepted → v2 picks it without a new write); cap → failure narrative in page + panel (empty inbox: decide → create → escalate → cap); danger guard blocks a script "Delete" click (`__deleted` = 0, `danger-blocked` event).
+- **Live 20-run chaos sweeps** (each = one live Opus widget × 20 seeds, danger confirms answered Block; different widgets, not a controlled comparison):
+
+  | metric | sweep 1 | sweep 2 (after fixes) |
+  |---|---|---|
+  | intervention rate | 60% (12/20) | 95% (19/20) |
+  | branch-choice accuracy (keyword heuristic) | 55% (16/29) | 70% (21/30) |
+  | new-branch success | 83% (10/12) | 19% (4/21) |
+  | final-failure rate | 35% (7/20) | 65% (13/20) |
+  | false "completed" | 40% (8/20) | 0% |
+  | task success | 25% | 35% |
+  | emails sent / deleted | 0 | 0 |
+
+  Failure modes: sweep 1 slow-load runs falsely "completed" with 0 drafts (fixed); sweep 2 10/13 failures are renamed-Reply seeds where the widget's own `expect` demands a visible "Reply" so a correct "Respond" click can't pass; decider chose `stop` with a popup visible in 2 runs. Narratives + per-run llm ids: `docs/evidence/C/sweep{1,2}/chaos-sweep.md`.
+- **Not implemented:** E2E for the network danger guard (classifier unit-tested), Inspector runs view (bus log only), runtime interception of `form.submit()` (statically rejected in agent branches only).
+- **Coordinator follow-up applied at merge:** generation `max_tokens` 32k → 64k and timeout 300 s → 600 s (C saw Opus truncate on 2/4 first attempts with the steps section).
+
+### Phase D — Activity model + suggestions + jobs — DONE (latency target missed: 11.1 s vs <10 s)
+Full report: `docs/phases/D.md`. Summary:
+- **Implemented:** pure WorkingMemory patch-op reducer (`core/activity.ts`), suggestion gate + dedupe (`core/suggest.ts`), job state machine (`core/job-machine.ts`); backend `modules/observe` (Tier 2 `observe.activity` Sonnet 5.5 structured patch ops, reconsolidation on completion / every 25 Steps, Tier 3 `observe.judge` Opus 5.5 on flags with dismissals) and `modules/jobs` (POST, GET `?wait=25` long-poll, DELETE cancel, `jobs` table); SW ObserveClient (single in-flight POST, coalescing) + JobClient; in-page suggestion card (Shadow DOM: Accept · Not now · Never for this; generating/ready/failed); Activity tab; Inspector hypothesis/pattern view. Backend service registry (`ModuleDeps.services`) for cross-module calls.
+- **Evidence (after merge):** in the 14/14 E2E above. suggest.spec: no card after the 1st manual reply, card after the 2nd, job ready → Accept → unapproved approval card → approve → drafts {m1, m3 by user, m2 by widget}, 0 sent; "Never for this" → no suggestion after a 3rd reply; restore from Activity works. Live trace eval (15 traces — 4 fixture-derived + 10 synthetic + B's youtube-read; 10 repeat, 5 noise): correct pattern **10/10**, **0/5** noise suggestions (none reached the Judge), 7/10 repeat traces suggested (Judge declined add-to-cart, expense approval, CRM logging). E3: default 10/10, no-Tier-1 10/10, full-trace 10/10 (latency 10.9 / 10.3 / 15.1 s — traces likely too easy to separate). E4: 0 false suggestions in 30 noise runs. E10: 30-step burst at 300 ms → 3 coalesced requests (max queue 19), suggestion ~23 s after completion. Live Demo 2: 3/3 card after 2nd completion (not 1st), 2/3 end-to-end (run 1: Judge proposed a per-email button; prompt adjusted, recorded). Tuning disclosed: Judge min score 0.3 → 0.2, effort medium → low (before the reported eval).
+- **Known issues:** observe toggle reaches open tabs only after reload; job cancel can't abort an in-flight Opus call (result discarded); reconsolidation rarely changes anything on these traces.
+
 ## Decisions (made without the human)
 - 11:35 — `nextgen` branched from `feat/network-observation` (89963a5), not `mvp`; `mvp-final` tag placed on 89963a5 — `mvp` lacks the netprobe window.fetch fallback commit; human approved this before leaving — rejected: branching from `mvp` exactly as the doc says.
 - 11:35 — Child "Devin sessions" are local Devin CLI subagents (max 4 parallel), each in its own `git worktree` under `.worktrees/`; PRs via `gh` into `nextgen`, merged by the coordinator — the human runs Devin CLI locally.
@@ -82,6 +108,8 @@ Full report: `docs/phases/B.md`. Summary:
 - 13:00 — Probe `start` events + `netActivity` tracker added in Phase 0 so Phase B never edits `page/netprobe.ts` (Phase E owns it).
 
 - 13:55 — Phase D started as soon as B passed its gate (table: depends on B, +C only for codegen; D's suggestion jobs reuse the existing generator, C's runtime can be layered on later) — maximises parallel time — rejected: waiting for C.
+- 14:42 — Raised generation max_tokens to 64k and the generation timeout to 10 min after Phase C observed Opus truncation at 32k — coordinator owns generate/service.ts.
+- 14:42 — Accepted C's deviations: static (not LLM) safety review of agent branches, danger confirm rendered by the prelude instead of content/overlay, step cap per step invocation — reasons in C.md.
 
 ## Stuck log
 (none yet)
