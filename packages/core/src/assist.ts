@@ -128,3 +128,16 @@ export function buildRunNarrative(run: Pick<WidgetRun, 'events' | 'startedAt' | 
   }
   return out.join('\n');
 }
+
+/** The exact code prepended to the widget for a learned branch (this is the diff shown to the user). */
+export function learnedBranchSnippet(step: string, l: { id: string; when: string; code: string }): string {
+  const body = l.code.split('\n').map(x => '    ' + x).join('\n');
+  return `// Learned branch (added by the self-healing runtime after the agent fixed step ${JSON.stringify(step)}).
+WidgetAI.addBranch(${JSON.stringify(step)}, {
+  id: ${JSON.stringify(l.id)},
+  when: ${JSON.stringify(l.when)},
+  run: async (state, h) => {
+${body}
+  },
+});`;
+}

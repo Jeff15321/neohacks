@@ -98,7 +98,7 @@ export type AssistCreateResponse = z.infer<typeof AssistCreateResponse>;
 /** SW → prelude reply to WIDGET_ASSIST. */
 export const AssistAction = z.object({
   action: z.enum(['branch', 'new', 'stop']),
-  source: z.enum(['decide', 'create', 'escalate', 'cap', 'disabled']),
+  source: z.enum(['decide', 'create', 'escalate', 'learned', 'cap', 'disabled']),
   reason: z.string(),
   branchId: z.string().optional(),
   /** For action "new": result of executing the new branch in the widget's worldId. */

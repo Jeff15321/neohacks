@@ -5,6 +5,9 @@ import { stepSection } from './sections/step.js';
 import { dbSection } from './sections/db.js';
 import { flowSection } from './sections/flow.js';
 
+/** Phase C: source for agent-written branches executed in the widget's worldId (JSON state in/out). */
+export { buildBranchSource, HELPERS_SRC } from './sections/helpers.js';
+
 export interface WidgetSourceInput {
   id: string;
   name: string;

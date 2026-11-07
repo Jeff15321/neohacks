@@ -91,6 +91,20 @@ export class WidgetService {
     return nw;
   }
 
+  /** Phase C (learned branch): new version with the given code, unapproved until the user approves it. */
+  async newVersion(widgetId: string, code: string, changeSummary: string, traceId: string): Promise<WidgetRecord> {
+    const w = this.mustGet(widgetId);
+    const version = w.version + 1;
+    const nw: WidgetRecord = {
+      ...w, code, version, status: 'ready', approved: false, changeSummary, traceId,
+      thread: [...(w.thread ?? []), { role: 'generator' as const, text: changeSummary, version, ts: now() }].slice(-40),
+    };
+    await this.store.put(nw);
+    void this.syncRegistrations();
+    this.bus.broadcast({ type: 'WIDGET_GENERATED', widget: nw, traceId });
+    return nw;
+  }
+
   private broadcastList(traceId?: string) {
     this.bus.broadcast({ type: 'WIDGET_LIST', widgets: this.store.list(), traceId });
   }

@@ -5,6 +5,7 @@ import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle, Discl
 import { send } from '../hooks/useBus.js';
 import { usePanel } from '../app/state.js';
 import { fmtTime } from '../lib/utils.js';
+import { RunTimeline } from './RunTimeline.js';
 
 const GRANT_TEXT: Record<string, string> = {
   inference: 'Send page text you act on to the AI to write or summarize',
@@ -99,6 +100,7 @@ export function WidgetCard({ w }: { w: WidgetRecord }) {
           <Input data-testid="edit-input" placeholder='Edit: e.g. "move the button into the toolbar"' value={edit} onChange={e => setEdit(e.target.value)} />
           <Button size="sm" variant="outline" type="submit" disabled={!edit.trim()}>Edit</Button>
         </form>
+        <RunTimeline widgetId={w.id} />
         {lines.length > 0 && (
           <div data-testid="widget-log" className="max-h-40 overflow-auto rounded-md bg-muted p-2 font-mono text-[10.5px] leading-relaxed">
             {lines.map((l, i) => <div key={i}><span className="text-muted-foreground">{fmtTime(l.t)}</span> {l.text}</div>)}

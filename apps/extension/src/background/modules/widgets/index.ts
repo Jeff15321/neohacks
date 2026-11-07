@@ -12,6 +12,7 @@ export function registerWidgets(bus: Bus) {
 
   bus.provide('widgets.list', () => svc.store.list());
   bus.provide('widgets.authorize', (id, url, grant) => svc.authorize(id, url, grant));
+  bus.provide('widgets.newVersion', async (id, code, summary, traceId) => { await ready; return svc.newVersion(id, code, summary, traceId); });
 
   // panel → SW
   bus.on('GENERATE_WIDGET', async (m, ctx) => { await ready; return { widget: await svc.generate(m.request, ctx.traceId) }; });
