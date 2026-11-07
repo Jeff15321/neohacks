@@ -1,3 +1,6 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 export interface Config {
   port: number;
   provider: 'anthropic' | 'openai' | 'mock';
@@ -8,6 +11,22 @@ export interface Config {
   authToken?: string;
   repoRoot: string;
 }
+
+/** Fallback: read KEY=VALUE lines from a .env file if vars are absent. */
+function dotenvFallback(): void {
+  try {
+    for (const dir of [process.cwd(), resolve(process.cwd(), '../..')]) {
+      const f = resolve(dir, '.env');
+      if (!existsSync(f)) continue;
+      for (const line of readFileSync(f, 'utf8').split('\n')) {
+        const m = line.match(/^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*)\s*$/);
+        if (m && !(m[1] in process.env)) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '');
+      }
+      break;
+    }
+  } catch { /* no .env — fine */ }
+}
+dotenvFallback();
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   return {
