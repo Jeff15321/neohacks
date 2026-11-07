@@ -14,6 +14,7 @@ export function registerWidgets(bus: Bus) {
   bus.provide('widgets.get', (id) => svc.store.get(id));
   bus.provide('widgets.authorize', (id, url, grant) => svc.authorize(id, url, grant));
   bus.provide('widgets.generate', async (request, traceId, opts) => { await ready; return svc.generate(request, traceId, opts); });
+  bus.provide('widgets.adopt', async (widget, request, traceId, opts) => { await ready; return svc.adopt(widget, request, traceId, opts); }); // Phase D
 
   // panel → SW
   bus.on('GENERATE_WIDGET', async (m, ctx) => { await ready; return { widget: await svc.generate(m.request, ctx.traceId) }; });

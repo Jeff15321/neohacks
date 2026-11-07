@@ -50,6 +50,17 @@ export const action = {
   getBadge: () => chrome.action.getBadgeText({}),
 };
 
+/** Phase D: open the side panel (needs a recent user gesture — e.g. a suggestion-card click relayed by content). */
+export const sidePanel = {
+  open: async (tabId?: number, windowId?: number) => {
+    try {
+      if (tabId !== undefined) await chrome.sidePanel.open({ tabId });
+      else if (windowId !== undefined) await chrome.sidePanel.open({ windowId });
+      return true;
+    } catch { return false; }
+  },
+};
+
 /** Phase B: manifest `commands` (toggle-recording Alt+Shift+R). */
 export const commands = {
   onCommand: (fn: (command: string, tab?: chrome.tabs.Tab) => void) => chrome.commands?.onCommand.addListener(fn),

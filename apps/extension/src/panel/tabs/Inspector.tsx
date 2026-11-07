@@ -6,6 +6,7 @@ import { Button } from '../components/ui/button.js';
 import { Badge, Disclosure } from '../components/ui/primitives.js';
 import { send } from '../hooks/useBus.js';
 import { cn, fmtTime } from '../lib/utils.js';
+import { HypothesesPane } from './ActivityInspector.js';
 
 /**
  * Inspector: raw capture and AI interpretation shown separately (decision A).
@@ -16,6 +17,7 @@ export function InspectorTab() {
     <div className="space-y-3">
       <ExportBar />
       <StepsPane />
+      <HypothesesPane />{/* Phase D */}
       <NetworkPane />
       <BusPane />
       <LlmPane />

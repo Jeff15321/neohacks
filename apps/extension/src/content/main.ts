@@ -7,11 +7,13 @@
 import { extractContext } from './context.js';
 import { startNetBridge } from './netbridge/index.js';
 import { startSteps } from './steps/index.js';
+import { startSuggestionCard } from './overlay/suggestion-card.js';
 
 startNetBridge();
 
 if (window === window.top) {
   startSteps(); // Phase B: Step recorder + REC pill (inactive until the SW enables capture)
+  startSuggestionCard(); // Phase D: in-page suggestion card
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.type === 'WWA_GET_CONTEXT') { sendResponse(extractContext()); return; }
     if (msg?.type === 'WWA_PING') { sendResponse({ ok: true }); return; }

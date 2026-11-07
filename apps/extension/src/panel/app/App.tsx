@@ -7,7 +7,7 @@ import { CreateTab } from '../tabs/Create.js';
 import { WidgetsTab } from '../tabs/Widgets.js';
 import { InspectorTab } from '../tabs/Inspector.js';
 import { RecordButton, RecordTab } from '../tabs/Record.js';
-import { ActivityTab } from '../tabs/Activity.js';
+import { ActivityTab, SuggestionRouter } from '../tabs/Activity.js';
 import { DataTab } from '../tabs/Data.js';
 
 /** Panel tab shell. Each tab's body lives in tabs/<Name>.tsx (one owner per tab: Record → B, Activity → D, Data → A). */
@@ -48,6 +48,7 @@ function Shell() {
   }, []);
   return (
     <div className="flex h-full flex-col">
+      <SuggestionRouter />{/* Phase D: Accept on a suggestion → Create tab approval card */}
       <Header />
       {health && !health.userScripts && (
         <div className="m-3 rounded-md border border-destructive/40 bg-destructive/10 p-2 text-xs">

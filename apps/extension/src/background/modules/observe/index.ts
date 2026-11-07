@@ -1,5 +1,6 @@
 import type { Bus } from '../../bus.js';
 import { StepStore } from './steps.js';
+import { registerActivity } from './activity.js';
 
 /**
  * Phase B: Step ingest (global seq, storage.session ring, late-effect merge) — see README.md.
@@ -20,4 +21,5 @@ export function registerObserve(bus: Bus) {
     if (s) bus.broadcast({ type: 'STEP_UPDATED', step: s });
   });
   bus.on('GET_STEPS', async (m) => { await store.ready; return { steps: store.recent(m.limit ?? 100) }; });
+  registerActivity(bus); // Phase D: ObserveClient + suggestions (activity.ts)
 }
