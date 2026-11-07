@@ -25,10 +25,33 @@ async function loadWidgets() {
   const list = (res[STORAGE_KEY] ?? []) as WidgetRecord[];
   for (const w of list) widgets.set(w.id, w);
 }
+
+/** Re-register stored widgets so their UI re-injects on page load. */
+async function persistToUserScripts() {
+  if (typeof chrome.userScripts === 'undefined') return;
+  const regs = [...widgets.values()].map(w => ({
+    id: w.id,
+    matches: w.matchPatterns,
+    js: [{ code: buildWidgetSource(w) }],
+    runAt: 'document_idle' as const,
+    world: 'USER_SCRIPT' as const,
+    worldId: w.id,
+  }));
+  try {
+    await chrome.userScripts.unregister();
+    if (regs.length) await chrome.userScripts.register(regs);
+    for (const w of widgets.values()) {
+      await chrome.userScripts.configureWorld({ worldId: w.id, messaging: true });
+    }
+  } catch (e) { console.warn('[wwa] userscript re-register failed:', e); }
+}
+chrome.runtime.onStartup?.addListener(() => void loadReady.then(persistToUserScripts));
+chrome.runtime.onInstalled.addListener(() => void loadReady.then(persistToUserScripts));
 async function persistWidgets() {
   await chrome.storage.local.set({ [STORAGE_KEY]: [...widgets.values()] });
 }
 const loadReady = loadWidgets();
+void loadReady.then(persistToUserScripts);
 
 function setStatus(w: WidgetRecord, status: WidgetStatus, log?: string) {
   w.status = status;
@@ -118,6 +141,7 @@ chrome.runtime.onMessage.addListener((raw: PanelToSW | SWToPanel, sender, sendRe
           };
           widgets.set(w.id, w);
           await persistWidgets();
+          void persistToUserScripts();
           broadcast({ type: 'WIDGET_GENERATED', widget: w });
           if (res.warnings?.length) broadcast({ type: 'WIDGET_STATUS', widgetId: w.id, status: 'ready', log: 'warnings: ' + res.warnings.join('; ') });
           sendResponse({ ok: true, widget: w });
@@ -163,6 +187,7 @@ chrome.runtime.onMessage.addListener((raw: PanelToSW | SWToPanel, sender, sendRe
           };
           widgets.set(nw.id, nw);
           await persistWidgets();
+          void persistToUserScripts();
           broadcast({ type: 'WIDGET_GENERATED', widget: nw });
           sendResponse({ ok: true, widget: nw });
           break;
@@ -171,6 +196,7 @@ chrome.runtime.onMessage.addListener((raw: PanelToSW | SWToPanel, sender, sendRe
           const w = widgets.get(msg.widgetId);
           widgets.delete(msg.widgetId);
           await persistWidgets();
+          void persistToUserScripts();
           try { await chrome.userScripts.unregister({ ids: [msg.widgetId] }); } catch {}
           if (w) {
             const tab = await findTargetTab(w.matchPatterns);

@@ -12,7 +12,7 @@ second agent (Devin Cloud or human) can reproduce/extend it.
 | 3 | Extension chat → generate → validate → run | ✅ done | side panel → SW → userScripts.execute, E2E green |
 | 4 | Gmail-like fixture automation | ✅ done | `tests/e2e/widget.spec.ts` — 2 drafts, 0 sent |
 | 5 | Real Gmail | ⏳ manual | needs a logged-in session — see `docs/manual-test.md` |
-| 6 | Stability/polish | 🔶 partial | retry loop, statuses, cleanup, logs done; repair loop deferred |
+| 6 | Stability/polish | 🔶 partial | retry loop, statuses, cleanup, logs, repair loop, persistence done; streaming/finer verification deferred |
 
 ## Repo layout (as built)
 

@@ -119,7 +119,7 @@ youtube.spec.ts`).
 | Decision | Why | Tradeoff |
 |---|---|---|
 | `chrome.userScripts` for execution | Only MV3 API that runs **arbitrary code strings**; USER_SCRIPT world exempt from page CSP (Gmail requires this) | Requires the per-extension "Allow User Scripts" toggle (Chrome ≥138); Chrome Web Store RHC policy would scrutinize this anyway |
-| `execute()` vs `register()` | Immediate run on an already-loaded page; `register()` also works for persistence across reloads (verified) | `execute` needs Chrome 135+ |
+| `execute()` + `register()` | Immediate run on an already-loaded page; approved widgets are also `register()`ed so their UI re-injects on subsequent matching page loads | `execute` needs Chrome 135+; re-running injects a second copy (idempotency is the widget's job) |
 | USER_SCRIPT world, `worldId` per widget | DOM access + isolation between widgets and from page JS | Cannot read page JS globals — widget must verify via DOM (we hit this exact bug in dev) |
 | Shadow DOM for widget UI | Style isolation, no global CSS, host site unaffected | Slightly more verbose generated code |
 | Structured `GeneratedWidget` JSON | Grants, matchPatterns, insertionHint are machine-checkable | Model must obey a contract — enforced by validator + retry |
@@ -130,7 +130,5 @@ youtube.spec.ts`).
 
 - `POST /api/repair-widget` execution-error repair loop (generate.ts already
   supports a `prior` field; the extension doesn't yet auto-feed runtime errors back)
-- `register()`-based persistence across reloads (widgets persist in storage
-  and re-run on demand, but don't auto-inject on every page load)
 - Streaming codegen progress, multi-widget management UI polish
 - `chrome.debugger` fallback path for pre-135 Chrome

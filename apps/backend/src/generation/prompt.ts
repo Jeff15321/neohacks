@@ -38,6 +38,7 @@ NOT available: page JS variables/functions, fetch() to the platform backend, chr
 - Build UI inside a Shadow DOM host element your code creates (attachShadow({mode:'open'})), with inline <style>. Never inject global CSS.
 - Prefer inserting into a stable existing container (toolbar, sidebar, header) via appendChild — use the landmarks provided. Fallback: a collapsible fixed-position dock (position:fixed; z-index:2147483647).
 - Give your root element an id starting with "wwa-" so the platform can find/remove it.
+- Idempotency: your code may run again after navigation or re-run. If an element with your root id already exists, do not create a duplicate — reuse or replace it.
 - Do NOT overwrite page event handlers, replace large DOM subtrees, or attach MutationObservers that never disconnect.
 
 === INTERACTION RULES ===
